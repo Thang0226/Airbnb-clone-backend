@@ -30,13 +30,14 @@ public class HouseList {
 
 
 
-   //cascade = CascadeType.ALL//Khi thực hiện thao tác CRUD trên HouseList, nó sẽ tự động áp dụng cho HouseImage.//Nếu thêm một HouseList, các HouseImage liên quan cũng sẽ được lưu.//Nếu xóa HouseList, các HouseImage liên quan cũng bị xóa theo.
-//orphanRemoval = true //Nếu một HouseImage bị xóa khỏi danh sách images, nó cũng sẽ bị xóa khỏi database.
-    @OneToMany(mappedBy = "house", cascade = CascadeType.ALL, orphanRemoval = true)
+
+    @OneToMany
+    @JoinTable(
+            name = "house_image_join",
+            joinColumns = @JoinColumn(name = "house_id"),
+            inverseJoinColumns = @JoinColumn(name = "image_id")
+    )
     private List<HouseImage> images;
-
-
-
 
 
     @Column( nullable = false)
