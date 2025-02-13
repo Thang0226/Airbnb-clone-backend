@@ -11,12 +11,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin ("*")
@@ -75,6 +78,13 @@ public class UserController {
     }
 
     private ResponseEntity<?> getResponseEntity(UserForm userForm, Optional<User> userOptional, BindingResult result) {
+        if (result.hasErrors()) {
+            List<String> errors = result.getAllErrors().stream()
+                    .map(ObjectError::getDefaultMessage)
+                    .collect(Collectors.toList());
+            return ResponseEntity.badRequest().body(errors);
+        }
+
         if (userOptional.isEmpty()) {
             return new ResponseEntity<>("User not found!",HttpStatus.NOT_FOUND);
         }
@@ -97,6 +107,6 @@ public class UserController {
         user.setAddress(userForm.getAddress());
         user.setPhone(userForm.getPhone());
         userService.save(user);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>("User profile update successfully", HttpStatus.OK);
     }
 }

@@ -16,11 +16,14 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserForm {
     private Long id;
 
-    @NotBlank(message = "Full Name is required")
+    @NotBlank(message = "Username is required")
     private String username;
 
     private MultipartFile avatar;
+
+    @NotBlank(message = "Full Name is required")
     private String fullName;
+
     private String address;
 
     @NotBlank(message = "Phone number is required")
