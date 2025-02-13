@@ -58,7 +58,7 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("/{userName}")
+    @GetMapping("/profile/{userName}")
     public ResponseEntity<UserProfileDTO> getUserProfile(@PathVariable String userName) {
         Optional<UserProfileDTO> userProfile = userService.getUserProfile(userName);
         return userProfile
@@ -66,9 +66,9 @@ public class UserController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @PutMapping("/{userName}")
-    public ResponseEntity<?> updateUserProfile(@PathVariable String userName, @ModelAttribute UserForm userForm) {
-        Optional<User> userOptional = userService.findByUsername(userName);
+    @PutMapping("/profile/update")
+    public ResponseEntity<?> updateUserProfile(@ModelAttribute UserForm userForm) {
+        Optional<User> userOptional = userService.findByUsername(userForm.getUsername());
         return getResponseEntity(userForm, userOptional);
     }
 
