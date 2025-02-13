@@ -2,14 +2,18 @@ package com.codegym.model;
 
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "usersTemporary", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"email"})
 })
-public class User_Temporary {
+public class UserTemporary {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,10 +47,10 @@ public class User_Temporary {
     private LocalDateTime updatedAt;
 
     // Constructors
-    public User_Temporary() {
+    public UserTemporary() {
     }
 
-    public User_Temporary(String name, String email, String password, String phoneNumber, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public UserTemporary(String name, String email, String password, String phoneNumber, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.name = name;
         this.email = email;
         this.password = password;
@@ -54,25 +58,5 @@ public class User_Temporary {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
-
-
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
 
 }
