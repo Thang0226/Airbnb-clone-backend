@@ -193,3 +193,11 @@ values  (1, '36 Hang Be, Hoan Kiem', 'Hanoi', '2024-02-12 08:00:00.000000', 'Ful
         (18, '120 Tran Phu, Nha Trang', 'Nha Trang', '2024-02-21 16:00:00.000000', 'Elegant resort with modern facilities and a private beach.', '2024-03-30', 'default.png', 12.23500000, 109.20000000, 'Elegant beach resort in Nha Trang', 3, 4, 2200000.00, '2024-02-22', 'BOOKING', '2024-02-21 16:00:00.000000', 6),
         (19, '55 Hang Bac, Hanoi', 'Hanoi', '2024-02-22 09:45:00.000000', 'Boutique apartment in the heart of the Old Quarter.', '2024-03-18', 'default.png', 21.03000000, 105.85000000, 'Boutique apartment in Hanoi Old Quarter', 1, 1, 850000.00, '2024-02-23', 'RENTED', '2024-02-22 09:45:00.000000', 3),
         (20, '18 Phan Dinh Phung, Hue', 'Hue', '2024-02-23 11:00:00.000000', 'Traditional house with modern amenities in a historic area.', '2024-03-15', 'default.png', 16.46300000, 107.59100000, 'Traditional house in Hue', 2, 3, 800000.00, '2024-02-24', 'RENTED', '2024-02-23 11:00:00.000000', 2);
+
+
+INSERT INTO airbnb.house_image_join (house_id, image_id) VALUES
+                                                             (2,1), (2,2), (2,3), (1,4), (1,5), (1,6), (2,7), (3,8), (3,9), (4,10),
+                                                             (4,11), (5,12), (5,13), (6,14), (6,15), (7,16), (7,17), (7,18), (8,19), (8,20),
+                                                             (8,21), (8,22), (9,23), (9,24), (9,25), (10,26), (10,27), (11,28), (11,29), (12,30),
+                                                             (12,31), (13,32), (13,33), (14,34), (14,35), (15,36), (15,37), (16,38), (16,39),
+                                                             (17,40), (17,41), (17,42), (18,43), (18,44), (18,45), (19,46), (19,47), (20,48), (20,49);
