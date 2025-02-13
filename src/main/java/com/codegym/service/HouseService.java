@@ -4,6 +4,8 @@ package com.codegym.service;
 import com.codegym.model.House;
 import com.codegym.model.HouseStatus;
 import com.codegym.repository.IHouseRepository;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,7 +33,7 @@ public class HouseService implements IHouseService {
     public List<House> findAll() {
         return houseRepository.findAll();
     }
-
+//    public List<House> searchHouses(Specification<House> spec, Sort sort);
 
 }
 
