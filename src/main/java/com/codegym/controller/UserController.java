@@ -1,14 +1,16 @@
 package com.codegym.controller;
 
-import com.codegym.model.DTO.UserProfileDTO;
 import com.codegym.model.User;
 import com.codegym.model.UserForm;
+import com.codegym.model.dto.UserProfileDTO;
 import com.codegym.service.user.IUserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,7 +25,7 @@ public class UserController {
     @Autowired
     private IUserService userService;
 
-    @Value("file_upload")
+    @Value("${file_upload}")
     private String fileUpload;
 
     @GetMapping
@@ -47,9 +49,9 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @ModelAttribute UserForm userForm) {
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @ModelAttribute UserForm userForm, BindingResult result) {
         Optional<User> userOptional = userService.findById(id);
-        return getResponseEntity(userForm, userOptional);
+        return getResponseEntity(userForm, userOptional, result);
     }
 
     @DeleteMapping("/{id}")
@@ -67,14 +69,14 @@ public class UserController {
     }
 
     @PutMapping("/profile/update")
-    public ResponseEntity<?> updateUserProfile(@ModelAttribute UserForm userForm) {
+    public ResponseEntity<?> updateUserProfile(@Valid @ModelAttribute UserForm userForm, BindingResult result) {
         Optional<User> userOptional = userService.findByUsername(userForm.getUsername());
-        return getResponseEntity(userForm, userOptional);
+        return getResponseEntity(userForm, userOptional, result);
     }
 
-    private ResponseEntity<?> getResponseEntity(@ModelAttribute UserForm userForm, Optional<User> userOptional) {
+    private ResponseEntity<?> getResponseEntity(UserForm userForm, Optional<User> userOptional, BindingResult result) {
         if (userOptional.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("User not found!",HttpStatus.NOT_FOUND);
         }
         User user = userOptional.get();
 

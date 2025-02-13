@@ -1,6 +1,6 @@
 package com.codegym.service.user;
 
-import com.codegym.model.DTO.UserProfileDTO;
+import com.codegym.model.dto.UserProfileDTO;
 import com.codegym.model.User;
 import com.codegym.service.IGenerateService;
 
