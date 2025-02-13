@@ -1,6 +1,7 @@
 package com.codegym.model;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
@@ -20,6 +21,7 @@ public class HouseList {
     @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty("id")
     private Long houses_id;
 
 
@@ -31,12 +33,13 @@ public class HouseList {
 
 
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "house_image_join",
             joinColumns = @JoinColumn(name = "house_id"),
             inverseJoinColumns = @JoinColumn(name = "image_id")
     )
+    @JsonProperty("image")
     private List<HouseImage> images;
 
 
@@ -154,14 +157,6 @@ public class HouseList {
         } else {
             this.imageFile = imageFile;
         }
-    }
-
-    public Long getId() {
-        return houses_id;
-    }
-
-    public void setId(Long houses_id) {
-        this.houses_id = houses_id;
     }
 
 

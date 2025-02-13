@@ -17,7 +17,7 @@ public class HouseListService implements IHouseListService {
         this.houseListRepository = houseListRepository;
     }
 
-    public List<HouseList> getHousesForRented(String status) {
+    public List<HouseList> getHousesForAVAILABLE(String status) {
         try {
             HouseListStatusEnum statusEnum = HouseListStatusEnum.valueOf(status.toUpperCase());
             return houseListRepository.findByStatus(statusEnum);

@@ -1,5 +1,6 @@
 package com.codegym.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
@@ -10,6 +11,7 @@ public class HouseImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty("id")
     private Long image_id;
 
     // Không cần ánh xạ ManyToOne vì quan hệ sẽ được định nghĩa qua join table ở HouseList
@@ -30,20 +32,11 @@ public class HouseImage {
         this.createdAt = createdAt;
     }
 
-    // Getters and setters
-    public Long getImage_id() {
-        return image_id;
-    }
-
-    public void setImage_id(Long image_id) {
-        this.image_id = image_id;
-    }
-
-    public String getImageUrl() {
+    public @NotBlank(message = "Image URL is required") String getImageUrl() {
         return imageUrl;
     }
 
-    public void setImageUrl(String imageUrl) {
+    public void setImageUrl(@NotBlank(message = "Image URL is required") String imageUrl) {
         this.imageUrl = imageUrl;
     }
 
@@ -51,7 +44,6 @@ public class HouseImage {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+
+// Getters and setters
 }

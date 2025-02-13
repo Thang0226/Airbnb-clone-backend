@@ -22,10 +22,10 @@ public class HouseListController {
         public HouseListController(HouseListService houseListService) {
             this.houseListService = houseListService;
         }
-       //api phải là: http://localhost:8080/api/housesList/for-rented?status=RENTED thì mới lấy được dữ liệu
-        @GetMapping("/for-rented")
+       //api phải là: http://localhost:8080/api/housesList/for-AVAILABLE?status=AVAILABLE thì mới lấy được dữ liệu
+        @GetMapping("/for-AVAILABLE")
         public ResponseEntity<List<HouseList>> getHousesForRented(@RequestParam HouseListStatusEnum status) {
-            List<HouseList> houseLists = houseListService.getHousesForRented(String.valueOf(status));
+            List<HouseList> houseLists = houseListService.getHousesForAVAILABLE(String.valueOf(status));
             return ResponseEntity.ok(houseLists);
         }
 
