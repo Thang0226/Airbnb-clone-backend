@@ -2,7 +2,7 @@ package com.codegym.controller;
 
 import com.codegym.exception.PhoneAlreadyExistsException;
 import com.codegym.exception.UsernameAlreadyExistsException;
-import com.codegym.model.DTO.UserProfileDTO;
+import com.codegym.model.dto.UserProfileDTO;
 import com.codegym.model.User;
 import com.codegym.model.UserForm;
 import com.codegym.service.user.IUserService;
@@ -44,12 +44,28 @@ public class UserController {
     @PostMapping
     public ResponseEntity<?> addUser(@RequestBody User user) {
         user.setAvatar("default.jpg");
+        userService.save(user);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PostMapping("/validate-username")
+    public ResponseEntity<?> validateUsername(@RequestBody User user) {
         try {
-            userService.save(user);
-        } catch (UsernameAlreadyExistsException | PhoneAlreadyExistsException e) {
+            userService.validateUsername(user.getUsername());
+        } catch (UsernameAlreadyExistsException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/validate-phone")
+    public ResponseEntity<?> validatePhone(@RequestBody User user) {
+        try {
+            userService.validatePhone(user.getPhone());
+        } catch (PhoneAlreadyExistsException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PutMapping("/{id}")

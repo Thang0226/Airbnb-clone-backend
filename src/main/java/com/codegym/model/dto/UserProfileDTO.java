@@ -1,4 +1,4 @@
-package com.codegym.model.DTO;
+package com.codegym.model.dto;
 
 public interface UserProfileDTO {
     Long getId();
