@@ -1,5 +1,7 @@
 package com.codegym.controller;
 
+import com.codegym.exception.PhoneAlreadyExistsException;
+import com.codegym.exception.UsernameAlreadyExistsException;
 import com.codegym.model.DTO.UserProfileDTO;
 import com.codegym.model.User;
 import com.codegym.model.UserForm;
@@ -42,7 +44,11 @@ public class UserController {
     @PostMapping
     public ResponseEntity<?> addUser(@RequestBody User user) {
         user.setAvatar("default.jpg");
-        userService.save(user);
+        try {
+            userService.save(user);
+        } catch (UsernameAlreadyExistsException | PhoneAlreadyExistsException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 

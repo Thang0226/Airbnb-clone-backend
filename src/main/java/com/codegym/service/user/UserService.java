@@ -1,5 +1,8 @@
 package com.codegym.service.user;
 
+import com.codegym.exception.NoSuchUserExistsException;
+import com.codegym.exception.PhoneAlreadyExistsException;
+import com.codegym.exception.UsernameAlreadyExistsException;
 import com.codegym.model.DTO.UserProfileDTO;
 import com.codegym.model.User;
 import com.codegym.repository.IUserRepository;
@@ -24,13 +27,25 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public Optional<User> findById(Long id) {
-        return userRepository.findById(id);
+    public Optional<User> findById(Long id) throws NoSuchUserExistsException {
+        Optional<User> user = userRepository.findById(id);
+        if (user.isEmpty()) {
+            throw new NoSuchUserExistsException("NO USER PRESENT WITH ID = " + id);
+        }
+        return user;
     }
 
     @Override
-    public void save(User object) {
-        userRepository.save(object);
+    public void save(User user) throws UsernameAlreadyExistsException, PhoneAlreadyExistsException {
+        Optional<User> user_username = userRepository.findByUsername(user.getUsername());
+        if (user_username.isPresent()) {
+            throw new UsernameAlreadyExistsException("USERNAME ALREADY EXISTS");
+        }
+        Optional<User> user_phone = userRepository.findByPhone(user.getPhone());
+        if (user_phone.isPresent()) {
+            throw new PhoneAlreadyExistsException("PHONE NUMBER ALREADY EXISTS");
+        }
+        userRepository.save(user);
     }
 
     @Override
