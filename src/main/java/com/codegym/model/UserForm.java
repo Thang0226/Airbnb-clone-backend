@@ -27,7 +27,6 @@ public class UserForm {
     private String address;
 
     @NotBlank(message = "Phone number is required")
-    @Pattern(regexp = "^0[0-9]{9}$", message = "Phone must start with 0 and be 10 digits long")
-    @Size(min = 10, max = 10, message = "Phone number must be exactly 10 digits")
+    @Pattern(regexp = "^0[0-9]{9}$", message = "Phone number must start with 0 and have at least 10 digits")
     private String phone;
 }

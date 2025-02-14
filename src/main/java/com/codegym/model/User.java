@@ -22,6 +22,7 @@ public class User {
 
     private String fullName;
 
+    @Column(columnDefinition = "TEXT")
     private String address;
 
     @Column(unique = true)
