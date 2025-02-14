@@ -3,6 +3,7 @@ package com.codegym.controller;
 
 import com.codegym.model.House;
 import com.codegym.model.HouseStatus;
+import com.codegym.model.SearchRequest;
 import com.codegym.repository.IHouseRepository;
 import com.codegym.service.HouseService;
 import com.codegym.service.IHouseService;
@@ -29,9 +30,9 @@ public class HouseController {
             this.houseService = houseService;
             this.houseRepository = houseRepository;
         }
-       //api phải là: http://localhost:8080/api/housesList/for-AVAILABLE?status=AVAILABLE thì mới lấy được dữ liệu
+       //api phải là: http://localhost:8080/api/housesList?status=AVAILABLE thì mới lấy được dữ liệu
         @GetMapping
-        public ResponseEntity<List<House>> getHousesForRented(@RequestParam(name = "status", required = false) HouseStatus status) {
+        public ResponseEntity<List<House>> getHousesForAvailable(@RequestParam(name = "status", required = false) HouseStatus status) {
             List<House> houses = List.of();
             if (status == null) {
                 houses = houseService.findAll();
@@ -41,23 +42,26 @@ public class HouseController {
             return ResponseEntity.ok(houses);
         }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<House>> searchHouses(
-            @RequestParam(required = false) String location,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkIn,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkOut,
-            @RequestParam(required = false) Integer guests,  // Có thể dùng để tính toán số phòng cần có
-            @RequestParam(required = false, defaultValue = "asc") String sortOrder,
-            @RequestParam(required = false) Integer minBedrooms,
-            @RequestParam(required = false) Integer minBathrooms
-    ) {
+    @PostMapping("/search")
+    public ResponseEntity<List<House>> searchHouses(@RequestBody SearchRequest request) {
+        // Nhận dữ liệu từ request body
+        LocalDate checkIn = request.getCheckIn();
+        LocalDate checkOut = request.getCheckOut();
+        Integer guests = request.getGuests();
+        String sortOrder = request.getSortOrder();
+        Integer minBedrooms = request.getMinBedrooms();
+        Integer minBathrooms = request.getMinBathrooms();
+
+        System.out.println("Received parameters:");
+        System.out.println("Check-in: " + checkIn);
+        System.out.println("Check-out: " + checkOut);
+        System.out.println("Guests: " + guests);
+        System.out.println("Sort Order: " + sortOrder);
+        System.out.println("Min Bedrooms: " + minBedrooms);
+        System.out.println("Min Bathrooms: " + minBathrooms);
+
         Specification<House> spec = Specification.where(null);
 
-        // Lọc theo thành phố (trường city trong House)
-        if (location != null && !location.trim().isEmpty()) {
-            spec = spec.and((root, query, cb) ->
-                    cb.like(cb.lower(root.get("city")), "%" + location.toLowerCase() + "%"));
-        }
 
         // Lọc theo ngày: căn nhà phải có sẵn từ trước checkIn và còn hiệu lực sau checkOut
         if (checkIn != null && checkOut != null) {
@@ -72,28 +76,34 @@ public class HouseController {
         // Lọc theo số phòng ngủ tối thiểu
         if (minBedrooms != null) {
             spec = spec.and((root, query, cb) ->
-                    cb.greaterThanOrEqualTo(root.get("numberOfBedrooms"), minBedrooms));
+                    cb.greaterThanOrEqualTo(root.get("bedrooms"), minBedrooms));
         }
 
         // Lọc theo số phòng tắm tối thiểu
         if (minBathrooms != null) {
             spec = spec.and((root, query, cb) ->
-                    cb.greaterThanOrEqualTo(root.get("numberOfBathrooms"), minBathrooms));
+                    cb.greaterThanOrEqualTo(root.get("bathrooms"), minBathrooms));
         }
 
+        // *** Lọc theo status: chỉ lấy những căn nhà có status AVAILABLE ***
+        spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("status"), HouseStatus.AVAILABLE)
+        );
+
+
+
         // Xử lý sắp xếp theo giá tiền theo trường pricePerDay
-        Sort sort = Sort.by("pricePerDay");
+        Sort sort = Sort.by("price");
         if ("desc".equalsIgnoreCase(sortOrder)) {
             sort = sort.descending();
         } else {
             sort = sort.ascending();
         }
 
-        List<House> houses = houseRepository.findAll(spec, sort);
+        List<House> houses = houseService.findAlltoSearch(spec, sort);
         return ResponseEntity.ok(houses);
     }
 
-
-    }
+}
 
 

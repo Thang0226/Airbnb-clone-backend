@@ -7,11 +7,13 @@ import com.codegym.repository.IHouseRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 
 @Service
 public class HouseService implements IHouseService {
+
 
     private final IHouseRepository houseRepository;
 
@@ -34,6 +36,11 @@ public class HouseService implements IHouseService {
         return houseRepository.findAll();
     }
 //    public List<House> searchHouses(Specification<House> spec, Sort sort);
+
+    @Override
+    public List<House> findAlltoSearch(Specification<House> spec, Sort sort) {
+        return houseRepository.findAll(spec, sort);
+    }
 
 }
 
