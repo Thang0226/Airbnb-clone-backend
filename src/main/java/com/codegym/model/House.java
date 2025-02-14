@@ -1,9 +1,13 @@
 package com.codegym.model;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -20,5 +24,9 @@ public class House {
     private int bathrooms;
     private String description;
     private int price;
-    private String houseImages;
+//    private String houseImages;
+
+    @OneToMany(mappedBy = "house", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<HouseImage> houseImages = new ArrayList<>();
 }
