@@ -4,6 +4,7 @@ import com.codegym.config.jwt.JwtResponse;
 import com.codegym.exception.PhoneAlreadyExistsException;
 import com.codegym.exception.UsernameAlreadyExistsException;
 import com.codegym.model.auth.AuthenticationRequest;
+import com.codegym.model.dto.UserDTO;
 import com.codegym.model.dto.UserProfileDTO;
 import com.codegym.model.User;
 import com.codegym.model.UserForm;
@@ -49,6 +50,7 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthenticationRequest authenticationRequest) {
         try {
+            System.out.println(authenticationRequest.getUsername());
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword()));
 
@@ -70,21 +72,24 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> addUser(@RequestBody User user) {
+    public ResponseEntity<?> addUser(@RequestBody UserDTO userDTO) {
+        User user = new User();
         user.setAvatar("default.jpg");
 
-        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setUsername(userDTO.getUsername());
+        user.setPhone(userDTO.getPhone());
+
+        String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
         user.setPassword(encodedPassword);
 
         userService.save(user);
-
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PostMapping("/register/validate-username")
-    public ResponseEntity<?> validateUsername(@RequestBody User user) {
+    public ResponseEntity<?> validateUsername(@RequestBody String username) {
         try {
-            userService.validateUsername(user.getUsername());
+            userService.validateUsername(username);
         } catch (UsernameAlreadyExistsException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
@@ -92,9 +97,9 @@ public class UserController {
     }
 
     @PostMapping("/register/validate-phone")
-    public ResponseEntity<?> validatePhone(@RequestBody User user) {
+    public ResponseEntity<?> validatePhone(@RequestBody String phone) {
         try {
-            userService.validatePhone(user.getPhone());
+            userService.validatePhone(phone);
         } catch (PhoneAlreadyExistsException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
