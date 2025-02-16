@@ -25,7 +25,6 @@ public class House {
     private int bathrooms;
     private String description;
     private int price;
-//    private String houseImages;
 
     @OneToMany(mappedBy = "house", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference

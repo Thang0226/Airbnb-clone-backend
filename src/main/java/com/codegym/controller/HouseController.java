@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -61,8 +62,14 @@ public class HouseController {
 
             System.out.println("Create house entity");
 
+            // Initialize house images list
+            if (house.getHouseImages() == null) {
+                house.setHouseImages(new ArrayList<>());
+            }
+
             // Handle images
-            if (houseDTO.getHouseImages() != null && !houseDTO.getHouseImages().isEmpty()) {
+            List<MultipartFile> houseImages = houseDTO.getHouseImages();
+            if (houseImages != null && !houseImages.isEmpty()) {
                 System.out.println("There are images!");
                 for (MultipartFile image : houseDTO.getHouseImages()) {
                     // Validate image
@@ -95,11 +102,16 @@ public class HouseController {
                     houseImage.setHouse(house);
                     house.getHouseImages().add(houseImage);
                 }
-            } else {
+            }
+            else {
+
                 // Add default image if no images provided
                 String defaultFileName = "default.png";
-                Path sourcePath = Paths.get("src/main/resources/default.png");
+                Path sourcePath = Paths.get("default.png");
                 Path targetPath = Paths.get(UPLOAD_DIR, defaultFileName);
+
+                System.out.println(targetPath);
+
                 // Create directories if they do not exist
                 Files.createDirectories(targetPath.getParent());
                 Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
@@ -117,33 +129,10 @@ public class HouseController {
              return ResponseEntity.ok(house);
 
         } catch (Exception e) {
+            System.err.println("Error creating house: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to create house: " + e.getMessage());
         }
     }
-//    @PostMapping(path = "/create", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-//    public ResponseEntity<?> createHouse(
-//            @RequestPart("house") House house,
-//            @RequestPart("houseImages") MultipartFile file
-//    ) {
-//        try {
-//            // Save file to server
-//            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-//            Path filePath = Paths.get(UPLOAD_DIR + fileName);
-//            Files.createDirectories(filePath.getParent());
-//            Files.write(filePath, file.getBytes());
-//
-//            // Set file path in the database
-//            house.setHouseImages(fileName);
-//
-//            houseService.save(house);
-//            Optional<House> savedHouse = houseService.findById(house.getId());
-//
-//            return savedHouse.map(value -> new ResponseEntity<>(value, HttpStatus.CREATED))
-//                    .orElseGet(() -> new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
-//        } catch (IOException e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//        }
-//    }
 }
