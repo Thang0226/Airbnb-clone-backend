@@ -81,11 +81,10 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
 //                        .requestMatchers(new AntPathRequestMatcher("/images/**")).permitAll()
-                        .requestMatchers(HttpMethod.GET).permitAll()
                         .requestMatchers("/api/users/login", "/api/users/register/**").permitAll()
 //                        .requestMatchers("/api/admin/**").hasAnyAuthority("ROLE_ADMIN")
 //                        .requestMatchers("/api/users/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN","ROLE_SELLER")
-                        .anyRequest().authenticated()
+                        .anyRequest().hasAuthority("ROLE_USER")
                 )
                 .exceptionHandling(customizer -> customizer.accessDeniedHandler(customAccessDeniedHandler()))
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -4,11 +4,13 @@ import com.codegym.config.jwt.JwtResponse;
 import com.codegym.exception.PhoneAlreadyExistsException;
 import com.codegym.exception.UsernameAlreadyExistsException;
 import com.codegym.model.auth.AuthenticationRequest;
+import com.codegym.model.auth.Role;
 import com.codegym.model.dto.UserDTO;
 import com.codegym.model.dto.UserProfileDTO;
 import com.codegym.model.User;
 import com.codegym.model.UserForm;
 import com.codegym.config.jwt.JwtService;
+import com.codegym.service.role.IRoleService;
 import com.codegym.service.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +30,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @CrossOrigin("*")
@@ -37,13 +42,12 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
+    @Autowired
+    private IRoleService roleService;
     @Autowired
     private AuthenticationManager authenticationManager;
-
     @Autowired
     private PasswordEncoder passwordEncoder;
-
     @Autowired
     private JwtService jwtService;
 
@@ -81,6 +85,11 @@ public class UserController {
 
         String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
         user.setPassword(encodedPassword);
+
+        Role userRole = roleService.findByName("ROLE_USER");
+        Set<Role> roles = new HashSet<>();
+        roles.add(userRole);
+        user.setRoles(roles);
 
         userService.save(user);
         return new ResponseEntity<>(HttpStatus.CREATED);
