@@ -3,16 +3,20 @@ package com.codegym.service.user;
 import com.codegym.exception.NoSuchUserExistsException;
 import com.codegym.exception.PhoneAlreadyExistsException;
 import com.codegym.exception.UsernameAlreadyExistsException;
+import com.codegym.model.auth.UserPrincipal;
 import com.codegym.model.dto.UserProfileDTO;
 import com.codegym.model.User;
 import com.codegym.repository.IUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
-public class UserService implements IUserService {
+public class UserService implements IUserService, UserDetailsService {
     @Autowired
     private IUserRepository userRepository;
 
@@ -63,6 +67,16 @@ public class UserService implements IUserService {
         Optional<User> user_phone = userRepository.findByPhone(phone);
         if (user_phone.isPresent()) {
             throw new PhoneAlreadyExistsException("Phone number already exists");
+        }
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (userOptional.isPresent()) {
+            return UserPrincipal.build(userOptional.get());
+        } else {
+            throw new UsernameNotFoundException("NO USER PRESENT WITH USERNAME = " + username);
         }
     }
 }

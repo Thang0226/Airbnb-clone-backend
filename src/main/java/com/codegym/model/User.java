@@ -1,5 +1,6 @@
 package com.codegym.model;
 
+import com.codegym.model.auth.Role;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;

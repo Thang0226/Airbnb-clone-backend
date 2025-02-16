@@ -1,15 +1,25 @@
 package com.codegym.controller;
 
+import com.codegym.config.jwt.JwtResponse;
 import com.codegym.exception.PhoneAlreadyExistsException;
 import com.codegym.exception.UsernameAlreadyExistsException;
+import com.codegym.model.auth.AuthenticationRequest;
 import com.codegym.model.dto.UserProfileDTO;
 import com.codegym.model.User;
 import com.codegym.model.UserForm;
-import com.codegym.service.user.IUserService;
+import com.codegym.config.jwt.JwtService;
+import com.codegym.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,8 +32,74 @@ import java.util.Optional;
 @CrossOrigin("*")
 @RequestMapping("/api/users")
 public class UserController {
+
     @Autowired
-    private IUserService userService;
+    private UserService userService;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtService jwtService;
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody AuthenticationRequest authenticationRequest) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword()));
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtService.generateTokenLogin(authentication);
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            User currentUser = userService.findByUsername(authenticationRequest.getUsername()).get();
+
+            return ResponseEntity.ok(new JwtResponse(
+                    currentUser.getId(),
+                    jwt,
+                    userDetails.getUsername(),
+                    currentUser.getFullName(),
+                    userDetails.getAuthorities()));
+
+        } catch (BadCredentialsException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Username or Password.");
+        }
+    }
+
+
+    @PostMapping("/register")
+    public ResponseEntity<?> addUser(@RequestBody User user) {
+        user.setAvatar("default.jpg");
+
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
+
+        userService.save(user);
+
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PostMapping("/register/validate-username")
+    public ResponseEntity<?> validateUsername(@RequestBody User user) {
+        try {
+            userService.validateUsername(user.getUsername());
+        } catch (UsernameAlreadyExistsException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/register/validate-phone")
+    public ResponseEntity<?> validatePhone(@RequestBody User user) {
+        try {
+            userService.validatePhone(user.getPhone());
+        } catch (PhoneAlreadyExistsException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
     @Value("file_upload")
     private String fileUpload;
@@ -39,33 +115,6 @@ public class UserController {
         return user.map(value ->
                         new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
-
-    @PostMapping
-    public ResponseEntity<?> addUser(@RequestBody User user) {
-        user.setAvatar("default.jpg");
-        userService.save(user);
-        return new ResponseEntity<>(HttpStatus.CREATED);
-    }
-
-    @PostMapping("/validate-username")
-    public ResponseEntity<?> validateUsername(@RequestBody User user) {
-        try {
-            userService.validateUsername(user.getUsername());
-        } catch (UsernameAlreadyExistsException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        }
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @PostMapping("/validate-phone")
-    public ResponseEntity<?> validatePhone(@RequestBody User user) {
-        try {
-            userService.validatePhone(user.getPhone());
-        } catch (PhoneAlreadyExistsException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        }
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
