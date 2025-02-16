@@ -35,18 +35,18 @@ public class HouseController {
     @Value("${file_upload}")
     private String UPLOAD_DIR;
 
-    @PostMapping("/create")
+    @PostMapping(path ="/create", consumes = { "multipart/form-data" })
     public ResponseEntity<?> createHouse(
            @ModelAttribute HouseDTO houseDTO) {
         try {
             // Validate house data
-            if (houseDTO.getBedrooms() < 1 || houseDTO.getBedrooms() > 10) {
+            if (houseDTO.getBedrooms() == null || houseDTO.getBedrooms() < 1 || houseDTO.getBedrooms() > 10) {
                 return ResponseEntity.badRequest().body("Bedrooms must be between 1 and 10");
             }
-            if (houseDTO.getBathrooms() < 1 || houseDTO.getBathrooms() > 3) {
+            if (houseDTO.getBathrooms() == null || houseDTO.getBathrooms() < 1 || houseDTO.getBathrooms() > 3) {
                 return ResponseEntity.badRequest().body("Bathrooms must be between 1 and 3");
             }
-            if (houseDTO.getPrice() < 100000) {
+            if (houseDTO.getPrice() == null || houseDTO.getPrice() < 100000) {
                 return ResponseEntity.badRequest().body("Price must be at least 100,000 VND");
             }
 
@@ -115,11 +115,6 @@ public class HouseController {
             // Save house with images
              houseService.save(house);
              return ResponseEntity.ok(house);
-//            houseService.save(house);
-//            Optional<House> savedHouse = houseService.findById(house.getId());
-//
-//            return savedHouse.map(value -> new ResponseEntity<>(value, HttpStatus.CREATED))
-//                    .orElseGet(() -> new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
 
         } catch (Exception e) {
             e.printStackTrace();

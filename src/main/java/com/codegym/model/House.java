@@ -19,6 +19,7 @@ public class House {
     private Long id;
 
     private String houseName;
+    @Column(length = 500)
     private String address;
     private int bedrooms;
     private int bathrooms;
