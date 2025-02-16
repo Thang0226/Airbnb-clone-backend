@@ -9,6 +9,7 @@ import com.codegym.model.User;
 import com.codegym.model.UserForm;
 import com.codegym.config.jwt.JwtService;
 import com.codegym.service.user.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -68,7 +69,6 @@ public class UserController {
         }
     }
 
-
     @PostMapping("/register")
     public ResponseEntity<?> addUser(@RequestBody User user) {
         user.setAvatar("default.jpg");
@@ -99,6 +99,17 @@ public class UserController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        String token = jwtService.extractTokenFromRequest(request);
+        if (token != null && jwtService.validateJwtToken(token)) {
+            // [IF REQUIRED] Add token to a blacklist or perform other logout logic
+            return ResponseEntity.ok("Logged out successfully!");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid token");
+        }
     }
 
     @Value("file_upload")
