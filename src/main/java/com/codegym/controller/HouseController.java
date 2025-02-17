@@ -1,15 +1,13 @@
 package com.codegym.controller;
 
-import com.codegym.model.House;
-import com.codegym.model.HouseStatus;
-import com.codegym.model.SearchRequest;
+import com.codegym.model.*;
 import com.codegym.repository.IHouseRepository;
 import com.codegym.service.house.HouseService;
+import com.codegym.service.user.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.codegym.model.HouseImage;
 import com.codegym.model.dto.HouseDTO;
 import com.codegym.service.house.IHouseService;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +21,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin("*")
@@ -31,9 +30,8 @@ public class HouseController {
 
     @Autowired
     private IHouseService houseService;
-
     @Autowired
-    private IHouseRepository houseRepository;
+    private IUserService userService;
 
     @GetMapping
     public ResponseEntity<List<House>> getHousesForAvailable(@RequestParam(name = "status", required = false) HouseStatus status) {
@@ -84,6 +82,13 @@ public class HouseController {
             house.setBathrooms(houseDTO.getBathrooms());
             house.setDescription(houseDTO.getDescription());
             house.setPrice(houseDTO.getPrice());
+
+            Optional<User> userOptional = userService.findByUsername(houseDTO.getUsername());
+            if (userOptional.isPresent()) {
+                house.setHost(userOptional.get());
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username not found");
+            }
 
             // Initialize house images list
             if (house.getHouseImages() == null) {

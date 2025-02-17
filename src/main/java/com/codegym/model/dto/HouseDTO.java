@@ -15,4 +15,5 @@ public class HouseDTO {
      private String description;
      private Integer price;
      private List<MultipartFile> houseImages;
+     private String username;
 }

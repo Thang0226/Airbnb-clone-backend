@@ -43,22 +43,14 @@ public class House {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
   
-    @Column(nullable = false)
+    @Column()
       @Enumerated(EnumType.STRING)
-    @NotNull(message = "Trạng thái là bắt buộc")
     private HouseStatus status;
-  
-  
-  @Column(nullable = false)
-    @NotNull(message = "Ngày bắt đầu là bắt buộc")
+
     private LocalDate startDate;
 
-
-    @Column(nullable = false)
-    @NotNull(message = "Ngày kết thúc là bắt buộc")
     private LocalDate endDate;
 
-    @Column(nullable = false)
     private LocalDateTime createdAt;
   
   // Liên kết với user được phân quyền là chủ nhà (host) , một user có thể sở hữu nhiều ngôi nhà
