@@ -1,5 +1,4 @@
 package com.codegym.model;
-
 import com.codegym.model.auth.Role;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -25,6 +24,7 @@ public class User {
 
     private String fullName;
 
+    @Column(columnDefinition = "TEXT")
     private String address;
 
     @Column(unique = true)

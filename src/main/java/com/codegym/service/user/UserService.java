@@ -1,5 +1,4 @@
 package com.codegym.service.user;
-
 import com.codegym.exception.NoSuchUserExistsException;
 import com.codegym.exception.PhoneAlreadyExistsException;
 import com.codegym.exception.UsernameAlreadyExistsException;

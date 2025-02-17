@@ -1,5 +1,4 @@
 package com.codegym.controller;
-
 import com.codegym.config.jwt.JwtResponse;
 import com.codegym.exception.PhoneAlreadyExistsException;
 import com.codegym.exception.UsernameAlreadyExistsException;
@@ -17,6 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.FileCopyUtils;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,12 +31,13 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashSet;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin("*")
@@ -50,6 +54,9 @@ public class UserController {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JwtService jwtService;
+  
+    @Value("${file_upload}")
+    private String fileUpload;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthenticationRequest authenticationRequest) {
@@ -126,9 +133,6 @@ public class UserController {
         }
     }
 
-    @Value("file_upload")
-    private String fileUpload;
-
     @GetMapping
     public ResponseEntity<Iterable<User>> getAllUsers() {
         return new ResponseEntity<>(userService.findAll(), HttpStatus.OK);
@@ -138,14 +142,21 @@ public class UserController {
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         Optional<User> user = userService.findById(id);
         return user.map(value ->
-                        new ResponseEntity<>(value, HttpStatus.OK))
+                new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @PostMapping
+    public ResponseEntity<?> addUser(@RequestBody User user) {
+        user.setAvatar("default.jpg");
+        userService.save(user);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @ModelAttribute UserForm userForm) {
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @ModelAttribute UserForm userForm, BindingResult result) {
         Optional<User> userOptional = userService.findById(id);
-        return getResponseEntity(userForm, userOptional);
+        return getResponseEntity(userForm, userOptional, result);
     }
 
     @DeleteMapping("/{id}")
@@ -154,7 +165,7 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping("/{userName}")
+    @GetMapping("/profile/{userName}")
     public ResponseEntity<UserProfileDTO> getUserProfile(@PathVariable String userName) {
         Optional<UserProfileDTO> userProfile = userService.getUserProfile(userName);
         return userProfile
@@ -162,15 +173,22 @@ public class UserController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @PutMapping("/{userName}")
-    public ResponseEntity<?> updateUserProfile(@PathVariable String userName, @ModelAttribute UserForm userForm) {
-        Optional<User> userOptional = userService.findByUsername(userName);
-        return getResponseEntity(userForm, userOptional);
+    @PutMapping("/profile/update")
+    public ResponseEntity<?> updateUserProfile(@Valid @ModelAttribute UserForm userForm, BindingResult result) {
+        Optional<User> userOptional = userService.findByUsername(userForm.getUsername());
+        return getResponseEntity(userForm, userOptional, result);
     }
 
-    private ResponseEntity<?> getResponseEntity(@ModelAttribute UserForm userForm, Optional<User> userOptional) {
+    private ResponseEntity<?> getResponseEntity(UserForm userForm, Optional<User> userOptional, BindingResult result) {
+        if (result.hasErrors()) {
+            List<String> errors = result.getAllErrors().stream()
+                    .map(ObjectError::getDefaultMessage)
+                    .collect(Collectors.toList());
+            return ResponseEntity.badRequest().body(errors);
+        }
+
         if (userOptional.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("User not found!",HttpStatus.NOT_FOUND);
         }
         User user = userOptional.get();
 
@@ -191,6 +209,6 @@ public class UserController {
         user.setAddress(userForm.getAddress());
         user.setPhone(userForm.getPhone());
         userService.save(user);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>("User profile update successfully", HttpStatus.OK);
     }
 }
