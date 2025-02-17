@@ -1,3 +1,4 @@
+package com.codegym.model;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
