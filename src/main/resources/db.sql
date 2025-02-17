@@ -1,3 +1,4 @@
+# Procedures
 DROP PROCEDURE IF EXISTS get_user_profile_by_username;
 create procedure get_user_profile_by_username(in _username varchar(255))
 begin
@@ -5,6 +6,14 @@ begin
     from users u
     where u.username = _username;
 end;
+
+
+
+# Data
+insert into roles(name) values ('ROLE_USER'), ('ROLE_HOST');
+
+
+
 
 
 
