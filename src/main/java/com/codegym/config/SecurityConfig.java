@@ -22,6 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
@@ -80,7 +81,7 @@ public class SecurityConfig {
                 }).csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers(new AntPathRequestMatcher("/images/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/images/**")).permitAll()
                         .requestMatchers("/api/users/login", "/api/users/register/**").permitAll()
 //                        .requestMatchers("/api/admin/**").hasAnyAuthority("ROLE_ADMIN")
 //                        .requestMatchers("/api/users/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN","ROLE_SELLER")
