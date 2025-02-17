@@ -10,4 +10,8 @@ public interface IUserService extends IGenerateService<User> {
     Optional<UserProfileDTO> getUserProfile(String userName);
 
     Optional<User> findByUsername(String username);
+
+    void validateUsername(String username);
+
+    void validatePhone(String phone);
 }

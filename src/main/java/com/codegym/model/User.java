@@ -1,8 +1,10 @@
 package com.codegym.model;
-
+import com.codegym.model.auth.Role;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Set;
 
 @Entity
 @Data
@@ -27,4 +29,7 @@ public class User {
 
     @Column(unique = true)
     private String phone;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Role> roles;
 }

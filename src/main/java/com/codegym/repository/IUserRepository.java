@@ -15,4 +15,6 @@ public interface IUserRepository extends JpaRepository<User, Long> {
     Optional<UserProfileDTO> getUserProfileByUsername(@Param("userName") String userName);
 
     Optional<User> findByUsername(String userName);
+
+    Optional<User> findByPhone(String phone);
 }
