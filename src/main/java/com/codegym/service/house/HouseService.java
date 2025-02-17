@@ -47,7 +47,7 @@ public class HouseService implements IHouseService {
         }
     }
 
-    public List<House> searchHouses(LocalDate checkIn, LocalDate checkOut, Integer guests, String sortOrder, Integer minBedrooms, Integer minBathrooms) {
+    public List<House> searchHouses(String address, LocalDate checkIn, LocalDate checkOut, Integer guests, String sortOrder, Integer minBedrooms, Integer minBathrooms) {
         Specification<House> spec = Specification.where(null);
 
         // Lọc theo ngày
@@ -84,6 +84,26 @@ public class HouseService implements IHouseService {
         } else {
             sort = sort.ascending();
         }
+
+        // Lọc theo tên thành phố/tỉnh (so sánh không dấu)
+        // Giả sử 'address' truyền vào là địa chỉ gốc từ client, ta trích xuất tên thành phố/tỉnh
+        if (address != null && !address.trim().isEmpty()) {
+            // In ra console thông báo rằng địa chỉ đã được nhập hợp lệ
+            System.out.println("Địa chỉ đã nhập: " + address);
+
+            // Ở đây, giả sử trong database address được lưu với định dạng: "120 Tran Phu, Nha Trang"
+            // Ta sẽ so sánh nếu address chứa chuỗi normalizedCity (đã chuyển thành chữ thường) ở bất kỳ đâu,
+            // thường là phần sau dấu phẩy.
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.lower(root.get("address")), "%" + address.toLowerCase() + "%")
+            );
+        } else {
+            // In ra console thông báo rằng địa chỉ không hợp lệ hoặc chỉ chứa khoảng trắng
+            System.out.println("Địa chỉ không hợp lệ hoặc rỗng.");
+        }
+
+
+
 
         return houseRepository.findAll(spec, sort);
     }

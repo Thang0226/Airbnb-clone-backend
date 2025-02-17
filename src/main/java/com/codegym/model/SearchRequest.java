@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 //phương thức bổ trợ để hỗ trợ lấy dữ liệu từ body gửi từ request api bên frontend search
 public class SearchRequest {
-    private String location;
+    private String address;
     private LocalDate checkIn;
     private LocalDate checkOut;
     private Integer guests;
@@ -13,8 +13,8 @@ public class SearchRequest {
     private Integer minBathrooms;
 
     // Getters & Setters
-    public String getLocation() { return location; }
-    public void setLocation(String location) { this.location = location; }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
     public LocalDate getCheckIn() { return checkIn; }
     public void setCheckIn(LocalDate checkIn) { this.checkIn = checkIn; }

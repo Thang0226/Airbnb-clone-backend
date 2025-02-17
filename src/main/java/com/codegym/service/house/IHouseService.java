@@ -11,6 +11,6 @@ public interface IHouseService extends IGenerateService<House> {
 
     List<House> findAll();
 
-    List<House> searchHouses(LocalDate checkIn, LocalDate checkOut, Integer guests, String sortOrder, Integer minBedrooms, Integer minBathrooms);
+    List<House> searchHouses(String address, LocalDate checkIn, LocalDate checkOut, Integer guests, String sortOrder, Integer minBedrooms, Integer minBathrooms);
 
 }

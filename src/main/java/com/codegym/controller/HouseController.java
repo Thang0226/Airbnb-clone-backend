@@ -35,6 +35,11 @@ public class HouseController {
 
     @GetMapping
     public ResponseEntity<List<House>> getHousesForAvailable(@RequestParam(name = "status", required = false) HouseStatus status) {
+
+
+            System.out.println("Received request for /api/houses with status: " + status);
+
+
         List<House> houses = List.of();
         if (status == null) {
             houses = houseService.findAll();
@@ -46,7 +51,15 @@ public class HouseController {
 
     @PostMapping("/search")
     public ResponseEntity<List<House>> searchHouses(@RequestBody SearchRequest request) {
+
+        // Xử lý chuỗi address: trích xuất phần tên thành phố hoặc tỉnh, chuyển sang dạng không dấu.
+        String normalizedAddress = AddressUtil.extractCityOrProvince(request.getAddress());
+        System.out.println("Normalized address for search: " + normalizedAddress);
+
+
+
         List<House> houses = houseService.searchHouses(
+                normalizedAddress,
                 request.getCheckIn(),
                 request.getCheckOut(),
                 request.getGuests(),
@@ -56,6 +69,8 @@ public class HouseController {
         );
         return ResponseEntity.ok(houses);
     }
+
+
 
     @Value("${file_upload}")
     private String UPLOAD_DIR;
