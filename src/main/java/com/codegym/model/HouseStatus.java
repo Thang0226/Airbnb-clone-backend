@@ -1,6 +1,6 @@
 package com.codegym.model;
 
-public enum HouseListStatusEnum {
+public enum HouseStatus {
 
         RENTED,
         AVAILABLE,
