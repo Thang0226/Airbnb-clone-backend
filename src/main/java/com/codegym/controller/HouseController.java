@@ -4,12 +4,8 @@ import com.codegym.model.House;
 import com.codegym.model.HouseStatus;
 import com.codegym.model.SearchRequest;
 import com.codegym.repository.IHouseRepository;
-import com.codegym.service.HouseService;
-import com.codegym.service.IHouseService;
+import com.codegym.service.house.HouseService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,40 +23,28 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.time.LocalDate;
 
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/api/houses")
 public class HouseController {
 
-        @Autowired
-        private IHouseService houseService;
+    @Autowired
+    private IHouseService houseService;
 
-        @Autowired
-        private IHouseRepository houseRepository;
-  
-         @Autowired
-        private IHouseService houseService;
+    @Autowired
+    private IHouseRepository houseRepository;
 
-        public HouseController(HouseService houseService, IHouseRepository houseRepository) {
-            this.houseService = houseService;
-            this.houseRepository = houseRepository;
+    @GetMapping
+    public ResponseEntity<List<House>> getHousesForAvailable(@RequestParam(name = "status", required = false) HouseStatus status) {
+        List<House> houses = List.of();
+        if (status == null) {
+            houses = houseService.findAll();
+        } else {
+            houses = houseService.getHousesForAVAILABLE(String.valueOf(status));
         }
-       //api phải là: http://localhost:8080/api/houses?status=AVAILABLE thì mới lấy được dữ liệu
-        @GetMapping
-        public ResponseEntity<List<House>> getHousesForAvailable(@RequestParam(name = "status", required = false) HouseStatus status) {
-            List<House> houses = List.of();
-            if (status == null) {
-                houses = houseService.findAll();
-            } else {
-                houses = houseService.getHousesForAVAILABLE(String.valueOf(status));
-            }
-            return ResponseEntity.ok(houses);
-        }
-
+        return ResponseEntity.ok(houses);
+    }
 
     @PostMapping("/search")
     public ResponseEntity<List<House>> searchHouses(@RequestBody SearchRequest request) {
