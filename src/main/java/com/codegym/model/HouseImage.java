@@ -18,10 +18,25 @@ public class HouseImage {
     private Long id;
     private String fileName;
     private LocalDateTime createdAt;
-
     @ManyToOne
     @JoinColumn(name = "house_id")
     @JsonBackReference
     @JsonIgnoreProperties("houseImages")
     private House house;
+
+    // Constructors
+    public HouseImage() {}
+
+    public HouseImage(String imageUrl, LocalDateTime createdAt) {
+        this.fileName = imageUrl;
+        this.createdAt = createdAt;
+    }
+
+    public @NotBlank(message = "Image URL is required") String getImageUrl() {
+        return fileName;
+    }
+
+    public void setImageUrl(@NotBlank(message = "Image URL is required") String imageUrl) {
+        this.fileName = imageUrl;
+    }
 }
