@@ -48,36 +48,7 @@ public class HouseService implements IHouseService {
     }
 
     public List<House> searchHouses(String address, LocalDate checkIn, LocalDate checkOut, Integer guests, String sortOrder, Integer minBedrooms, Integer minBathrooms) {
-        Specification<House> spec = Specification.where(null);
-
-        // Lọc theo ngày
-        if (checkIn != null && checkOut != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.and(
-                            cb.lessThanOrEqualTo(root.get("startDate"), checkIn),
-                            cb.greaterThanOrEqualTo(root.get("endDate"), checkOut)
-                    )
-            );
-        }
-
-        // Lọc theo số phòng ngủ tối thiểu
-        if (minBedrooms != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.greaterThanOrEqualTo(root.get("bedrooms"), minBedrooms));
-        }
-
-        // Lọc theo số phòng tắm tối thiểu
-        if (minBathrooms != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.greaterThanOrEqualTo(root.get("bathrooms"), minBathrooms));
-        }
-
-        // Lọc theo trạng thái AVAILABLE
-        spec = spec.and((root, query, cb) ->
-                cb.equal(root.get("status"), HouseStatus.AVAILABLE)
-        );
-
-        // Sắp xếp theo giá
+        // Xác định sắp xếp theo giá
         Sort sort = Sort.by("price");
         if ("desc".equalsIgnoreCase(sortOrder)) {
             sort = sort.descending();
@@ -85,28 +56,32 @@ public class HouseService implements IHouseService {
             sort = sort.ascending();
         }
 
-        // Lọc theo tên thành phố/tỉnh (so sánh không dấu)
-        // Giả sử 'address' truyền vào là địa chỉ gốc từ client, ta trích xuất tên thành phố/tỉnh
-        if (address != null && !address.trim().isEmpty()) {
-            // In ra console thông báo rằng địa chỉ đã được nhập hợp lệ
-            System.out.println("Địa chỉ đã nhập: " + address);
+        // In ra console các tham số tìm kiếm để kiểm tra
+        System.out.println("=== Bắt đầu quá trình tìm kiếm nhà ===");
+        System.out.println("Địa chỉ: " + address);
+        System.out.println("Ngày nhận phòng (checkIn): " + checkIn);
+        System.out.println("Ngày trả phòng (checkOut): " + checkOut);
+        System.out.println("Số lượng khách: " + guests);
+        System.out.println("Sắp xếp theo giá: " + sortOrder);
+        System.out.println("Phòng ngủ tối thiểu: " + minBedrooms);
+        System.out.println("Phòng tắm tối thiểu: " + minBathrooms);
+        System.out.println("Sắp xếp: " + sort);
 
-            // Ở đây, giả sử trong database address được lưu với định dạng: "120 Tran Phu, Nha Trang"
-            // Ta sẽ so sánh nếu address chứa chuỗi normalizedCity (đã chuyển thành chữ thường) ở bất kỳ đâu,
-            // thường là phần sau dấu phẩy.
-            spec = spec.and((root, query, cb) ->
-                    cb.like(cb.lower(root.get("address")), "%" + address.toLowerCase() + "%")
-            );
-        } else {
-            // In ra console thông báo rằng địa chỉ không hợp lệ hoặc chỉ chứa khoảng trắng
-            System.out.println("Địa chỉ không hợp lệ hoặc rỗng.");
+        // Gọi repository method với các tham số lọc
+        List<House> houses = houseRepository.searchHouses(checkIn, checkOut, minBedrooms, minBathrooms, address, sort);
+
+        // In ra kết quả tìm kiếm
+        System.out.println("Tìm thấy " + houses.size() + " nhà.");
+        for (House house : houses) {
+            System.out.println("House ID: " + house.getId()
+                    + " - Address: " + house.getAddress()
+                    + " - Price: " + house.getPrice());
         }
+        System.out.println("=== Kết thúc quá trình tìm kiếm ===");
 
-
-
-
-        return houseRepository.findAll(spec, sort);
+        return houses;
     }
+
 }
 
 
