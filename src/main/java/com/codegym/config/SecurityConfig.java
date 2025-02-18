@@ -85,6 +85,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/login", "/api/users/register/**").permitAll()
 //                        .requestMatchers("/api/admin/**").hasAnyAuthority("ROLE_ADMIN")
 //                        .requestMatchers("/api/users/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN","ROLE_SELLER")
+                                .requestMatchers("/api/houses/**").permitAll() // Cho phép tất cả truy cập API này
+                                .requestMatchers("/api/placeholder/**").permitAll() // Cho phép tất cả truy cập API này
                         .anyRequest().hasAuthority("ROLE_USER")
                 )
                 .exceptionHandling(customizer -> customizer.accessDeniedHandler(customAccessDeniedHandler()))
