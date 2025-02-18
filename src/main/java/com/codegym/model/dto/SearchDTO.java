@@ -1,5 +1,6 @@
-package com.codegym.model;
+package com.codegym.model.dto;
 
+import com.codegym.model.constants.SortOrder;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
