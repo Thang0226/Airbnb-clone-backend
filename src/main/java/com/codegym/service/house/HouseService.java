@@ -1,12 +1,10 @@
 package com.codegym.service.house;
 
 
-import com.codegym.model.BookingStatus;
 import com.codegym.model.House;
-import com.codegym.model.SortOrder;
+import com.codegym.model.constants.SortOrder;
 import com.codegym.repository.IHouseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

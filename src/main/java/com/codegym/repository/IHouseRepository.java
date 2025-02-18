@@ -1,7 +1,7 @@
 package com.codegym.repository;
 
 import com.codegym.model.House;
-import com.codegym.model.SortOrder;
+import com.codegym.model.constants.SortOrder;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;

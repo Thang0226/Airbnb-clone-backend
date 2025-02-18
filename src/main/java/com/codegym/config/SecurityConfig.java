@@ -78,7 +78,8 @@ public class SecurityConfig {
                     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
                     source.registerCorsConfiguration("/**", configuration);
                     httpSecurityCorsConfigurer.configurationSource(source);
-                }).csrf(AbstractHttpConfigurer::disable)
+                })
+                .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(new AntPathRequestMatcher("/images/**")).permitAll()
@@ -87,7 +88,7 @@ public class SecurityConfig {
 //                        .requestMatchers("/api/users/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN","ROLE_SELLER")
                                 .requestMatchers("/api/houses/**").permitAll() // Cho phép tất cả truy cập API này
                                 .requestMatchers("/api/placeholder/**").permitAll() // Cho phép tất cả truy cập API này
-                        .anyRequest().hasAuthority("ROLE_USER")
+                        .anyRequest().authenticated()
                 )
                 .exceptionHandling(customizer -> customizer.accessDeniedHandler(customAccessDeniedHandler()))
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

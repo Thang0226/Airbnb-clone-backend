@@ -1,7 +1,7 @@
 package com.codegym.service.house;
 
 import com.codegym.model.House;
-import com.codegym.model.SortOrder;
+import com.codegym.model.constants.SortOrder;
 import com.codegym.service.IGenerateService;
 
 import java.time.LocalDate;
