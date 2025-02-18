@@ -53,7 +53,7 @@ public class UserController {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JwtService jwtService;
-  
+
     @Value("${file_upload}")
     private String fileUpload;
 
@@ -92,12 +92,19 @@ public class UserController {
         String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
         user.setPassword(encodedPassword);
 
-        Role userRole = roleService.findByName("ROLE_USER");
         Set<Role> roles = new HashSet<>();
-        roles.add(userRole);
-        user.setRoles(roles);
+        if (userDTO.isHost()) {
+            Role hostRole = roleService.findByName("ROLE_HOST");
+            roles.add(hostRole);
+        } else {
+            Role userRole = roleService.findByName("ROLE_USER");
+            roles.add(userRole);
+        }
 
+        user.setRoles(roles);
+        System.out.println("User roles before saving: " + roles);
         userService.save(user);
+        System.out.println("User saved with roles: " + user.getRoles());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
