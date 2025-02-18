@@ -3,6 +3,7 @@ package com.codegym.service.house;
 
 import com.codegym.model.BookingStatus;
 import com.codegym.model.House;
+import com.codegym.model.SortOrder;
 import com.codegym.repository.IHouseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -17,6 +18,7 @@ public class HouseService implements IHouseService {
 
     @Autowired
     private IHouseRepository houseRepository;
+
     @Override
     public List<House> findAll() {
         return houseRepository.findAll();
@@ -37,38 +39,16 @@ public class HouseService implements IHouseService {
         houseRepository.deleteById(id);
     }
 
-    public List<House> searchHouses(String address, LocalDate checkIn, LocalDate checkOut, Integer guests, String sortOrder, Integer minBedrooms, Integer minBathrooms) {
-        // Xác định sắp xếp theo giá
-        Sort sort = Sort.by("price");
-        if ("desc".equalsIgnoreCase(sortOrder)) {
-            sort = sort.descending();
+    @Override
+    public List<House> searchHouses(String address, LocalDate checkIn, LocalDate checkOut, Integer minBedrooms, Integer minBathrooms, Integer minPrice, Integer maxPrice, SortOrder priceOrder) {
+        List<House> houses;
+        if (checkIn == null) {
+            houses = houseRepository.searchHouses(address, null, null, minBedrooms, minBathrooms, minPrice, maxPrice, priceOrder);
+        } else if (checkOut == null) {
+            houses = houseRepository.searchHouses(address, checkIn, checkIn.plusDays(1), minBedrooms, minBathrooms, minPrice, maxPrice, priceOrder);
         } else {
-            sort = sort.ascending();
+            houses = houseRepository.searchHouses(address, checkIn, checkOut, minBedrooms, minBathrooms, minPrice, maxPrice, priceOrder);
         }
-
-        // In ra console các tham số tìm kiếm để kiểm tra
-        System.out.println("=== Bắt đầu quá trình tìm kiếm nhà ===");
-        System.out.println("Địa chỉ: " + address);
-        System.out.println("Ngày nhận phòng (checkIn): " + checkIn);
-        System.out.println("Ngày trả phòng (checkOut): " + checkOut);
-        System.out.println("Số lượng khách: " + guests);
-        System.out.println("Sắp xếp theo giá: " + sortOrder);
-        System.out.println("Phòng ngủ tối thiểu: " + minBedrooms);
-        System.out.println("Phòng tắm tối thiểu: " + minBathrooms);
-        System.out.println("Sắp xếp: " + sort);
-
-        // Gọi repository method với các tham số lọc
-        List<House> houses = houseRepository.searchHouses(checkIn, checkOut, minBedrooms, minBathrooms, address, sort);
-
-        // In ra kết quả tìm kiếm
-        System.out.println("Tìm thấy " + houses.size() + " nhà.");
-        for (House house : houses) {
-            System.out.println("House ID: " + house.getId()
-                    + " - Address: " + house.getAddress()
-                    + " - Price: " + house.getPrice());
-        }
-        System.out.println("=== Kết thúc quá trình tìm kiếm ===");
-
         return houses;
     }
 }

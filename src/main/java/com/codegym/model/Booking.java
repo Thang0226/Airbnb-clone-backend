@@ -26,4 +26,8 @@ public class Booking {
     private BookingStatus status;
 
     private LocalDateTime updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "house_id", nullable = false)
+    private House house;
 }

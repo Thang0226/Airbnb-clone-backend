@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.codegym.model.SortOrder.ASC;
+
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/api/houses")
@@ -33,29 +35,28 @@ public class HouseController {
     private IUserService userService;
 
     @GetMapping
-    public ResponseEntity<List<House>> getHousesForAvailable(@RequestBody SearchRequest request) {
+    public ResponseEntity<List<House>> getHousesForAvailable() {
         List<House> houses;
-        houses = houseService.searchHouses(null, LocalDate.now(), LocalDate.now().plusDays(1), null, request.getSortOrder(), null, null);
+        houses = houseService.searchHouses(null, LocalDate.now(), LocalDate.now().plusDays(1), null, null, null, null, SortOrder.ASC);
         return ResponseEntity.ok(houses);
     }
 
     @PostMapping("/search")
-    public ResponseEntity<List<House>> searchHouses(@RequestBody SearchRequest request) {
+    public ResponseEntity<List<House>> searchHouses(@RequestBody SearchDTO searchDTO) {
 
         // Xử lý chuỗi address: trích xuất phần tên thành phố hoặc tỉnh, chuyển sang dạng không dấu.
-        String normalizedAddress = AddressUtil.extractCityOrProvince(request.getAddress());
+        String normalizedAddress = AddressUtil.extractCityOrProvince(searchDTO.getAddress());
         System.out.println("Normalized address for search: " + normalizedAddress);
-
-
 
         List<House> houses = houseService.searchHouses(
                 normalizedAddress,
-                request.getCheckIn(),
-                request.getCheckOut(),
-                request.getGuests(),
-                request.getSortOrder(),
-                request.getMinBedrooms(),
-                request.getMinBathrooms()
+                searchDTO.getCheckIn(),
+                searchDTO.getCheckOut(),
+                searchDTO.getMinBedrooms(),
+                searchDTO.getMinBathrooms(),
+                searchDTO.getMinPrice(),
+                searchDTO.getMaxPrice(),
+                searchDTO.getPriceOrder()
         );
         return ResponseEntity.ok(houses);
     }
