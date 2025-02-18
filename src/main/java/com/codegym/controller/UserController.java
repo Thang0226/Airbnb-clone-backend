@@ -84,7 +84,6 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<?> addUser(@RequestBody UserDTO userDTO) {
         User user = new User();
-        user.setAvatar("default.jpg");
 
         user.setUsername(userDTO.getUsername());
         user.setPhone(userDTO.getPhone());
@@ -147,7 +146,6 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<?> addUser(@RequestBody User user) {
-        user.setAvatar("default.jpg");
         userService.save(user);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
