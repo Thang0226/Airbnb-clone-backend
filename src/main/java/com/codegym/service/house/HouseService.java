@@ -1,12 +1,12 @@
 package com.codegym.service.house;
 
 
+import com.codegym.model.BookingStatus;
 import com.codegym.model.House;
-import com.codegym.model.HouseStatus;
+import com.codegym.model.SortOrder;
 import com.codegym.repository.IHouseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -18,6 +18,7 @@ public class HouseService implements IHouseService {
 
     @Autowired
     private IHouseRepository houseRepository;
+
     @Override
     public List<House> findAll() {
         return houseRepository.findAll();
@@ -38,54 +39,17 @@ public class HouseService implements IHouseService {
         houseRepository.deleteById(id);
     }
 
-    public List<House> getHousesForAVAILABLE(String status) {
-        try {
-            HouseStatus statusEnum = HouseStatus.valueOf(status.toUpperCase());
-            return houseRepository.findByStatus(statusEnum);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Invalid status value: " + status);
-        }
-    }
-
-    public List<House> searchHouses(LocalDate checkIn, LocalDate checkOut, Integer guests, String sortOrder, Integer minBedrooms, Integer minBathrooms) {
-        Specification<House> spec = Specification.where(null);
-
-        // Lọc theo ngày
-        if (checkIn != null && checkOut != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.and(
-                            cb.lessThanOrEqualTo(root.get("startDate"), checkIn),
-                            cb.greaterThanOrEqualTo(root.get("endDate"), checkOut)
-                    )
-            );
-        }
-
-        // Lọc theo số phòng ngủ tối thiểu
-        if (minBedrooms != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.greaterThanOrEqualTo(root.get("bedrooms"), minBedrooms));
-        }
-
-        // Lọc theo số phòng tắm tối thiểu
-        if (minBathrooms != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.greaterThanOrEqualTo(root.get("bathrooms"), minBathrooms));
-        }
-
-        // Lọc theo trạng thái AVAILABLE
-        spec = spec.and((root, query, cb) ->
-                cb.equal(root.get("status"), HouseStatus.AVAILABLE)
-        );
-
-        // Sắp xếp theo giá
-        Sort sort = Sort.by("price");
-        if ("desc".equalsIgnoreCase(sortOrder)) {
-            sort = sort.descending();
+    @Override
+    public List<House> searchHouses(String address, LocalDate checkIn, LocalDate checkOut, Integer minBedrooms, Integer minBathrooms, Integer minPrice, Integer maxPrice, SortOrder priceOrder) {
+        List<House> houses;
+        if (checkIn == null) {
+            houses = houseRepository.searchHouses(address, null, null, minBedrooms, minBathrooms, minPrice, maxPrice, priceOrder);
+        } else if (checkOut == null) {
+            houses = houseRepository.searchHouses(address, checkIn, checkIn.plusDays(1), minBedrooms, minBathrooms, minPrice, maxPrice, priceOrder);
         } else {
-            sort = sort.ascending();
+            houses = houseRepository.searchHouses(address, checkIn, checkOut, minBedrooms, minBathrooms, minPrice, maxPrice, priceOrder);
         }
-
-        return houseRepository.findAll(spec, sort);
+        return houses;
     }
 }
 

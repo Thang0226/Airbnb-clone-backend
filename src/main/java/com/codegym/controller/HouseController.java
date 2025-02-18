@@ -1,8 +1,6 @@
 package com.codegym.controller;
 
 import com.codegym.model.*;
-import com.codegym.repository.IHouseRepository;
-import com.codegym.service.house.HouseService;
 import com.codegym.service.user.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +17,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static com.codegym.model.SortOrder.ASC;
 
 @RestController
 @CrossOrigin("*")
@@ -34,25 +35,28 @@ public class HouseController {
     private IUserService userService;
 
     @GetMapping
-    public ResponseEntity<List<House>> getHousesForAvailable(@RequestParam(name = "status", required = false) HouseStatus status) {
-        List<House> houses = List.of();
-        if (status == null) {
-            houses = houseService.findAll();
-        } else {
-            houses = houseService.getHousesForAVAILABLE(String.valueOf(status));
-        }
+    public ResponseEntity<List<House>> getHousesForAvailable() {
+        List<House> houses;
+        houses = houseService.searchHouses(null, LocalDate.now(), LocalDate.now().plusDays(1), null, null, null, null, SortOrder.ASC);
         return ResponseEntity.ok(houses);
     }
 
     @PostMapping("/search")
-    public ResponseEntity<List<House>> searchHouses(@RequestBody SearchRequest request) {
+    public ResponseEntity<List<House>> searchHouses(@RequestBody SearchDTO searchDTO) {
+
+        // Xử lý chuỗi address: trích xuất phần tên thành phố hoặc tỉnh, chuyển sang dạng không dấu.
+        String normalizedAddress = AddressUtil.extractCityOrProvince(searchDTO.getAddress());
+        System.out.println("Normalized address for search: " + normalizedAddress);
+
         List<House> houses = houseService.searchHouses(
-                request.getCheckIn(),
-                request.getCheckOut(),
-                request.getGuests(),
-                request.getSortOrder(),
-                request.getMinBedrooms(),
-                request.getMinBathrooms()
+                normalizedAddress,
+                searchDTO.getCheckIn(),
+                searchDTO.getCheckOut(),
+                searchDTO.getMinBedrooms(),
+                searchDTO.getMinBathrooms(),
+                searchDTO.getMinPrice(),
+                searchDTO.getMaxPrice(),
+                searchDTO.getPriceOrder()
         );
         return ResponseEntity.ok(houses);
     }
