@@ -1,8 +1,6 @@
 package com.codegym.controller;
 
 import com.codegym.model.*;
-import com.codegym.repository.IHouseRepository;
-import com.codegym.service.house.HouseService;
 import com.codegym.service.user.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -34,12 +32,7 @@ public class HouseController {
     private IUserService userService;
 
     @GetMapping
-    public ResponseEntity<List<House>> getHousesForAvailable(@RequestParam(name = "status", required = false) HouseStatus status) {
-
-
-            System.out.println("Received request for /api/houses with status: " + status);
-
-
+    public ResponseEntity<List<House>> getHousesForAvailable(@RequestParam(name = "status", required = false) BookingStatus status) {
         List<House> houses = List.of();
         if (status == null) {
             houses = houseService.findAll();
@@ -69,8 +62,6 @@ public class HouseController {
         );
         return ResponseEntity.ok(houses);
     }
-
-
 
     @Value("${file_upload}")
     private String UPLOAD_DIR;

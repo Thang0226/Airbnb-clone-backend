@@ -5,7 +5,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import com.codegym.model.HouseStatus;
+import com.codegym.model.BookingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
@@ -15,7 +15,7 @@ import java.util.List;
 @Repository
 public interface IHouseRepository extends JpaRepository<House, Long>, JpaSpecificationExecutor<House> {
   //cần JpaSpecificationExecutor để lọc và tìm kiếm
-    List<House> findByStatus(HouseStatus status);
+    List<House> findByStatus(BookingStatus status);
 
 
 

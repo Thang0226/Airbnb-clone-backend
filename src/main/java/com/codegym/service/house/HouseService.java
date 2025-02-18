@@ -1,12 +1,11 @@
 package com.codegym.service.house;
 
 
+import com.codegym.model.BookingStatus;
 import com.codegym.model.House;
-import com.codegym.model.HouseStatus;
 import com.codegym.repository.IHouseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -40,7 +39,7 @@ public class HouseService implements IHouseService {
 
     public List<House> getHousesForAVAILABLE(String status) {
         try {
-            HouseStatus statusEnum = HouseStatus.valueOf(status.toUpperCase());
+            BookingStatus statusEnum = BookingStatus.valueOf(status.toUpperCase());
             return houseRepository.findByStatus(statusEnum);
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Invalid status value: " + status);
@@ -81,7 +80,6 @@ public class HouseService implements IHouseService {
 
         return houses;
     }
-
 }
 
 
