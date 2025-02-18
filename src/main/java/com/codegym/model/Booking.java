@@ -1,5 +1,6 @@
 package com.codegym.model;
 
+import com.codegym.model.constants.BookingStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
