@@ -37,15 +37,6 @@ public class HouseService implements IHouseService {
         houseRepository.deleteById(id);
     }
 
-    public List<House> getHousesForAVAILABLE(String status) {
-        try {
-            BookingStatus statusEnum = BookingStatus.valueOf(status.toUpperCase());
-            return houseRepository.findByStatus(statusEnum);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Invalid status value: " + status);
-        }
-    }
-
     public List<House> searchHouses(String address, LocalDate checkIn, LocalDate checkOut, Integer guests, String sortOrder, Integer minBedrooms, Integer minBathrooms) {
         // Xác định sắp xếp theo giá
         Sort sort = Sort.by("price");

@@ -2,6 +2,8 @@
 # DROP PROCEDURE IF EXISTS <proc_name>;
 #     Tạo bảng thêm câu này vào trước:
 
+create database airbnb;
+
 use airbnb;
 
 # user tạm thoi
@@ -224,6 +226,15 @@ VALUES
     (40, '65 Dao Duy Anh, Lao Cai', 2, 2, '2024-03-03 10:30:00.000000', 'Modern apartment with a mix of contemporary and traditional style.', '2024-03-18', 'Contemporary apartment in Lao Cai', 800000.00, '2024-03-04', 'RENTED', '2024-03-03 10:30:00.000000', 2);
 
 
+insert into airbnb.houses
+(id, address, bathrooms, bedrooms, created_at, description, end_date, house_name, price, start_date, status, updated_at, host_id)
+values
+    (41, 'Ho Chi Minh', 4, 2, '2024-02-01 10:00:00.000000',
+     'Cozy house in the heart of Ho Chi Minh City, ideal for solo travelers.',
+     '2024-03-15', 'Ho Chi Minh Cozy Home', 500000, '2024-02-10',
+     'AVAILABLE', '2024-02-01 10:00:00.000000', 4);
+
+
 insert into airbnb.house_image_join (house_id, image_id)
 values  (1, 4),
         (1, 5),
@@ -340,3 +351,5 @@ values
     (40, 107),
     (40, 108),
     (40, 109);
+
+

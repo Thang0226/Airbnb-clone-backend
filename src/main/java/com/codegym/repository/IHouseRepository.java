@@ -14,17 +14,10 @@ import java.util.List;
 
 @Repository
 public interface IHouseRepository extends JpaRepository<House, Long>, JpaSpecificationExecutor<House> {
-  //cần JpaSpecificationExecutor để lọc và tìm kiếm
-    List<House> findByStatus(BookingStatus status);
-
-
 
   @Query("SELECT h FROM House h " +
-          "WHERE (:checkIn IS NULL OR h.startDate <= :checkIn) " +
-          "AND (:checkOut IS NULL OR h.endDate >= :checkOut) " +
-          "AND (:minBedrooms IS NULL OR h.bedrooms >= :minBedrooms) " +
+          "WHERE (:minBedrooms IS NULL OR h.bedrooms >= :minBedrooms) " +
           "AND (:minBathrooms IS NULL OR h.bathrooms >= :minBathrooms) " +
-          "AND h.status = 'AVAILABLE' " +
           "AND (:address IS NULL OR TRIM(:address) = '' OR " +
           "LOWER(h.address) LIKE LOWER(CONCAT('%', :address, '%')))")
   List<House> searchHouses(@Param("checkIn") LocalDate checkIn,

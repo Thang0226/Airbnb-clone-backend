@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,13 +33,9 @@ public class HouseController {
     private IUserService userService;
 
     @GetMapping
-    public ResponseEntity<List<House>> getHousesForAvailable(@RequestParam(name = "status", required = false) BookingStatus status) {
-        List<House> houses = List.of();
-        if (status == null) {
-            houses = houseService.findAll();
-        } else {
-            houses = houseService.getHousesForAVAILABLE(String.valueOf(status));
-        }
+    public ResponseEntity<List<House>> getHousesForAvailable(@RequestBody SearchRequest request) {
+        List<House> houses;
+        houses = houseService.searchHouses(null, LocalDate.now(), LocalDate.now().plusDays(1), null, request.getSortOrder(), null, null);
         return ResponseEntity.ok(houses);
     }
 
