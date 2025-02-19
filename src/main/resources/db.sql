@@ -66,7 +66,7 @@ VALUES
         '123 Oak Street, Austin, TX 78701',
         'default.jpg',
         'John Doe',
-        '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewopWz8T5/zLWXe6', -- "123456"
+        '$2a$12$HBLHhzG6Cjy8gQuhHQ2yLOets.K4Wvv2Lt7lKvu6BRM98TnmYfWke', -- "123456"
         '0123456789',
         'john_doe'
     ),
@@ -74,7 +74,7 @@ VALUES
         '456 Pine Ave, Seattle, WA 98101',
         'default.jpg',
         'Sarah Smith',
-        '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewopWz8T5/zLWXe6', -- "123456"
+        '$2a$12$HBLHhzG6Cjy8gQuhHQ2yLOets.K4Wvv2Lt7lKvu6BRM98TnmYfWke', -- "123456"
         '0987654321',
         'sarah_smith'
     ),
@@ -82,7 +82,7 @@ VALUES
         '789 Maple Dr, Chicago, IL 60601',
         'default.jpg',
         'Michael Johnson',
-        '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewopWz8T5/zLWXe6', -- "123456"
+        '$2a$12$HBLHhzG6Cjy8gQuhHQ2yLOets.K4Wvv2Lt7lKvu6BRM98TnmYfWke', -- "123456"
         '0456789123',
         'mike_j'
     ),
@@ -90,7 +90,7 @@ VALUES
         '321 Elm Road, Miami, FL 33101',
         'default.jpg',
         'Emily Brown',
-        '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewopWz8T5/zLWXe6', -- "123456"
+        '$2a$12$HBLHhzG6Cjy8gQuhHQ2yLOets.K4Wvv2Lt7lKvu6BRM98TnmYfWke', -- "123456"
         '0789123456',
         'emily_b'
     ),
@@ -98,7 +98,7 @@ VALUES
         '654 Cedar Lane, Denver, CO 80201',
         'default.jpg',
         'David Wilson',
-        '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewopWz8T5/zLWXe6', -- "123456"
+        '$2a$12$HBLHhzG6Cjy8gQuhHQ2yLOets.K4Wvv2Lt7lKvu6BRM98TnmYfWke', -- "123456"
         '0321654987',
         'david_w'
     ),
@@ -106,7 +106,7 @@ VALUES
         '987 Birch Blvd, Portland, OR 97201',
         'default.jpg',
         'Lisa Taylor',
-        '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewopWz8T5/zLWXe6', -- "123456"
+        '$2a$12$HBLHhzG6Cjy8gQuhHQ2yLOets.K4Wvv2Lt7lKvu6BRM98TnmYfWke', -- "123456"
         '0147258369',
         'lisa_t'
     ),
@@ -114,7 +114,7 @@ VALUES
         '147 Walnut St, Boston, MA 02101',
         'default.jpg',
         'Robert Miller',
-        '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewopWz8T5/zLWXe6', -- "123456"
+        '$2a$12$HBLHhzG6Cjy8gQuhHQ2yLOets.K4Wvv2Lt7lKvu6BRM98TnmYfWke', -- "123456"
         '0258147369',
         'robert_m'
     ),
