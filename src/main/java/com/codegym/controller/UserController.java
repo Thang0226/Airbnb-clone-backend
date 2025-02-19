@@ -153,14 +153,13 @@ public class UserController {
 
             // Add host role
             Role hostRole = roleService.findByName("ROLE_HOST");
-            Set<Role> roles = user.getRoles();
+            // Set<Role> roles = user.getRoles(); // add new role_id for same user_id (old)
+            Set<Role> roles = new HashSet<>(); // replace new role_id (new)
             roles.add(hostRole);
             user.setRoles(roles);
+
             userService.save(user);
-
-            // Delete the request
-            hostRequestService.deleteById(requestId);
-
+            hostRequestService.deleteById(requestId); // Delete the request
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
