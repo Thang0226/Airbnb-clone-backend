@@ -2,13 +2,14 @@ package com.codegym.controller;
 import com.codegym.config.jwt.JwtResponse;
 import com.codegym.exception.PhoneAlreadyExistsException;
 import com.codegym.exception.UsernameAlreadyExistsException;
-import com.codegym.model.auth.AuthenticationRequest;
+import com.codegym.model.auth.Account;
 import com.codegym.model.auth.Role;
+import com.codegym.model.dto.UpdatePasswordDTO;
 import com.codegym.model.dto.UserDTO;
+import com.codegym.model.dto.UserProfileDTO;
 import com.codegym.model.User;
 import com.codegym.model.UserForm;
 import com.codegym.config.jwt.JwtService;
-import com.codegym.model.dto.UserProfileDTO;
 import com.codegym.service.role.IRoleService;
 import com.codegym.service.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -58,16 +59,16 @@ public class UserController {
     private String fileUpload;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthenticationRequest authenticationRequest) {
+    public ResponseEntity<?> login(@RequestBody Account account) {
         try {
-            System.out.println(authenticationRequest.getUsername());
+            System.out.println(account.getUsername());
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword()));
+                    new UsernamePasswordAuthenticationToken(account.getUsername(), account.getPassword()));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwt = jwtService.generateTokenLogin(authentication);
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            User currentUser = userService.findByUsername(authenticationRequest.getUsername()).get();
+            User currentUser = userService.findByUsername(account.getUsername()).get();
 
             return ResponseEntity.ok(new JwtResponse(
                     currentUser.getId(),
@@ -131,6 +132,51 @@ public class UserController {
         }
     }
 
+    @PostMapping("/change_password")
+    public ResponseEntity<?> changePassword(@RequestBody UpdatePasswordDTO updatePasswordDTO) {
+        Optional<User> userOptional = userService.findByUsername(updatePasswordDTO.getUsername());
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            if (passwordEncoder.matches(updatePasswordDTO.getOldPassword(), user.getPassword())) {
+                String newPassword = passwordEncoder.encode(updatePasswordDTO.getNewPassword());
+                user.setPassword(newPassword);
+                userService.save(user);
+                return ResponseEntity.ok("Password changed successfully!");
+            }
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Username or Password.");
+    }
+
+    @GetMapping
+    public ResponseEntity<Iterable<User>> getAllUsers() {
+        return new ResponseEntity<>(userService.findAll(), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        Optional<User> user = userService.findById(id);
+        return user.map(value ->
+                new ResponseEntity<>(value, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @PostMapping
+    public ResponseEntity<?> addUser(@RequestBody User user) {
+        userService.save(user);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @ModelAttribute UserForm userForm, BindingResult result) {
+        Optional<User> userOptional = userService.findById(id);
+        return getResponseEntity(userForm, userOptional, result);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        userService.deleteById(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
     @GetMapping("/profile/{userName}")
     public ResponseEntity<UserProfileDTO> getUserProfile(@PathVariable String userName) {
