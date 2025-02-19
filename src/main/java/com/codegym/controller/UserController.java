@@ -2,7 +2,8 @@ package com.codegym.controller;
 import com.codegym.config.jwt.JwtResponse;
 import com.codegym.exception.PhoneAlreadyExistsException;
 import com.codegym.exception.UsernameAlreadyExistsException;
-//import com.codegym.model.HostRequest;
+import com.codegym.model.HostRequest;
+import com.codegym.model.HostRequest;
 import com.codegym.model.auth.AuthenticationRequest;
 import com.codegym.model.auth.Account;
 import com.codegym.model.auth.Role;
@@ -12,7 +13,7 @@ import com.codegym.model.dto.UserProfileDTO;
 import com.codegym.model.User;
 import com.codegym.model.UserForm;
 import com.codegym.config.jwt.JwtService;
-//import com.codegym.service.host.IHostRequestService;
+import com.codegym.service.host.IHostRequestService;
 import com.codegym.service.role.IRoleService;
 import com.codegym.service.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,6 +35,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.io.File;
 import java.io.IOException;
@@ -58,48 +60,11 @@ public class UserController {
     @Autowired
     private JwtService jwtService;
 
-//    @Autowired
-//    private IHostRequestService hostRequestService;
+    @Autowired
+    private IHostRequestService hostRequestService;
 
     @Value("${file_upload}")
     private String fileUpload;
-
-    // Admin: fetches all pending host requests
-//    @GetMapping("/host-requests")
-//    public ResponseEntity<List<HostRequest>> getHostRequests() {
-//        List<HostRequest> requests = (List<HostRequest>) hostRequestService.findAll();
-//        return ResponseEntity.ok(requests);
-//    }
-
-    // Admin: approve request to be Host
-//    @PostMapping("/host-requests/{requestId}/approve")
-//    public ResponseEntity<?> approveHostRequest(@PathVariable Long requestId) {
-//        try {
-//            // Find the request
-//            Optional<HostRequest> request = hostRequestService.findById(requestId);
-//            if (request.isEmpty()) {
-//                return new ResponseEntity<>("Request not found", HttpStatus.NOT_FOUND);
-//            }
-//
-//            // Get the user from the request
-//            User user = request.get().getUser();
-//
-//            // Add host role
-//            Role hostRole = roleService.findByName("ROLE_HOST");
-//            Set<Role> roles = user.getRoles();
-//            roles.add(hostRole);
-//            user.setRoles(roles);
-//            userService.save(user);
-//
-//            // Delete the request
-//            hostRequestService.deleteById(requestId);
-//
-//            return new ResponseEntity<>(HttpStatus.OK);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
-
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Account account) {
@@ -135,37 +100,80 @@ public class UserController {
         String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
         user.setPassword(encodedPassword);
 
+        // Old: Allow register host to users_roles DB:
+//        Set<Role> roles = new HashSet<>();
+//        if (userDTO.isHost()) {
+//            Role hostRole = roleService.findByName("ROLE_HOST");
+//            roles.add(hostRole);
+//        } else {
+//            Role userRole = roleService.findByName("ROLE_USER");
+//            roles.add(userRole);
+//        }
+//        user.setRoles(roles);
+//        System.out.println("User roles before saving: " + roles);
+//        userService.save(user);
+//        System.out.println("User saved with roles: " + user.getRoles());
+
+        // New: Set ROLE_USER first, then create a Host Request if user wants
         Set<Role> roles = new HashSet<>();
+        Role userRole = roleService.findByName("ROLE_USER");
+        roles.add(userRole);
+        user.setRoles(roles);
+        userService.save(user);
+
         if (userDTO.isHost()) {
-            Role hostRole = roleService.findByName("ROLE_HOST");
-            roles.add(hostRole);
-        } else {
-            Role userRole = roleService.findByName("ROLE_USER");
-            roles.add(userRole);
+            HostRequest hostRequest = new HostRequest();
+            hostRequest.setUser(user);
+            hostRequest.setRequestDate(LocalDateTime.now());
+            hostRequest.setStatus("PENDING");
+            hostRequestService.save(hostRequest);
         }
 
-        // Always set ROLE_USER first
-//        Set<Role> roles = new HashSet<>();
-//        Role userRole = roleService.findByName("ROLE_USER");
-//        roles.add(userRole);
-//        user.setRoles(roles);
-//        userService.save(user);
-//
-//        // If they want to be a host, create a host request
-//        if (userDTO.isHost()) {
-//            HostRequest hostRequest = new HostRequest();
-//            hostRequest.setUser(user);
-////            hostRequest.setRequestDate(LocalDateTime.now());
-//            hostRequest.setStatus("PENDING");
-//            hostRequestService.save(hostRequest);
-//        }
 
-        user.setRoles(roles);
-        System.out.println("User roles before saving: " + roles);
-        userService.save(user);
-        System.out.println("User saved with roles: " + user.getRoles());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
+
+    // Admin: fetches all pending host requests
+    @GetMapping("/host-requests")
+    public ResponseEntity<List<HostRequest>> getHostRequests() {
+        List<HostRequest> requests = (List<HostRequest>) hostRequestService.findAll();
+        return ResponseEntity.ok(requests);
+    }
+
+    // Admin: approve request to be Host
+    @PostMapping("/host-requests/{requestId}/approve")
+    public ResponseEntity<?> approveHostRequest(@PathVariable Long requestId) {
+        try {
+            // Find the request
+            Optional<HostRequest> request = hostRequestService.findById(requestId);
+            if (request.isEmpty()) {
+                return new ResponseEntity<>("Request not found", HttpStatus.NOT_FOUND);
+            }
+
+            // Get the user from the request
+            User user = request.get().getUser();
+
+            // Add host role
+            Role hostRole = roleService.findByName("ROLE_HOST");
+            Set<Role> roles = user.getRoles();
+            roles.add(hostRole);
+            user.setRoles(roles);
+            userService.save(user);
+
+            // Delete the request
+            hostRequestService.deleteById(requestId);
+
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
+
+
+
 
     @PostMapping("/register/validate-username")
     public ResponseEntity<?> validateUsername(@RequestBody String username) {
