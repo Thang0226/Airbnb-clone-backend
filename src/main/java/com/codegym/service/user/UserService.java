@@ -2,9 +2,11 @@ package com.codegym.service.user;
 import com.codegym.exception.NoSuchUserExistsException;
 import com.codegym.exception.PhoneAlreadyExistsException;
 import com.codegym.exception.UsernameAlreadyExistsException;
+import com.codegym.mapper.UserMapper;
 import com.codegym.model.auth.UserPrincipal;
-import com.codegym.model.dto.UserProfileDTO;
+import com.codegym.model.dto.UserInfoDTO;
 import com.codegym.model.User;
+import com.codegym.model.dto.UserProfileDTO;
 import com.codegym.repository.IUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -19,10 +22,14 @@ public class UserService implements IUserService, UserDetailsService {
     @Autowired
     private IUserRepository userRepository;
 
-    @Override
-    public Optional<UserProfileDTO> getUserProfile(String userName) {
-        return userRepository.getUserProfileByUsername(userName);
-    }
+        @Override
+        public UserProfileDTO getUserProfile(String userName) {
+            Optional<User> userOptional = userRepository.findByUsername(userName);
+            if (userOptional.isEmpty()) {
+                throw new NoSuchUserExistsException(userName);
+            }
+            return UserMapper.toUserProfileDTO(userOptional.get());
+        }
 
     @Override
     public Iterable<User> findAll() {
@@ -77,5 +84,11 @@ public class UserService implements IUserService, UserDetailsService {
         } else {
             throw new UsernameNotFoundException("NO USER PRESENT WITH USERNAME = " + username);
         }
+    }
+
+    @Override
+    public List<UserInfoDTO> getAllUsersInfo() {
+        Iterable<User> users = userRepository.findAll();
+        return UserMapper.toUserInfoDTOList(users);
     }
 }
