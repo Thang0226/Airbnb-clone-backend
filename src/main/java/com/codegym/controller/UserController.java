@@ -5,10 +5,10 @@ import com.codegym.exception.UsernameAlreadyExistsException;
 import com.codegym.model.auth.AuthenticationRequest;
 import com.codegym.model.auth.Role;
 import com.codegym.model.dto.UserDTO;
-import com.codegym.model.dto.UserProfileDTO;
 import com.codegym.model.User;
 import com.codegym.model.UserForm;
 import com.codegym.config.jwt.JwtService;
+import com.codegym.model.dto.UserProfileDTO;
 import com.codegym.service.role.IRoleService;
 import com.codegym.service.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -131,43 +131,11 @@ public class UserController {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<Iterable<User>> getAllUsers() {
-        return new ResponseEntity<>(userService.findAll(), HttpStatus.OK);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        Optional<User> user = userService.findById(id);
-        return user.map(value ->
-                new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
-
-    @PostMapping
-    public ResponseEntity<?> addUser(@RequestBody User user) {
-        userService.save(user);
-        return new ResponseEntity<>(HttpStatus.CREATED);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @ModelAttribute UserForm userForm, BindingResult result) {
-        Optional<User> userOptional = userService.findById(id);
-        return getResponseEntity(userForm, userOptional, result);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
-        userService.deleteById(id);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
 
     @GetMapping("/profile/{userName}")
     public ResponseEntity<UserProfileDTO> getUserProfile(@PathVariable String userName) {
-        Optional<UserProfileDTO> userProfile = userService.getUserProfile(userName);
-        return userProfile
-                .map(userProfileDTO -> new ResponseEntity<>(userProfileDTO, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        UserProfileDTO userProfile = userService.getUserProfile(userName);
+        return new ResponseEntity<>(userProfile, HttpStatus.OK);
     }
 
     @PutMapping("/profile/update")
