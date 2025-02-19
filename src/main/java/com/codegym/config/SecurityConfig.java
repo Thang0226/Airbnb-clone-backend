@@ -83,7 +83,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(new AntPathRequestMatcher("/images/**")).permitAll()
                         .requestMatchers("/api/users/login", "/api/users/register/**").permitAll()
-//                        .requestMatchers("/api/admin/**").hasAnyAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/admin/**").hasAnyAuthority("ROLE_ADMIN")
 //                        .requestMatchers("/api/users/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN","ROLE_SELLER")
                         .anyRequest().hasAuthority("ROLE_USER")
                 )
