@@ -32,4 +32,11 @@ public class User {
 
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles;
+
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.ACTIVE;
+
+    public enum Status {
+        ACTIVE, LOCKED
+    }
 }

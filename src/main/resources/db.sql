@@ -12,15 +12,6 @@ use airbnb;
 
 
 # Procedures
-DROP PROCEDURE IF EXISTS get_user_profile_by_username;
-create procedure get_user_profile_by_username(in _username varchar(255))
-begin
-    select u.username as username, u.avatar as avatar, u.full_name as fullName, u.address as address, u.phone as phone
-    from users u
-    where u.username = _username;
-end;
-
-
 drop procedure if exists search_houses;
 create procedure search_houses(
     IN address VARCHAR(255),
@@ -64,81 +55,81 @@ INSERT INTO users
 VALUES
     (
         '123 Oak Street, Austin, TX 78701',
-        'default.jpg',
+        '',
         'John Doe',
-        '$2a$12$HBLHhzG6Cjy8gQuhHQ2yLOets.K4Wvv2Lt7lKvu6BRM98TnmYfWke', -- "123456"
+        '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0123456789',
         'john_doe'
     ),
     (
         '456 Pine Ave, Seattle, WA 98101',
-        'default.jpg',
+        '',
         'Sarah Smith',
-        '$2a$12$HBLHhzG6Cjy8gQuhHQ2yLOets.K4Wvv2Lt7lKvu6BRM98TnmYfWke', -- "123456"
-        '0987654321',
+        '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
+        '0987654322',
         'sarah_smith'
     ),
     (
         '789 Maple Dr, Chicago, IL 60601',
-        'default.jpg',
+        '',
         'Michael Johnson',
-        '$2a$12$HBLHhzG6Cjy8gQuhHQ2yLOets.K4Wvv2Lt7lKvu6BRM98TnmYfWke', -- "123456"
+        '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0456789123',
         'mike_j'
     ),
     (
         '321 Elm Road, Miami, FL 33101',
-        'default.jpg',
+        '',
         'Emily Brown',
-        '$2a$12$HBLHhzG6Cjy8gQuhHQ2yLOets.K4Wvv2Lt7lKvu6BRM98TnmYfWke', -- "123456"
+        '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0789123456',
         'emily_b'
     ),
     (
         '654 Cedar Lane, Denver, CO 80201',
-        'default.jpg',
+        '',
         'David Wilson',
-        '$2a$12$HBLHhzG6Cjy8gQuhHQ2yLOets.K4Wvv2Lt7lKvu6BRM98TnmYfWke', -- "123456"
+        '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0321654987',
         'david_w'
     ),
     (
         '987 Birch Blvd, Portland, OR 97201',
-        'default.jpg',
+        '',
         'Lisa Taylor',
-        '$2a$12$HBLHhzG6Cjy8gQuhHQ2yLOets.K4Wvv2Lt7lKvu6BRM98TnmYfWke', -- "123456"
+        '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0147258369',
         'lisa_t'
     ),
     (
         '147 Walnut St, Boston, MA 02101',
-        'default.jpg',
+        '',
         'Robert Miller',
-        '$2a$12$HBLHhzG6Cjy8gQuhHQ2yLOets.K4Wvv2Lt7lKvu6BRM98TnmYfWke', -- "123456"
+        '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0258147369',
         'robert_m'
     ),
     (
         '258 Spruce Court, Houston, TX 77001',
-        'default.jpg',
+        '',
         'Jennifer Davis',
-        '$2a$12$93pjT2iLWasrz1U.8S1fzOAWca/BGdFbnBLx8rmOycAhaqmzn76Uq', -- "123456"
+        '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0369147258',
         'jennifer_d'
     ),
     (
         '369 Ash Way, Phoenix, AZ 85001',
-        'default.jpg',
+        '',
         'William Jones',
-        '$2a$12$93pjT2iLWasrz1U.8S1fzOAWca/BGdFbnBLx8rmOycAhaqmzn76Uq', -- "123456"
+        '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0741852963',
         'william_j'
     ),
     (
         '741 Beech Path, San Diego, CA 92101',
-        'default.jpg',
+        '',
         'Mary Anderson',
-        '$2a$12$93pjT2iLWasrz1U.8S1fzOAWca/BGdFbnBLx8rmOycAhaqmzn76Uq', -- "123456"
+        '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0963852741',
         'mary_a'
     );
@@ -173,7 +164,7 @@ VALUES
 
 insert into house_images (house_id, file_name)
 values  (1, 'hinh anh so (1).jpg'),
-    (1, 'hinh anh so (2).jpg'),
+        (1, 'hinh anh so (2).jpg'),
         (1, 'hinh anh so (6).jpg'),
         (2, 'hinh anh so (1).jpg'),
         (2, 'hinh anh so (2).jpg'),

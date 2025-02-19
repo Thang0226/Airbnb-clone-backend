@@ -29,4 +29,11 @@ public class GlobalExceptionHandler {
                     HttpStatus.PAYLOAD_TOO_LARGE);
         }
     }
+
+    @ExceptionHandler(NoSuchUserExistsException.class)
+    public ResponseEntity<?> handleNoSuchUserExistsException(NoSuchUserExistsException ex) {
+        return new ResponseEntity<>(
+                "User " + ex.getMessage() + " does not exist",
+                HttpStatus.NOT_FOUND);
+    }
 }
