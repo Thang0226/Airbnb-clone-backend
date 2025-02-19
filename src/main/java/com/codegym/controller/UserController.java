@@ -2,10 +2,10 @@ package com.codegym.controller;
 import com.codegym.config.jwt.JwtResponse;
 import com.codegym.exception.PhoneAlreadyExistsException;
 import com.codegym.exception.UsernameAlreadyExistsException;
+import com.codegym.model.auth.Account;
 import com.codegym.model.HostRequest;
-import com.codegym.model.HostRequest;
-import com.codegym.model.auth.AuthenticationRequest;
 import com.codegym.model.auth.Role;
+import com.codegym.model.dto.UpdatePasswordDTO;
 import com.codegym.model.dto.UserDTO;
 import com.codegym.model.dto.UserProfileDTO;
 import com.codegym.model.User;
@@ -65,16 +65,16 @@ public class UserController {
     private String fileUpload;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthenticationRequest authenticationRequest) {
+    public ResponseEntity<?> login(@RequestBody Account account) {
         try {
-            System.out.println(authenticationRequest.getUsername());
+            System.out.println(account.getUsername());
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword()));
+                    new UsernamePasswordAuthenticationToken(account.getUsername(), account.getPassword()));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwt = jwtService.generateTokenLogin(authentication);
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            User currentUser = userService.findByUsername(authenticationRequest.getUsername()).get();
+            User currentUser = userService.findByUsername(account.getUsername()).get();
 
             return ResponseEntity.ok(new JwtResponse(
                     currentUser.getId(),
@@ -201,6 +201,21 @@ public class UserController {
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid token");
         }
+    }
+
+    @PostMapping("/change_password")
+    public ResponseEntity<?> changePassword(@RequestBody UpdatePasswordDTO updatePasswordDTO) {
+        Optional<User> userOptional = userService.findByUsername(updatePasswordDTO.getUsername());
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            if (passwordEncoder.matches(updatePasswordDTO.getOldPassword(), user.getPassword())) {
+                String newPassword = passwordEncoder.encode(updatePasswordDTO.getNewPassword());
+                user.setPassword(newPassword);
+                userService.save(user);
+                return ResponseEntity.ok("Password changed successfully!");
+            }
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Username or Password.");
     }
 
     @GetMapping
