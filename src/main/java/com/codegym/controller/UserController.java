@@ -24,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.FileCopyUtils;
 import jakarta.validation.Valid;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -91,28 +92,31 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> addUser(@RequestBody UserDTO userDTO) {
-        User user = new User();
+    public ResponseEntity<?> addUser(@Valid @RequestBody UserDTO userDTO, BindingResult bindingResult) {
+        // Validate email backend
+        if (bindingResult.hasErrors()) {
+            System.out.println(bindingResult.getAllErrors());
+            System.out.println(bindingResult.getFieldErrors());
+            if (!bindingResult.getFieldErrors().isEmpty()) {
+                for (FieldError fieldError : bindingResult.getFieldErrors()) {
+                    if (fieldError.getField().equals("email")) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid email address!");
+                    }
+                }
+            }
+        }
+        Optional<User> userOptional = userService.findByEmail(userDTO.getEmail());
+        if (userOptional.isPresent()) {
+            return new ResponseEntity<>("Email already exist", HttpStatus.CONFLICT);
+        }
 
+        User user = new User();
         user.setUsername(userDTO.getUsername());
         user.setPhone(userDTO.getPhone());
+        user.setEmail(userDTO.getEmail());
 
         String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
         user.setPassword(encodedPassword);
-
-        // Old: Allow register host to users_roles DB:
-//        Set<Role> roles = new HashSet<>();
-//        if (userDTO.isHost()) {
-//            Role hostRole = roleService.findByName("ROLE_HOST");
-//            roles.add(hostRole);
-//        } else {
-//            Role userRole = roleService.findByName("ROLE_USER");
-//            roles.add(userRole);
-//        }
-//        user.setRoles(roles);
-//        System.out.println("User roles before saving: " + roles);
-//        userService.save(user);
-//        System.out.println("User saved with roles: " + user.getRoles());
 
         // New: Set ROLE_USER first, then create a Host Request if user wants
         Set<Role> roles = new HashSet<>();
@@ -128,7 +132,6 @@ public class UserController {
             hostRequest.setStatus("PENDING");
             hostRequestService.save(hostRequest);
         }
-
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
