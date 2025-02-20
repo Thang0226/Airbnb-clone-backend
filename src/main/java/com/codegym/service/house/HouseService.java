@@ -2,7 +2,6 @@ package com.codegym.service.house;
 
 
 import com.codegym.model.House;
-import com.codegym.model.constants.SortOrder;
 import com.codegym.repository.IHouseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,14 +37,27 @@ public class HouseService implements IHouseService {
     }
 
     @Override
-    public List<House> searchHouses(String address, LocalDate checkIn, LocalDate checkOut, Integer minBedrooms, Integer minBathrooms, Integer minPrice, Integer maxPrice, SortOrder priceOrder) {
+    public List<House> searchHousesAsc(String address, LocalDate checkIn, LocalDate checkOut, Integer minBedrooms, Integer minBathrooms, Integer minPrice, Integer maxPrice) {
         List<House> houses;
         if (checkIn == null) {
-            houses = houseRepository.searchHouses(address, null, null, minBedrooms, minBathrooms, minPrice, maxPrice, priceOrder);
+            houses = houseRepository.searchHousesAsc(address, null, null, minBedrooms, minBathrooms, minPrice, maxPrice);
         } else if (checkOut == null) {
-            houses = houseRepository.searchHouses(address, checkIn, checkIn.plusDays(1), minBedrooms, minBathrooms, minPrice, maxPrice, priceOrder);
+            houses = houseRepository.searchHousesAsc(address, checkIn, checkIn.plusDays(1), minBedrooms, minBathrooms, minPrice, maxPrice);
         } else {
-            houses = houseRepository.searchHouses(address, checkIn, checkOut, minBedrooms, minBathrooms, minPrice, maxPrice, priceOrder);
+            houses = houseRepository.searchHousesAsc(address, checkIn, checkOut, minBedrooms, minBathrooms, minPrice, maxPrice);
+        }
+        return houses;
+    }
+
+    @Override
+    public List<House> searchHousesDesc(String address, LocalDate checkIn, LocalDate checkOut, Integer minBedrooms, Integer minBathrooms, Integer minPrice, Integer maxPrice) {
+        List<House> houses;
+        if (checkIn == null) {
+            houses = houseRepository.searchHousesDesc(address, null, null, minBedrooms, minBathrooms, minPrice, maxPrice);
+        } else if (checkOut == null) {
+            houses = houseRepository.searchHousesDesc(address, checkIn, checkIn.plusDays(1), minBedrooms, minBathrooms, minPrice, maxPrice);
+        } else {
+            houses = houseRepository.searchHousesDesc(address, checkIn, checkOut, minBedrooms, minBathrooms, minPrice, maxPrice);
         }
         return houses;
     }

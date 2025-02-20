@@ -13,16 +13,15 @@ use airbnb;
 
 
 # Procedures
-drop procedure if exists search_houses;
-create procedure search_houses(
+drop procedure if exists search_houses_asc;
+create procedure search_houses_asc(
     IN address VARCHAR(255),
     IN checkIn DATE,
     IN checkOut DATE,
     IN minBedrooms INT,
     IN minBathrooms INT,
     IN minPrice INT,
-    IN maxPrice INT,
-    IN priceOrder VARCHAR(10)
+    IN maxPrice INT
 )
 begin
     SELECT h.*
@@ -34,7 +33,30 @@ begin
       AND ( checkIn IS NULL OR (a.start_date <= checkIn AND a.end_date >= checkOut) )
       AND ( minPrice IS NULL OR h.price >= minPrice )
       AND ( maxPrice IS NULL OR h.price <= maxPrice )
-    ORDER BY priceOrder;
+    ORDER BY h.price;
+end;
+
+drop procedure if exists search_houses_desc;
+create procedure search_houses_desc(
+    IN address VARCHAR(255),
+    IN checkIn DATE,
+    IN checkOut DATE,
+    IN minBedrooms INT,
+    IN minBathrooms INT,
+    IN minPrice INT,
+    IN maxPrice INT
+)
+begin
+    SELECT h.*
+    FROM houses h
+             LEFT JOIN availabilities a ON a.house_id = h.id
+    WHERE ( minBedrooms IS NULL OR h.bedrooms >= minBedrooms )
+      AND ( minBathrooms IS NULL OR h.bathrooms >= minBathrooms )
+      AND ( address IS NULL OR TRIM(address) = '' OR LOWER(h.address) LIKE LOWER(CONCAT('%', address, '%')) )
+      AND ( checkIn IS NULL OR (a.start_date <= checkIn AND a.end_date >= checkOut) )
+      AND ( minPrice IS NULL OR h.price >= minPrice )
+      AND ( maxPrice IS NULL OR h.price <= maxPrice )
+    ORDER BY h.price DESC;
 end;
 
 
