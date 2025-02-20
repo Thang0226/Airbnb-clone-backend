@@ -9,11 +9,15 @@ import com.codegym.model.User;
 import com.codegym.model.dto.UserProfileDTO;
 import com.codegym.repository.IUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -87,9 +91,12 @@ public class UserService implements IUserService, UserDetailsService {
     }
 
     @Override
-    public List<UserInfoDTO> getAllUsersInfo() {
-        Iterable<User> users = userRepository.findAll();
-        return UserMapper.toUserInfoDTOList(users);
+    public Page<UserInfoDTO> getAllUsersInfo(Pageable pageable) {
+        Iterable<User> users = userRepository.findAllUserRole("ROLE_USER");
+        List<UserInfoDTO> userInfoDTOs = UserMapper.toUserInfoDTOList(users);
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), userInfoDTOs.size());
+        return new PageImpl<>(userInfoDTOs.subList(start, end), pageable, userInfoDTOs.size());
     }
 
     @Override
