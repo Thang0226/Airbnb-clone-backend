@@ -2,17 +2,15 @@ package com.codegym.controller;
 import com.codegym.config.jwt.JwtResponse;
 import com.codegym.exception.PhoneAlreadyExistsException;
 import com.codegym.exception.UsernameAlreadyExistsException;
-import com.codegym.model.HostRequest;
-import com.codegym.model.HostRequest;
-import com.codegym.model.auth.AuthenticationRequest;
 import com.codegym.model.auth.Account;
+import com.codegym.model.HostRequest;
 import com.codegym.model.auth.Role;
 import com.codegym.model.dto.UpdatePasswordDTO;
 import com.codegym.model.dto.UserDTO;
-import com.codegym.model.dto.UserProfileDTO;
 import com.codegym.model.User;
 import com.codegym.model.UserForm;
 import com.codegym.config.jwt.JwtService;
+import com.codegym.model.dto.UserProfileDTO;
 import com.codegym.service.host.IHostRequestService;
 import com.codegym.service.role.IRoleService;
 import com.codegym.service.user.UserService;
@@ -169,12 +167,6 @@ public class UserController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
-
-
-
-
 
     @PostMapping("/register/validate-username")
     public ResponseEntity<?> validateUsername(@RequestBody String username) {
