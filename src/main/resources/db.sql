@@ -4,6 +4,7 @@ drop table if exists house_images;
 drop table if exists bookings;
 drop table if exists availabilities;
 drop table if exists houses;
+drop table if exists host_requests;
 drop table if exists users;
 drop table if exists users_temporary;
 drop table if exists roles;
@@ -51,87 +52,97 @@ VALUES
     ('ROLE_ADMIN');
 
 INSERT INTO users
-(address, avatar, full_name, password, phone, username)
+(address, full_name, password, phone, email, username, status)
 VALUES
     (
         '123 Oak Street, Austin, TX 78701',
-        '',
         'John Doe',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0123456789',
-        'john_doe'
+        'thang.nd0226@gmail.com',
+        'john_doe',
+        'ACTIVE'
     ),
     (
         '456 Pine Ave, Seattle, WA 98101',
-        '',
         'Sarah Smith',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0987654322',
-        'sarah_smith'
+        'sarah.smith@gmail.com',
+        'sarah_smith',
+        'ACTIVE'
     ),
     (
         '789 Maple Dr, Chicago, IL 60601',
-        '',
         'Michael Johnson',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0456789123',
-        'mike_j'
+        'mike.j@gmail.com',
+        'mike_j',
+        'ACTIVE'
     ),
     (
         '321 Elm Road, Miami, FL 33101',
-        '',
         'Emily Brown',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0789123456',
-        'emily_b'
+        'emily.b@gmail.com',
+        'emily_b',
+        'ACTIVE'
     ),
     (
         '654 Cedar Lane, Denver, CO 80201',
-        '',
         'David Wilson',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0321654987',
-        'david_w'
+        'david.w@gmail.com',
+        'david_w',
+        'ACTIVE'
     ),
     (
         '987 Birch Blvd, Portland, OR 97201',
-        '',
         'Lisa Taylor',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0147258369',
-        'lisa_t'
+        'lisa.t@gmail.com',
+        'lisa_t',
+        'ACTIVE'
     ),
     (
         '147 Walnut St, Boston, MA 02101',
-        '',
         'Robert Miller',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0258147369',
-        'robert_m'
+        'robert.m@gmail.com',
+        'robert_m',
+        'ACTIVE'
     ),
     (
         '258 Spruce Court, Houston, TX 77001',
-        '',
         'Jennifer Davis',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0369147258',
-        'jennifer_d'
+        'jennifer.d@gmail.com',
+        'jennifer_d',
+        'ACTIVE'
     ),
     (
         '369 Ash Way, Phoenix, AZ 85001',
-        '',
         'William Jones',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0741852963',
-        'william_j'
+        'william.j@gmail.com',
+        'william_j',
+        'ACTIVE'
     ),
     (
         '741 Beech Path, San Diego, CA 92101',
-        '',
         'Mary Anderson',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0963852741',
-        'mary_a'
+        'mary.a@gmail.com',
+        'mary_a',
+        'LOCKED'
     );
 
 INSERT INTO users_roles
@@ -243,44 +254,44 @@ values
     ('2025-06-01', '2025-07-31', 10),
     ('2025-11-30', '2027-10-10', 10);
 
-insert into bookings (start_date, end_date, status, updated_at, house_id)
+insert into bookings (start_date, end_date, status, updated_at, house_id, user_id)
 values
     -- House 1 (gaps: Apr 16-Apr 30, Jul 1-Sep 29)
-    ('2025-04-16', '2025-04-30', 'CONFIRMED', '2025-03-16 14:30:00', 1),
-    ('2025-07-01', '2025-09-29', 'CONFIRMED', '2025-06-01 09:45:00', 1),
+    ('2025-04-16', '2025-04-30', 'CONFIRMED', '2025-03-16 14:30:00', 1, 4),
+    ('2025-07-01', '2025-09-29', 'CONFIRMED', '2025-06-01 09:45:00', 1,5),
 
 -- House 2 (gaps: Apr 1-Apr 9, Jun 1-Aug 30)
-    ('2025-04-01', '2025-04-09', 'CONFIRMED', '2025-03-01 11:00:00', 2),
-    ('2025-06-01', '2025-08-30', 'CONFIRMED', '2025-05-01 13:15:00', 2),
+    ('2025-04-01', '2025-04-09', 'CONFIRMED', '2025-03-01 11:00:00', 2, 6),
+    ('2025-06-01', '2025-08-30', 'CONFIRMED', '2025-05-01 13:15:00', 2, 7),
 
 -- House 3 (gaps: May 1-May 31, Jul 16-Oct 30)
-    ('2025-05-01', '2025-05-31', 'CONFIRMED', '2025-04-01 15:45:00', 3),
-    ('2025-07-16', '2025-10-30', 'CONFIRMED', '2025-06-16 12:00:00', 3),
+    ('2025-05-01', '2025-05-31', 'CONFIRMED', '2025-04-01 15:45:00', 3, 8),
+    ('2025-07-16', '2025-10-30', 'CONFIRMED', '2025-06-16 12:00:00', 3, 9),
 
 -- House 4 (gaps: Mar 16-May 14, Jul 1-Sep 14)
-    ('2025-03-16', '2025-05-14', 'CONFIRMED', '2025-02-16 14:20:00', 4),
-    ('2025-07-01', '2025-09-14', 'CONFIRMED', '2025-06-01 16:45:00', 4),
+    ('2025-03-16', '2025-05-14', 'CONFIRMED', '2025-02-16 14:20:00', 4, 10),
+    ('2025-07-01', '2025-09-14', 'CONFIRMED', '2025-06-01 16:45:00', 4, 10),
 
 -- House 5 (gaps: Jun 1-Jul 14, Sep 1-Nov 29)
-    ('2025-06-01', '2025-07-14', 'CONFIRMED', '2025-05-01 10:15:00', 5),
-    ('2025-09-01', '2025-11-29', 'CONFIRMED', '2025-08-01 13:30:00', 5),
+    ('2025-06-01', '2025-07-14', 'CONFIRMED', '2025-05-01 10:15:00', 5, 4),
+    ('2025-09-01', '2025-11-29', 'CONFIRMED', '2025-08-01 13:30:00', 5, 5),
 
 -- House 6 (gaps: May 1-Jun 14, Aug 1-Oct 30)
-    ('2025-05-01', '2025-06-14', 'CONFIRMED', '2025-04-01 11:20:00', 6),
-    ('2025-08-01', '2025-10-30', 'PENDING', '2025-07-01 15:00:00', 6),
+    ('2025-05-01', '2025-06-14', 'CONFIRMED', '2025-04-01 11:20:00', 6, 6),
+    ('2025-08-01', '2025-10-30', 'PENDING', '2025-07-01 15:00:00', 6, 7),
 
 -- House 7 (gaps: Apr 16-Apr 30, Jun 16-Sep 29)
-    ('2025-04-16', '2025-04-30', 'CONFIRMED', '2025-03-16 09:00:00', 7),
-    ('2025-06-16', '2025-09-29', 'PENDING', '2025-05-16 14:45:00', 7),
+    ('2025-04-16', '2025-04-30', 'CONFIRMED', '2025-03-16 09:00:00', 7, 8),
+    ('2025-06-16', '2025-09-29', 'PENDING', '2025-05-16 14:45:00', 7, 9),
 
 -- House 8 (gaps: May 16-May 31, Aug 1-Oct 14)
-    ('2025-05-16', '2025-05-31', 'CONFIRMED', '2025-04-16 16:15:00', 8),
-    ('2025-08-01', '2025-10-14', 'PENDING', '2025-07-01 10:45:00', 8),
+    ('2025-05-16', '2025-05-31', 'CONFIRMED', '2025-04-16 16:15:00', 8, 10),
+    ('2025-08-01', '2025-10-14', 'PENDING', '2025-07-01 10:45:00', 8, 4),
 
 -- House 9 (gaps: Jun 1-Jul 14, Sep 1-Nov 14)
-    ('2025-06-01', '2025-07-14', 'CONFIRMED', '2025-05-01 11:30:00', 9),
-    ('2025-09-01', '2025-11-14', 'PENDING', '2025-08-01 15:45:00', 9),
+    ('2025-06-01', '2025-07-14', 'CONFIRMED', '2025-05-01 11:30:00', 9, 5),
+    ('2025-09-01', '2025-11-14', 'PENDING', '2025-08-01 15:45:00', 9, 6),
 
 -- House 10 (gaps: May 1-May 31, Aug 1-Nov 29)
-    ('2025-05-01', '2025-05-31', 'CONFIRMED', '2025-04-01 14:00:00', 10),
-    ('2025-08-01', '2025-11-29', 'PENDING', '2025-07-01 10:30:00', 10);
+    ('2025-05-01', '2025-05-31', 'CONFIRMED', '2025-04-01 14:00:00', 10, 7),
+    ('2025-08-01', '2025-11-29', 'PENDING', '2025-07-01 10:30:00', 10, 8);

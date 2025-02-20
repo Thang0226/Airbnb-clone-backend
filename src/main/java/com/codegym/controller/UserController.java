@@ -2,13 +2,16 @@ package com.codegym.controller;
 import com.codegym.config.jwt.JwtResponse;
 import com.codegym.exception.PhoneAlreadyExistsException;
 import com.codegym.exception.UsernameAlreadyExistsException;
-import com.codegym.model.auth.AuthenticationRequest;
+import com.codegym.model.auth.Account;
+import com.codegym.model.HostRequest;
 import com.codegym.model.auth.Role;
+import com.codegym.model.dto.UpdatePasswordDTO;
 import com.codegym.model.dto.UserDTO;
 import com.codegym.model.User;
 import com.codegym.model.UserForm;
 import com.codegym.config.jwt.JwtService;
 import com.codegym.model.dto.UserProfileDTO;
+import com.codegym.service.host.IHostRequestService;
 import com.codegym.service.role.IRoleService;
 import com.codegym.service.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.FileCopyUtils;
 import jakarta.validation.Valid;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -30,6 +34,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.io.File;
 import java.io.IOException;
@@ -53,21 +58,24 @@ public class UserController {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JwtService jwtService;
-  
+
+    @Autowired
+    private IHostRequestService hostRequestService;
+
     @Value("${file_upload}")
     private String fileUpload;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthenticationRequest authenticationRequest) {
+    public ResponseEntity<?> login(@RequestBody Account account) {
         try {
-            System.out.println(authenticationRequest.getUsername());
+            System.out.println(account.getUsername());
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword()));
+                    new UsernamePasswordAuthenticationToken(account.getUsername(), account.getPassword()));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwt = jwtService.generateTokenLogin(authentication);
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            User currentUser = userService.findByUsername(authenticationRequest.getUsername()).get();
+            User currentUser = userService.findByUsername(account.getUsername()).get();
 
             return ResponseEntity.ok(new JwtResponse(
                     currentUser.getId(),
@@ -82,22 +90,82 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> addUser(@RequestBody UserDTO userDTO) {
-        User user = new User();
+    public ResponseEntity<?> addUser(@Valid @RequestBody UserDTO userDTO, BindingResult bindingResult) {
+        // Validate email backend
+        if (bindingResult.hasErrors()) {
+            System.out.println(bindingResult.getAllErrors());
+            System.out.println(bindingResult.getFieldErrors());
+            if (!bindingResult.getFieldErrors().isEmpty()) {
+                for (FieldError fieldError : bindingResult.getFieldErrors()) {
+                    if (fieldError.getField().equals("email")) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid email address!");
+                    }
+                }
+            }
+        }
+        Optional<User> userOptional = userService.findByEmail(userDTO.getEmail());
+        if (userOptional.isPresent()) {
+            return new ResponseEntity<>("Email already exist", HttpStatus.CONFLICT);
+        }
 
+        User user = new User();
         user.setUsername(userDTO.getUsername());
         user.setPhone(userDTO.getPhone());
+        user.setEmail(userDTO.getEmail());
 
         String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
         user.setPassword(encodedPassword);
 
-        Role userRole = roleService.findByName("ROLE_USER");
+        // New: Set ROLE_USER first, then create a Host Request if user wants
         Set<Role> roles = new HashSet<>();
+        Role userRole = roleService.findByName("ROLE_USER");
         roles.add(userRole);
         user.setRoles(roles);
-
         userService.save(user);
+
+        if (userDTO.isHost()) {
+            HostRequest hostRequest = new HostRequest();
+            hostRequest.setUser(user);
+            hostRequest.setRequestDate(LocalDateTime.now());
+            hostRequestService.save(hostRequest);
+        }
+
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    // Admin: fetches all pending host requests
+    @GetMapping("/host-requests")
+    public ResponseEntity<List<HostRequest>> getHostRequests() {
+        List<HostRequest> requests = (List<HostRequest>) hostRequestService.findAll();
+        return ResponseEntity.ok(requests);
+    }
+
+    // Admin: approve request to be Host
+    @PostMapping("/host-requests/{requestId}/approve")
+    public ResponseEntity<?> approveHostRequest(@PathVariable Long requestId) {
+        try {
+            // Find the request
+            Optional<HostRequest> request = hostRequestService.findById(requestId);
+            if (request.isEmpty()) {
+                return new ResponseEntity<>("Request not found", HttpStatus.NOT_FOUND);
+            }
+
+            // Get the user from the request
+            User user = request.get().getUser();
+
+            // Add host role
+            Role hostRole = roleService.findByName("ROLE_HOST");
+            // Set<Role> roles = user.getRoles(); // add new role_id for same user_id (old)
+            Set<Role> roles = new HashSet<>(); // replace new role_id (new)
+            roles.add(hostRole);
+            user.setRoles(roles);
+
+            userService.save(user);
+            hostRequestService.deleteById(requestId); // Delete the request
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/register/validate-username")
@@ -120,6 +188,16 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @PostMapping("/register/validate-email")
+    public ResponseEntity<?> validateEmail(@RequestBody String email) {
+        boolean accepted = userService.validateEmail(email);
+        if (accepted) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Email address already existed", HttpStatus.CONFLICT);
+        }
+    }
+
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request) {
         String token = jwtService.extractTokenFromRequest(request);
@@ -131,6 +209,20 @@ public class UserController {
         }
     }
 
+    @PostMapping("/change_password")
+    public ResponseEntity<?> changePassword(@RequestBody UpdatePasswordDTO updatePasswordDTO) {
+        Optional<User> userOptional = userService.findByUsername(updatePasswordDTO.getUsername());
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            if (passwordEncoder.matches(updatePasswordDTO.getOldPassword(), user.getPassword())) {
+                String newPassword = passwordEncoder.encode(updatePasswordDTO.getNewPassword());
+                user.setPassword(newPassword);
+                userService.save(user);
+                return ResponseEntity.ok("Password changed successfully!");
+            }
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Username or Password.");
+    }
 
     @GetMapping("/profile/{userName}")
     public ResponseEntity<UserProfileDTO> getUserProfile(@PathVariable String userName) {

@@ -98,4 +98,15 @@ public class UserService implements IUserService, UserDetailsService {
         int end = Math.min((start + pageable.getPageSize()), userInfoDTOs.size());
         return new PageImpl<>(userInfoDTOs.subList(start, end), pageable, userInfoDTOs.size());
     }
+
+    @Override
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public boolean validateEmail(String email) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        return userOptional.isEmpty();
+    }
 }

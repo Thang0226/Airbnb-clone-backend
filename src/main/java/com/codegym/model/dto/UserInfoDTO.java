@@ -1,6 +1,6 @@
 package com.codegym.model.dto;
 
-import com.codegym.model.User.Status; // Import enum Status từ entity User
+import com.codegym.model.constants.UserStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,5 +11,5 @@ public class UserInfoDTO {
     private Long id;
     private String username;
     private String phone;
-    private Status status;
+    private UserStatus status;
 }
