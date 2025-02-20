@@ -4,6 +4,8 @@ import com.codegym.model.User;
 import com.codegym.model.dto.UserInfoDTO;
 import com.codegym.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +21,8 @@ public class AdminController {
     private UserService userService;
 
     @GetMapping("/users")
-    public ResponseEntity<List<UserInfoDTO>> getAllUsers() {
-        return new ResponseEntity<>(userService.getAllUsersInfo(), HttpStatus.OK);
+    public ResponseEntity<Page<UserInfoDTO>> getAllUsers(Pageable pageable) {
+        return new ResponseEntity<>(userService.getAllUsersInfo(pageable), HttpStatus.OK);
     }
 
     @GetMapping("/users/{id}")
