@@ -4,6 +4,7 @@ drop table if exists house_images;
 drop table if exists bookings;
 drop table if exists availabilities;
 drop table if exists houses;
+drop table if exists host_requests;
 drop table if exists users;
 drop table if exists users_temporary;
 drop table if exists roles;
@@ -51,87 +52,97 @@ VALUES
     ('ROLE_ADMIN');
 
 INSERT INTO users
-(address, avatar, full_name, password, phone, username)
+(address, full_name, password, phone, email, username, status)
 VALUES
     (
         '123 Oak Street, Austin, TX 78701',
-        '',
         'John Doe',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0123456789',
-        'john_doe'
+        'thang.nd0226@gmail.com',
+        'john_doe',
+        'ACTIVE'
     ),
     (
         '456 Pine Ave, Seattle, WA 98101',
-        '',
         'Sarah Smith',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0987654322',
-        'sarah_smith'
+        'sarah.smith@gmail.com',
+        'sarah_smith',
+        'ACTIVE'
     ),
     (
         '789 Maple Dr, Chicago, IL 60601',
-        '',
         'Michael Johnson',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0456789123',
-        'mike_j'
+        'mike.j@gmail.com',
+        'mike_j',
+        'ACTIVE'
     ),
     (
         '321 Elm Road, Miami, FL 33101',
-        '',
         'Emily Brown',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0789123456',
-        'emily_b'
+        'emily.b@gmail.com',
+        'emily_b',
+        'ACTIVE'
     ),
     (
         '654 Cedar Lane, Denver, CO 80201',
-        '',
         'David Wilson',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0321654987',
-        'david_w'
+        'david.w@gmail.com',
+        'david_w',
+        'ACTIVE'
     ),
     (
         '987 Birch Blvd, Portland, OR 97201',
-        '',
         'Lisa Taylor',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0147258369',
-        'lisa_t'
+        'lisa.t@gmail.com',
+        'lisa_t',
+        'ACTIVE'
     ),
     (
         '147 Walnut St, Boston, MA 02101',
-        '',
         'Robert Miller',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0258147369',
-        'robert_m'
+        'robert.m@gmail.com',
+        'robert_m',
+        'ACTIVE'
     ),
     (
         '258 Spruce Court, Houston, TX 77001',
-        '',
         'Jennifer Davis',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0369147258',
-        'jennifer_d'
+        'jennifer.d@gmail.com',
+        'jennifer_d',
+        'ACTIVE'
     ),
     (
         '369 Ash Way, Phoenix, AZ 85001',
-        '',
         'William Jones',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0741852963',
-        'william_j'
+        'william.j@gmail.com',
+        'william_j',
+        'ACTIVE'
     ),
     (
         '741 Beech Path, San Diego, CA 92101',
-        '',
         'Mary Anderson',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0963852741',
-        'mary_a'
+        'mary.a@gmail.com',
+        'mary_a',
+        'LOCKED'
     );
 
 INSERT INTO users_roles

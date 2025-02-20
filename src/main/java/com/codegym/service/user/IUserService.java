@@ -16,6 +16,8 @@ public interface IUserService extends IGenerateService<User> {
 
     void validatePhone(String phone);
 
+    boolean validateEmail(String email);
+
     Iterable<UserInfoDTO> getAllUsersInfo();
 
     UserProfileDTO getUserProfile(String userName);

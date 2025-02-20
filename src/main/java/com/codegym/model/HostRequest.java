@@ -17,5 +17,4 @@ public class HostRequest {
     @JoinColumn(name = "user_id")
     private User user;
     private LocalDateTime requestDate; // in case Sorting
-    private String status; // Pending, Approved, Rejected
 }

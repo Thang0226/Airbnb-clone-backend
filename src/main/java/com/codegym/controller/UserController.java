@@ -129,7 +129,6 @@ public class UserController {
             HostRequest hostRequest = new HostRequest();
             hostRequest.setUser(user);
             hostRequest.setRequestDate(LocalDateTime.now());
-            hostRequest.setStatus("PENDING");
             hostRequestService.save(hostRequest);
         }
 
@@ -195,6 +194,16 @@ public class UserController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/register/validate-email")
+    public ResponseEntity<?> validateEmail(@RequestBody String email) {
+        boolean accepted = userService.validateEmail(email);
+        if (accepted) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Email address already existed", HttpStatus.CONFLICT);
+        }
     }
 
     @PostMapping("/logout")

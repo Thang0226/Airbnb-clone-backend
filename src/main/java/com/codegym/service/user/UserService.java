@@ -96,4 +96,10 @@ public class UserService implements IUserService, UserDetailsService {
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
+
+    @Override
+    public boolean validateEmail(String email) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        return userOptional.isEmpty();
+    }
 }
