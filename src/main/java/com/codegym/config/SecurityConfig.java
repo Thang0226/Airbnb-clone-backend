@@ -84,12 +84,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(new AntPathRequestMatcher("/images/**")).permitAll()
                         .requestMatchers("/api/users/login", "/api/users/register/**").permitAll()
-                        .requestMatchers("/api/users/change_password").hasRole("USER")
+                                .requestMatchers("/api/houses").permitAll()
+                        .requestMatchers("/api/users/change_password").authenticated()
                         .requestMatchers("/api/admin/**").hasAnyAuthority("ROLE_ADMIN")
 //                        .requestMatchers("/api/users/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN","ROLE_SELLER")
                                 .requestMatchers("/api/houses/**").permitAll() // Cho phép tất cả truy cập API này
                                 .requestMatchers("/api/placeholder/**").permitAll() // Cho phép tất cả truy cập API này
-                        .anyRequest().authenticated()
+                                .anyRequest().hasAnyAuthority("ROLE_USER", "ROLE_HOST")
                 )
                 .exceptionHandling(customizer -> customizer.accessDeniedHandler(customAccessDeniedHandler()))
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

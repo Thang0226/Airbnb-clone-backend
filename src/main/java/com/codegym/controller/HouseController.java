@@ -37,27 +37,38 @@ public class HouseController {
     @GetMapping
     public ResponseEntity<List<House>> getHousesForAvailable() {
         List<House> houses;
-        houses = houseService.searchHouses(null, LocalDate.now(), LocalDate.now().plusDays(1), null, null, null, null, SortOrder.ASC);
+        houses = houseService.searchHousesDesc(null, LocalDate.now(), LocalDate.now().plusDays(1), null, null, null, null);
         return ResponseEntity.ok(houses);
     }
 
-    @PostMapping("/search")
+    @PostMapping
     public ResponseEntity<List<House>> searchHouses(@RequestBody SearchDTO searchDTO) {
-
+        List<House> houses;
         // Xử lý chuỗi address: trích xuất phần tên thành phố hoặc tỉnh, chuyển sang dạng không dấu.
         String normalizedAddress = AddressUtil.extractCityOrProvince(searchDTO.getAddress());
         System.out.println("Normalized address for search: " + normalizedAddress);
 
-        List<House> houses = houseService.searchHouses(
-                normalizedAddress,
-                searchDTO.getCheckIn(),
-                searchDTO.getCheckOut(),
-                searchDTO.getMinBedrooms(),
-                searchDTO.getMinBathrooms(),
-                searchDTO.getMinPrice(),
-                searchDTO.getMaxPrice(),
-                searchDTO.getPriceOrder()
-        );
+        if (searchDTO.getPriceOrder().equals("ASC")) {
+            houses = houseService.searchHousesAsc(
+                    normalizedAddress,
+                    searchDTO.getCheckIn(),
+                    searchDTO.getCheckOut(),
+                    searchDTO.getMinBedrooms(),
+                    searchDTO.getMinBathrooms(),
+                    searchDTO.getMinPrice(),
+                    searchDTO.getMaxPrice()
+            );
+        } else {
+            houses = houseService.searchHousesDesc(
+                    normalizedAddress,
+                    searchDTO.getCheckIn(),
+                    searchDTO.getCheckOut(),
+                    searchDTO.getMinBedrooms(),
+                    searchDTO.getMinBathrooms(),
+                    searchDTO.getMinPrice(),
+                    searchDTO.getMaxPrice()
+            );
+        }
         return ResponseEntity.ok(houses);
     }
 
