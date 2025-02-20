@@ -1,6 +1,7 @@
 package com.codegym.controller;
 
 import com.codegym.model.User;
+import com.codegym.model.constants.UserStatus;
 import com.codegym.model.dto.UserInfoDTO;
 import com.codegym.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,11 +60,11 @@ public class AdminController {
         User user = userOptional.get();
         String userStatus = user.getStatus().toString();
         if (userStatus.equals("ACTIVE")) {
-            user.setStatus(User.Status.valueOf("LOCKED"));
+            user.setStatus(UserStatus.LOCKED);
             userService.save(user);
             return new ResponseEntity<>("User locked", HttpStatus.OK);
         } else {
-            user.setStatus(User.Status.valueOf("ACTIVE"));
+            user.setStatus(UserStatus.ACTIVE);
             userService.save(user);
             return new ResponseEntity<>("User unlocked", HttpStatus.OK);
         }

@@ -1,5 +1,6 @@
 package com.codegym.model;
 import com.codegym.model.auth.Role;
+import com.codegym.model.constants.UserStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
@@ -39,9 +40,5 @@ public class User {
     private Set<Role> roles;
 
     @Enumerated(EnumType.STRING)
-    private Status status = Status.ACTIVE;
-
-    public enum Status {
-        ACTIVE, LOCKED
-    }
+    private UserStatus status = UserStatus.ACTIVE;
 }
