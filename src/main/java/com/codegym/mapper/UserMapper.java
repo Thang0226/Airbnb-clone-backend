@@ -3,11 +3,7 @@ package com.codegym.mapper;
 import com.codegym.model.User;
 import com.codegym.model.dto.UserInfoDTO;
 import com.codegym.model.dto.UserProfileDTO;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import org.springframework.data.domain.Page;
 
 public class UserMapper {
     public static UserInfoDTO toUserInfoDTO(User user) {
@@ -19,10 +15,8 @@ public class UserMapper {
         return userInfoDTO;
     }
 
-    public static List<UserInfoDTO> toUserInfoDTOList(Iterable<User> users) {
-        return StreamSupport.stream(users.spliterator(), false)
-                .map(UserMapper::toUserInfoDTO)
-                .collect(Collectors.toList());
+    public static Page<UserInfoDTO> toUserInfoDTOList(Page<User> users) {
+        return users.map(UserMapper::toUserInfoDTO);
     }
 
     public static UserProfileDTO toUserProfileDTO(User user) {
