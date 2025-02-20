@@ -91,4 +91,9 @@ public class UserService implements IUserService, UserDetailsService {
         Iterable<User> users = userRepository.findAll();
         return UserMapper.toUserInfoDTOList(users);
     }
+
+    @Override
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
 }

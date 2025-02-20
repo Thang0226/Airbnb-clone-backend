@@ -10,6 +10,8 @@ import java.util.Optional;
 public interface IUserService extends IGenerateService<User> {
     Optional<User> findByUsername(String username);
 
+    Optional<User> findByEmail(String email);
+
     void validateUsername(String username);
 
     void validatePhone(String phone);
