@@ -92,10 +92,7 @@ public class UserService implements IUserService, UserDetailsService {
 
     @Override
     public Page<UserInfoDTO> getAllUsersInfo(Pageable pageable) {
-        Iterable<User> users = userRepository.findAllUserRole("ROLE_USER");
-        List<UserInfoDTO> userInfoDTOs = UserMapper.toUserInfoDTOList(users);
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), userInfoDTOs.size());
-        return new PageImpl<>(userInfoDTOs.subList(start, end), pageable, userInfoDTOs.size());
+        Page<User> users = userRepository.findAllUserRole("ROLE_USER", pageable);
+        return UserMapper.toUserInfoDTOList(users);
     }
 }
