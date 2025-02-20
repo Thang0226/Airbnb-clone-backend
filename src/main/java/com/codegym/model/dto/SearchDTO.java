@@ -1,6 +1,5 @@
 package com.codegym.model.dto;
 
-import com.codegym.model.constants.SortOrder;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,5 +17,5 @@ public class SearchDTO {
     private Integer minBathrooms;
     private Integer minPrice;
     private Integer maxPrice;
-    private SortOrder priceOrder;
+    private String priceOrder;
 }

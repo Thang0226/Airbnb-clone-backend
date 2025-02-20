@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,5 +39,4 @@ public class House {
     @JoinColumn(name = "host_id", nullable = false)
     @JsonIgnore
     private User host;
-
 }
