@@ -162,7 +162,24 @@ public class UserController {
 
             userService.save(user);
             hostRequestService.deleteById(requestId); // Delete the request
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(user.getUsername(), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // Admin: decline request to be Host
+    @PostMapping("/host-requests/{requestId}/decline")
+    public ResponseEntity<?> declineHostRequest(@PathVariable Long requestId) {
+        try {
+            Optional<HostRequest> request = hostRequestService.findById(requestId);
+            if (request.isEmpty()) {
+                return new ResponseEntity<>("Request not found", HttpStatus.NOT_FOUND);
+            }
+            hostRequestService.deleteById(requestId);
+            User user = request.get().getUser();
+            return new ResponseEntity<>(user.getUsername(), HttpStatus.OK);
+
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
