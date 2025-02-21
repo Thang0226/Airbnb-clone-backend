@@ -10,6 +10,8 @@ public class UserMapper {
         UserInfoDTO userInfoDTO = new UserInfoDTO();
         userInfoDTO.setId(user.getId());
         userInfoDTO.setUsername(user.getUsername());
+        userInfoDTO.setAvatar(user.getAvatar());
+        userInfoDTO.setFullName(user.getFullName());
         userInfoDTO.setPhone(user.getPhone());
         userInfoDTO.setStatus(user.getStatus());
         return userInfoDTO;

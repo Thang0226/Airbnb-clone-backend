@@ -106,4 +106,13 @@ public class UserService implements IUserService, UserDetailsService {
         Optional<User> userOptional = userRepository.findByEmail(email);
         return userOptional.isEmpty();
     }
+
+    @Override
+    public UserInfoDTO getUserInfo(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) {
+            throw new NoSuchUserExistsException("NO USER PRESENT WITH ID = " + userId);
+        }
+        return UserMapper.toUserInfoDTO(user.get());
+    }
 }
