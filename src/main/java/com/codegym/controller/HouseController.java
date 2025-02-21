@@ -1,7 +1,6 @@
 package com.codegym.controller;
 
 import com.codegym.model.*;
-import com.codegym.model.constants.SortOrder;
 import com.codegym.model.dto.SearchDTO;
 import com.codegym.service.user.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
