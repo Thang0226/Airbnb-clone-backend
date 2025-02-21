@@ -224,6 +224,12 @@ values  (1, 'hinh anh so (1).jpg'),
         (10, 'hinh anh so (26).jpg'),
         (10, 'hinh anh so (27).jpg');
 
+insert into host_requests (request_date, user_id)
+values
+    ('2025-02-21 13:07:43.708469', 4),
+    ('2025-02-20 13:07:43.708469', 5),
+    ('2025-02-19 13:07:43.708469', 6);
+
 insert into availabilities (start_date, end_date, house_id)
 values
 -- House 1
