@@ -23,4 +23,6 @@ public interface IUserService extends IGenerateService<User> {
     UserProfileDTO getUserProfile(String userName);
   
     Page<UserInfoDTO> getAllUsersInfo(Pageable pageable);
+
+    UserInfoDTO getUserInfo(Long userId);
 }

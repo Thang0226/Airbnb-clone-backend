@@ -90,7 +90,7 @@ public class SecurityConfig {
 //                        .requestMatchers("/api/users/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN","ROLE_SELLER")
                                 .requestMatchers("/api/houses/**").permitAll() // Cho phép tất cả truy cập API này
                                 .requestMatchers("/api/placeholder/**").permitAll() // Cho phép tất cả truy cập API này
-                                .anyRequest().hasAnyAuthority("ROLE_USER", "ROLE_HOST")
+                                .anyRequest().hasAnyAuthority("ROLE_USER", "ROLE_HOST", "ROLE_ADMIN")
                 )
                 .exceptionHandling(customizer -> customizer.accessDeniedHandler(customAccessDeniedHandler()))
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

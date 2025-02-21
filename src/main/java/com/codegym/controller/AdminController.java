@@ -3,7 +3,9 @@ package com.codegym.controller;
 import com.codegym.model.User;
 import com.codegym.model.constants.UserStatus;
 import com.codegym.model.dto.UserInfoDTO;
-import com.codegym.service.user.UserService;
+import com.codegym.model.dto.UserRentalHistoryDTO;
+import com.codegym.service.booking.IBookingService;
+import com.codegym.service.user.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,7 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @RestController
@@ -19,7 +21,10 @@ import java.util.Optional;
 @RequestMapping("/api/admin")
 public class AdminController {
     @Autowired
-    private UserService userService;
+    private IUserService userService;
+
+    @Autowired
+    private IBookingService bookingService;
 
     @GetMapping("/users")
     public ResponseEntity<Page<UserInfoDTO>> getAllUsers(Pageable pageable) {
@@ -70,5 +75,24 @@ public class AdminController {
             userService.save(user);
             return new ResponseEntity<>("User unlocked", HttpStatus.OK);
         }
+    }
+
+    @GetMapping("/user-details/{id}")
+    public ResponseEntity<UserInfoDTO> getUserInfo(@PathVariable Long id) {
+        UserInfoDTO userInfo = userService.getUserInfo(id);
+        return new ResponseEntity<>(userInfo, HttpStatus.OK);
+    }
+
+    @GetMapping("/user-rental-history/{id}")
+    public ResponseEntity<Page<UserRentalHistoryDTO>> getUserRentalHistory(@PathVariable Long id, Pageable pageable) {
+        Page<UserRentalHistoryDTO> userRentalHistory = bookingService.getUserRentalHistory(id, pageable);
+
+        return new ResponseEntity<>(userRentalHistory, HttpStatus.OK);
+    }
+
+    @GetMapping("/user-payment/{id}")
+    public ResponseEntity<?> getUserPayment(@PathVariable Long id) {
+        BigDecimal userTotalRentPaid = bookingService.getTotalRentPaidByUserId(id);
+        return new ResponseEntity<>(userTotalRentPaid, HttpStatus.OK);
     }
 }
