@@ -28,6 +28,8 @@ public class Booking {
 
     private LocalDateTime updatedAt;
 
+    private Integer price;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "house_id", nullable = false)
     private House house;

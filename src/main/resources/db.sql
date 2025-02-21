@@ -29,7 +29,7 @@ begin
              LEFT JOIN availabilities a ON a.house_id = h.id
     WHERE ( minBedrooms IS NULL OR h.bedrooms >= minBedrooms )
       AND ( minBathrooms IS NULL OR h.bathrooms >= minBathrooms )
-      AND ( address IS NULL OR TRIM(address) = '' OR LOWER(h.address) LIKE LOWER(CONCAT('%', address, '%')) )
+      AND ( address IS NULL OR TRIM(address) = '' OR LOWER(h.address) LIKE CONCAT('%', LOWER(address), '%'))
       AND ( checkIn IS NULL OR (a.start_date <= checkIn AND a.end_date >= checkOut) )
       AND ( minPrice IS NULL OR h.price >= minPrice )
       AND ( maxPrice IS NULL OR h.price <= maxPrice )
@@ -77,7 +77,7 @@ INSERT INTO users
 (address, full_name, password, phone, email, username, status)
 VALUES
     (
-        '123 Oak Street, Austin, TX 78701',
+        '12 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh',
         'John Doe',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0123456789',
@@ -86,7 +86,7 @@ VALUES
         'ACTIVE'
     ),
     (
-        '456 Pine Ave, Seattle, WA 98101',
+        '25 Trần Duy Hưng, Cầu Giấy, Hà Nội',
         'Sarah Smith',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0987654322',
@@ -95,7 +95,7 @@ VALUES
         'ACTIVE'
     ),
     (
-        '789 Maple Dr, Chicago, IL 60601',
+        '90 Lê Lợi, Quận Hải Châu, Đà Nẵng',
         'Michael Johnson',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0456789123',
@@ -104,7 +104,7 @@ VALUES
         'ACTIVE'
     ),
     (
-        '321 Elm Road, Miami, FL 33101',
+        '66 Nguyễn Hữu Thọ, Quận 7, TP. Hồ Chí Minh',
         'Emily Brown',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0789123456',
@@ -113,7 +113,7 @@ VALUES
         'ACTIVE'
     ),
     (
-        '654 Cedar Lane, Denver, CO 80201',
+        '57 Bạch Đằng, Quận Hải Châu, Đà Nẵng',
         'David Wilson',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0321654987',
@@ -122,7 +122,7 @@ VALUES
         'ACTIVE'
     ),
     (
-        '987 Birch Blvd, Portland, OR 97201',
+        '38 Nguyễn Văn Linh, Quận Hải Châu, Đà Nẵng',
         'Lisa Taylor',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0147258369',
@@ -131,7 +131,7 @@ VALUES
         'ACTIVE'
     ),
     (
-        '147 Walnut St, Boston, MA 02101',
+        '45 Phan Chu Trinh, Quận Hoàn Kiếm, Hà Nội',
         'Robert Miller',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0258147369',
@@ -140,7 +140,7 @@ VALUES
         'ACTIVE'
     ),
     (
-        '258 Spruce Court, Houston, TX 77001',
+        '102 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh',
         'Jennifer Davis',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0369147258',
@@ -149,7 +149,7 @@ VALUES
         'ACTIVE'
     ),
     (
-        '369 Ash Way, Phoenix, AZ 85001',
+        '78 Võ Văn Kiệt, Quận Sơn Trà, Đà Nẵng',
         'William Jones',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0741852963',
@@ -158,7 +158,7 @@ VALUES
         'ACTIVE'
     ),
     (
-        '741 Beech Path, San Diego, CA 92101',
+        '15 Hoàng Hoa Thám, Quận Ninh Kiều, Cần Thơ',
         'Mary Anderson',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0963852741',
@@ -184,16 +184,16 @@ VALUES
 INSERT INTO houses
 (address, bathrooms, bedrooms, description, house_name, price, host_id)
 VALUES
-    ( '36 Hang Be, Hoan Kiem', 2, 3, 'Fully-equipped apartment, centrally located, suitable for couples or small families.', 'Luxury apartment near Hoan Kiem Lake', 800000, 2),
-    ('12 Tran Phu, Ba Dinh', 3, 4, 'Spacious villa with garden, perfect for large families or groups.', 'Elegant Ba Dinh Villa', 1500000, 2),
-    ('25 Xuan Dieu, Tay Ho', 2, 2, 'Lake-view apartment with modern design, ideal for expats and digital nomads.', 'Tay Ho Lakeview Apartment', 900000, 2),
-    ('78 Kim Ma, Ba Dinh', 1, 1, 'Cozy studio in central Hanoi, close to embassies and business areas.', 'Kim Ma Cozy Studio', 600000, 2),
-    ('9 Hang Bong, Hoan Kiem', 2, 3, 'Traditional-style home in Hanoi Old Quarter, offering an authentic experience.', 'Old Quarter Charm House', 850000, 2),
-    ('105 Lang Ha, Dong Da', 2, 2, 'Modern apartment with full amenities, near shopping malls and offices.', 'Lang Ha Modern Condo', 950000, 3),
-    ('45 Le Van Luong, Thanh Xuan', 2, 3, 'Newly built apartment with gym and pool access.', 'Thanh Xuan Luxury Condo', 1000000, 3),
-    ('33 Hoang Hoa Tham, Ba Dinh', 1, 2, 'Quiet and comfortable apartment near West Lake.', 'West Lake Retreat', 700000, 3),
-    ('56 Doi Can, Ba Dinh', 3, 4, 'Spacious home with rooftop terrace, perfect for family gatherings.', 'Doi Can Family House', 1200000, 3),
-    ('15 Phan Dinh Phung, Hoan Kiem', 2, 3, 'Historic French colonial house with elegant decor.', 'French Colonial Residence', 1400000, 3);
+    ( '12 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh', 2, 3, 'Fully-equipped apartment, centrally located, suitable for couples or small families.', 'Hoàn Kiếm Villa', 800000, 2),
+    ('25 Trần Duy Hưng, Cầu Giấy, Hà Nội', 3, 4, 'Spacious villa with garden, perfect for large families or groups.', 'Ba Đình Villa', 1500000, 2),
+    ('90 Lê Lợi, Quận Hải Châu, Đà Nẵng', 2, 2, 'Lake-view apartment with modern design, ideal for expats and digital nomads.', 'Tây Hồ Lakeview Apartment', 900000, 2),
+    ('15 Hoàng Hoa Thám, Quận Ninh Kiều, Cần Thơ', 1, 1, 'Cozy studio in central Hanoi, close to embassies and business areas.', 'Kim Mã Studio', 600000, 2),
+    ('78 Võ Văn Kiệt, Quận Sơn Trà, Đà Nẵng', 2, 3, 'Traditional-style home in Hanoi Old Quarter, offering an authentic experience.', 'Old Quarter Charm House', 850000, 2),
+    ('102 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh', 2, 2, 'Modern apartment with full amenities, near shopping malls and offices.', 'Láng Hạ Modern Condo', 950000, 3),
+    ('45 Phan Chu Trinh, Quận Hoàn Kiếm, Hà Nội', 2, 3, 'Newly built apartment with gym and pool access.', 'Thanh Xuân Luxury Condo', 1000000, 3),
+    ('38 Nguyễn Văn Linh, Quận Hải Châu, Đà Nẵng', 1, 2, 'Quiet and comfortable apartment near West Lake.', 'West Lake Retreat', 700000, 3),
+    ('57 Bạch Đằng, Quận Hải Châu, Đà Nẵng', 3, 4, 'Spacious home with rooftop terrace, perfect for family gatherings.', ' Đội Cấn Family House', 1200000, 3),
+    ('66 Nguyễn Hữu Thọ, Quận 7, TP. Hồ Chí Minh', 2, 3, 'Historic French colonial house with elegant decor.', 'French Colonial Residence', 1400000, 3);
 
 insert into house_images (house_id, file_name)
 values  (1, 'hinh anh so (1).jpg'),
@@ -282,44 +282,44 @@ values
     ('2025-06-01', '2025-07-31', 10),
     ('2025-11-30', '2027-10-10', 10);
 
-insert into bookings (start_date, end_date, status, updated_at, house_id, user_id)
+insert into bookings (start_date, end_date, status, updated_at, price, house_id, user_id)
 values
     -- House 1 (gaps: Apr 16-Apr 30, Jul 1-Sep 29)
-    ('2025-04-16', '2025-04-30', 'CONFIRMED', '2025-03-16 14:30:00', 1, 4),
-    ('2025-07-01', '2025-09-29', 'CONFIRMED', '2025-06-01 09:45:00', 1,5),
+    ('2025-04-16', '2025-04-30', 'CONFIRMED', '2025-03-16 14:30:00',800000, 1, 4),
+    ('2025-07-01', '2025-09-29', 'CONFIRMED', '2025-06-01 09:45:00',800000, 1,5),
 
 -- House 2 (gaps: Apr 1-Apr 9, Jun 1-Aug 30)
-    ('2025-04-01', '2025-04-09', 'CONFIRMED', '2025-03-01 11:00:00', 2, 6),
-    ('2025-06-01', '2025-08-30', 'CONFIRMED', '2025-05-01 13:15:00', 2, 7),
+    ('2025-04-01', '2025-04-09', 'CONFIRMED', '2025-03-01 11:00:00', 1500000, 2, 6),
+    ('2025-06-01', '2025-08-30', 'CONFIRMED', '2025-05-01 13:15:00', 1500000, 2, 7),
 
 -- House 3 (gaps: May 1-May 31, Jul 16-Oct 30)
-    ('2025-05-01', '2025-05-31', 'CONFIRMED', '2025-04-01 15:45:00', 3, 8),
-    ('2025-07-16', '2025-10-30', 'CONFIRMED', '2025-06-16 12:00:00', 3, 9),
+    ('2025-05-01', '2025-05-31', 'CONFIRMED', '2025-04-01 15:45:00', 900000, 3, 8),
+    ('2025-07-16', '2025-10-30', 'CONFIRMED', '2025-06-16 12:00:00', 900000, 3, 9),
 
 -- House 4 (gaps: Mar 16-May 14, Jul 1-Sep 14)
-    ('2025-03-16', '2025-05-14', 'CONFIRMED', '2025-02-16 14:20:00', 4, 10),
-    ('2025-07-01', '2025-09-14', 'CONFIRMED', '2025-06-01 16:45:00', 4, 10),
+    ('2025-03-16', '2025-05-14', 'CONFIRMED', '2025-02-16 14:20:00', 600000, 4, 10),
+    ('2025-07-01', '2025-09-14', 'CONFIRMED', '2025-06-01 16:45:00', 600000, 4, 10),
 
 -- House 5 (gaps: Jun 1-Jul 14, Sep 1-Nov 29)
-    ('2025-06-01', '2025-07-14', 'CONFIRMED', '2025-05-01 10:15:00', 5, 4),
-    ('2025-09-01', '2025-11-29', 'CONFIRMED', '2025-08-01 13:30:00', 5, 5),
+    ('2025-06-01', '2025-07-14', 'CONFIRMED', '2025-05-01 10:15:00', 850000, 5, 4),
+    ('2025-09-01', '2025-11-29', 'CONFIRMED', '2025-08-01 13:30:00', 850000, 5, 5),
 
 -- House 6 (gaps: May 1-Jun 14, Aug 1-Oct 30)
-    ('2025-05-01', '2025-06-14', 'CONFIRMED', '2025-04-01 11:20:00', 6, 6),
-    ('2025-08-01', '2025-10-30', 'PENDING', '2025-07-01 15:00:00', 6, 7),
+    ('2025-05-01', '2025-06-14', 'CONFIRMED', '2025-04-01 11:20:00', 950000, 6, 6),
+    ('2025-08-01', '2025-10-30', 'PENDING', '2025-07-01 15:00:00', 950000, 6, 7),
 
 -- House 7 (gaps: Apr 16-Apr 30, Jun 16-Sep 29)
-    ('2025-04-16', '2025-04-30', 'CONFIRMED', '2025-03-16 09:00:00', 7, 8),
-    ('2025-06-16', '2025-09-29', 'PENDING', '2025-05-16 14:45:00', 7, 9),
+    ('2025-04-16', '2025-04-30', 'CONFIRMED', '2025-03-16 09:00:00', 1000000, 7, 8),
+    ('2025-06-16', '2025-09-29', 'PENDING', '2025-05-16 14:45:00', 1000000, 7, 9),
 
 -- House 8 (gaps: May 16-May 31, Aug 1-Oct 14)
-    ('2025-05-16', '2025-05-31', 'CONFIRMED', '2025-04-16 16:15:00', 8, 10),
-    ('2025-08-01', '2025-10-14', 'PENDING', '2025-07-01 10:45:00', 8, 4),
+    ('2025-05-16', '2025-05-31', 'CONFIRMED', '2025-04-16 16:15:00', 700000, 8, 10),
+    ('2025-08-01', '2025-10-14', 'PENDING', '2025-07-01 10:45:00', 700000, 8, 4),
 
 -- House 9 (gaps: Jun 1-Jul 14, Sep 1-Nov 14)
-    ('2025-06-01', '2025-07-14', 'CONFIRMED', '2025-05-01 11:30:00', 9, 5),
-    ('2025-09-01', '2025-11-14', 'PENDING', '2025-08-01 15:45:00', 9, 6),
+    ('2025-06-01', '2025-07-14', 'CONFIRMED', '2025-05-01 11:30:00', 1200000, 9, 5),
+    ('2025-09-01', '2025-11-14', 'PENDING', '2025-08-01 15:45:00', 1200000, 9, 6),
 
 -- House 10 (gaps: May 1-May 31, Aug 1-Nov 29)
-    ('2025-05-01', '2025-05-31', 'CONFIRMED', '2025-04-01 14:00:00', 10, 7),
-    ('2025-08-01', '2025-11-29', 'PENDING', '2025-07-01 10:30:00', 10, 8);
+    ('2025-05-01', '2025-05-31', 'CONFIRMED', '2025-04-01 14:00:00', 1400000, 10, 7),
+    ('2025-08-01', '2025-11-29', 'PENDING', '2025-07-01 10:30:00', 1400000, 10, 8);

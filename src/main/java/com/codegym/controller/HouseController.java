@@ -43,13 +43,10 @@ public class HouseController {
     @PostMapping
     public ResponseEntity<List<House>> searchHouses(@RequestBody SearchDTO searchDTO) {
         List<House> houses;
-        // Xử lý chuỗi address: trích xuất phần tên thành phố hoặc tỉnh, chuyển sang dạng không dấu.
-        String normalizedAddress = AddressUtil.extractCityOrProvince(searchDTO.getAddress());
-        System.out.println("Normalized address for search: " + normalizedAddress);
 
         if (searchDTO.getPriceOrder().equals("ASC")) {
             houses = houseService.searchHousesAsc(
-                    normalizedAddress,
+                    searchDTO.getAddress(),
                     searchDTO.getCheckIn(),
                     searchDTO.getCheckOut(),
                     searchDTO.getMinBedrooms(),
@@ -59,7 +56,7 @@ public class HouseController {
             );
         } else {
             houses = houseService.searchHousesDesc(
-                    normalizedAddress,
+                    searchDTO.getAddress(),
                     searchDTO.getCheckIn(),
                     searchDTO.getCheckOut(),
                     searchDTO.getMinBedrooms(),

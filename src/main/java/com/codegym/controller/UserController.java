@@ -82,6 +82,7 @@ public class UserController {
                     jwt,
                     userDetails.getUsername(),
                     currentUser.getFullName(),
+                    currentUser.getStatus(),
                     userDetails.getAuthorities()));
 
         } catch (BadCredentialsException ex) {
