@@ -81,7 +81,7 @@ VALUES
         'John Doe',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0123456789',
-        'thang.nd0226@gmail.com',
+        'john.d@gmail.com',
         'john_doe',
         'ACTIVE'
     ),
@@ -90,7 +90,7 @@ VALUES
         'Sarah Smith',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0987654322',
-        'sarah.smith@gmail.com',
+        'sarah.s@gmail.com',
         'sarah_smith',
         'ACTIVE'
     ),
@@ -108,7 +108,7 @@ VALUES
         'Emily Brown',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0789123456',
-        'emily.b@gmail.com',
+        'thang.nd0226@gmail.com',
         'emily_b',
         'ACTIVE'
     ),

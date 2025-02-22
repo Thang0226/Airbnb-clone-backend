@@ -150,22 +150,21 @@ public class UserController {
             if (request.isEmpty()) {
                 return new ResponseEntity<>("Request not found", HttpStatus.NOT_FOUND);
             }
-
             // Get the user from the request
             User user = request.get().getUser();
-
-            // Add host role
+            // Replace user role by host role
             Role hostRole = roleService.findByName("ROLE_HOST");
-            // Set<Role> roles = user.getRoles(); // add new role_id for same user_id (old)
-            Set<Role> roles = new HashSet<>(); // replace new role_id (new)
+            Set<Role> roles = new HashSet<>();
             roles.add(hostRole);
             user.setRoles(roles);
-
             userService.save(user);
-            hostRequestService.deleteById(requestId); // Delete the request
-            return new ResponseEntity<>(user.getUsername(), HttpStatus.OK);
+
+            // Delete the request
+            hostRequestService.deleteById(requestId);
+            return ResponseEntity.ok("Host request approved");
+
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
@@ -177,9 +176,9 @@ public class UserController {
             if (request.isEmpty()) {
                 return new ResponseEntity<>("Request not found", HttpStatus.NOT_FOUND);
             }
+
             hostRequestService.deleteById(requestId);
-            User user = request.get().getUser();
-            return new ResponseEntity<>(user.getUsername(), HttpStatus.OK);
+            return ResponseEntity.ok("Host request declined");
 
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
