@@ -25,6 +25,9 @@ public class User {
 
     private String fullName;
 
+    @Column(name = "is_gg_account", nullable = false, columnDefinition = "boolean default false")
+    private boolean isGGAccount = false;
+
     @Column(columnDefinition = "TEXT")
     private String address;
 
