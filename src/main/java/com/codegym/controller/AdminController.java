@@ -45,13 +45,6 @@ public class AdminController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-//    @PutMapping("/{id}")
-//    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @ModelAttribute UserForm userForm, BindingResult result) {
-//        Optional<User> userOptional = userService.findById(id);
-//        return getResponseEntity(userForm, userOptional, result);
-//    }
-
-
     @DeleteMapping("/users/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         userService.deleteById(id);
