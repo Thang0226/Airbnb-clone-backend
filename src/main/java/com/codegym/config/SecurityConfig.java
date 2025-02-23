@@ -83,7 +83,7 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(new AntPathRequestMatcher("/images/**")).permitAll()
-                        .requestMatchers("/api/users/login", "/api/users/register/**").permitAll()
+                        .requestMatchers("/api/users/login", "api/users/login-gg", "/api/users/register/**").permitAll()
                                 .requestMatchers("/api/houses").permitAll()
                         .requestMatchers("/api/users/change_password", "/api/users/logout").authenticated()
                         .requestMatchers("/api/admin/**", "api/users/host-requests/**").hasRole("ADMIN")

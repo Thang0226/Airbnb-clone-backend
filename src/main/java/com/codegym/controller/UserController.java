@@ -4,6 +4,7 @@ import com.codegym.exception.PhoneAlreadyExistsException;
 import com.codegym.exception.UsernameAlreadyExistsException;
 import com.codegym.model.auth.Account;
 import com.codegym.model.HostRequest;
+import com.codegym.model.auth.GGAccount;
 import com.codegym.model.auth.Role;
 import com.codegym.model.dto.UpdatePasswordDTO;
 import com.codegym.model.dto.UserDTO;
@@ -48,6 +49,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/users")
 public class UserController {
 
+
     @Autowired
     private UserService userService;
     @Autowired
@@ -64,6 +66,8 @@ public class UserController {
 
     @Value("${file_upload}")
     private String fileUpload;
+    @Value("${DEFAULT_PASSWORD}")
+    private String defaultPassword;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Account account) {
@@ -88,6 +92,52 @@ public class UserController {
         } catch (BadCredentialsException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Username or Password.");
         }
+    }
+
+    @PostMapping("/login-gg")
+    public ResponseEntity<?> loginWithGG(@RequestBody GGAccount ggAccount) {
+        try {
+            Optional<User> userOptional = userService.findByEmail(ggAccount.getEmail());
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
+                Authentication authentication = authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(user.getUsername(), defaultPassword));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                String jwt = jwtService.generateTokenLogin(authentication);
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                return ResponseEntity.ok(new JwtResponse(
+                        user.getId(),
+                        jwt,
+                        userDetails.getUsername(),
+                        user.getFullName(),
+                        user.getStatus(),
+                        userDetails.getAuthorities()));
+            }
+            // If GGAccount is not registered by email, create new user account from GGAccount
+            return addUserWithGG(ggAccount);
+
+        } catch (BadCredentialsException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Username or Password.");
+        }
+    }
+
+    private ResponseEntity<?> addUserWithGG(GGAccount ggAccount) {
+        User user = new User();
+        user.setUsername(ggAccount.getUsername());
+        user.setEmail(ggAccount.getEmail());
+        user.setFullName(ggAccount.getFullName());
+        String encodedPassword = passwordEncoder.encode(defaultPassword);
+        user.setPassword(encodedPassword);
+        user.setGGAccount(true);
+
+        Set<Role> roles = new HashSet<>();
+        Role userRole = roleService.findByName("ROLE_USER");
+        roles.add(userRole);
+        user.setRoles(roles);
+
+        userService.save(user);
+        return loginWithGG(ggAccount);
     }
 
     @PostMapping("/register")

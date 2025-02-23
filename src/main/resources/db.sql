@@ -108,7 +108,7 @@ VALUES
         'Emily Brown',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0789123456',
-        'thang.nd0226@gmail.com',
+        'emily.b@gmail.com',
         'emily_b',
         'ACTIVE'
     ),
@@ -167,6 +167,21 @@ VALUES
         'LOCKED'
     );
 
+INSERT INTO users
+(address, full_name, password, phone, email, username, status, is_gg_account)
+values
+    (
+        'Số 1 Ngô Xuân Quảng, Trâu Quỳ, Gia Lâm, Hà Nội',
+        'Nguyễn Đức Thắng',
+        '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
+        '0888899999',
+        'thang.nd0226@gmail.com',
+        'Thắng Nguyễn Đức',
+        'PENDING',
+        true
+    );
+
+
 INSERT INTO users_roles
 (user_id, roles_id)
 VALUES
@@ -179,7 +194,8 @@ VALUES
     (7, 1),
     (8, 1),
     (9, 1),
-    (10, 1);
+    (10, 1),
+    (11, 1);
 
 INSERT INTO houses
 (address, bathrooms, bedrooms, description, house_name, price, host_id)
@@ -226,9 +242,9 @@ values  (1, 'hinh anh so (1).jpg'),
 
 insert into host_requests (request_date, user_id)
 values
-    ('2025-02-21 13:07:43.708469', 4),
+    ('2025-02-21 13:07:43.708469', 11),
     ('2025-02-20 13:07:43.708469', 5),
-    ('2025-02-19 13:07:43.708469', 6);
+    ('2025-02-09 13:07:43.708469', 6);
 
 insert into availabilities (start_date, end_date, house_id)
 values
@@ -321,5 +337,5 @@ values
     ('2025-09-01', '2025-11-14', 'PENDING', '2025-08-01 15:45:00', 1200000, 9, 6),
 
 -- House 10 (gaps: May 1-May 31, Aug 1-Nov 29)
-    ('2025-05-01', '2025-05-31', 'CONFIRMED', '2025-04-01 14:00:00', 1400000, 10, 7),
-    ('2025-08-01', '2025-11-29', 'PENDING', '2025-07-01 10:30:00', 1400000, 10, 8);
+    ('2025-05-01', '2025-05-31', 'CONFIRMED', '2025-04-01 14:00:00', 1400000, 10, 11),
+    ('2025-08-01', '2025-11-29', 'PENDING', '2025-07-01 10:30:00', 1400000, 10, 11);
