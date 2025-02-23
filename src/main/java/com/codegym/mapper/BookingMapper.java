@@ -2,26 +2,27 @@ package com.codegym.mapper;
 
 import com.codegym.model.Booking;
 import com.codegym.model.dto.UserRentalHistoryDTO;
-import org.springframework.data.domain.Page;
+import org.mapstruct.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
+@Mapper(componentModel = "spring", imports = { BigDecimal.class })
+public interface BookingMapper {
 
-public class BookingMapper {
-    public static UserRentalHistoryDTO toUserRentalHistoryDTO(Booking booking) {
-        UserRentalHistoryDTO userRentalHistoryDTO = new UserRentalHistoryDTO();
-        userRentalHistoryDTO.setId(booking.getId());
-        userRentalHistoryDTO.setHouseName(booking.getHouse().getHouseName());
-        userRentalHistoryDTO.setRentalPrice(BigDecimal.valueOf(booking.getHouse().getPrice()));
-        userRentalHistoryDTO.setStartDate(booking.getStartDate());
-        userRentalHistoryDTO.setEndDate(booking.getEndDate());
+    @Mapping(target = "houseName", expression = "java(booking.getHouse().getHouseName())")
+    @Mapping(target = "rentalPrice", expression = "java(BigDecimal.valueOf(booking.getPrice()))")
+    @Mapping(target = "rentalDay", expression = "java(calculateRentalDays(booking.getStartDate(), booking.getEndDate()))")
+    @Mapping(target = "rentPaid", expression = "java(calculateRentPaid(booking.getStartDate(), booking.getEndDate(), booking.getPrice()))")
+    UserRentalHistoryDTO toUserRentalHistoryDTO(Booking booking);
 
-        userRentalHistoryDTO.calcRentPaid(booking.getStartDate(), booking.getEndDate(), booking.getHouse().getPrice());
-
-        return userRentalHistoryDTO;
+    default long calculateRentalDays(LocalDate startDate, LocalDate endDate) {
+        return startDate != null && endDate != null ? Math.max(ChronoUnit.DAYS.between(startDate, endDate), 0) : 0;
     }
 
-    public static Page<UserRentalHistoryDTO> toUserRentalHistory(Page<Booking> bookings) {
-        return bookings.map(BookingMapper::toUserRentalHistoryDTO);
+    default BigDecimal calculateRentPaid(LocalDate startDate, LocalDate endDate, int housePrice) {
+        long days = calculateRentalDays(startDate, endDate);
+        return BigDecimal.valueOf(housePrice).multiply(BigDecimal.valueOf(days));
     }
 }

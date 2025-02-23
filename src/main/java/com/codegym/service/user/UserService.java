@@ -1,4 +1,5 @@
 package com.codegym.service.user;
+
 import com.codegym.exception.NoSuchUserExistsException;
 import com.codegym.exception.PhoneAlreadyExistsException;
 import com.codegym.exception.UsernameAlreadyExistsException;
@@ -10,15 +11,12 @@ import com.codegym.model.dto.UserProfileDTO;
 import com.codegym.repository.IUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -26,14 +24,15 @@ public class UserService implements IUserService, UserDetailsService {
     @Autowired
     private IUserRepository userRepository;
 
-        @Override
-        public UserProfileDTO getUserProfile(String userName) {
-            Optional<User> userOptional = userRepository.findByUsername(userName);
-            if (userOptional.isEmpty()) {
-                throw new NoSuchUserExistsException(userName);
-            }
-            return UserMapper.toUserProfileDTO(userOptional.get());
-        }
+    @Autowired
+    private UserMapper userMapper;
+
+    @Override
+    public UserProfileDTO getUserProfile(String userName) {
+        User user = userRepository.findByUsername(userName)
+                .orElseThrow(() -> new NoSuchUserExistsException(userName));
+        return userMapper.toUserProfileDTO(user);
+    }
 
     @Override
     public Iterable<User> findAll() {
@@ -92,8 +91,8 @@ public class UserService implements IUserService, UserDetailsService {
 
     @Override
     public Page<UserInfoDTO> getAllUsersInfo(Pageable pageable) {
-        Page<User> users = userRepository.findAllUserRoleUsers(pageable);
-        return UserMapper.toUserInfoDTOList(users);
+        Page<User> users = userRepository.findAllUsers(pageable);
+        return users.map(userMapper::toUserInfoDTO);
     }
 
     @Override
@@ -109,10 +108,8 @@ public class UserService implements IUserService, UserDetailsService {
 
     @Override
     public UserInfoDTO getUserInfo(Long userId) {
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty()) {
-            throw new NoSuchUserExistsException("NO USER PRESENT WITH ID = " + userId);
-        }
-        return UserMapper.toUserInfoDTO(user.get());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchUserExistsException("NO USER PRESENT WITH ID = " + userId));
+        return userMapper.toUserInfoDTO(user);
     }
 }

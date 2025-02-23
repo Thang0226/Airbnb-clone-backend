@@ -18,5 +18,5 @@ public interface IUserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = 'ROLE_USER'")
-    Page<User> findAllUserRoleUsers(Pageable pageable);
+    Page<User> findAllUsers(Pageable pageable);
 }
