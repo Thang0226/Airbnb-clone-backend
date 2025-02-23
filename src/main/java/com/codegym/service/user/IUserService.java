@@ -1,5 +1,6 @@
 package com.codegym.service.user;
 
+import com.codegym.model.dto.HostInfoDTO;
 import com.codegym.model.dto.UserInfoDTO;
 import com.codegym.model.User;
 import com.codegym.model.dto.UserProfileDTO;
@@ -25,4 +26,8 @@ public interface IUserService extends IGenerateService<User> {
     Page<UserInfoDTO> getAllUsersInfo(Pageable pageable);
 
     UserInfoDTO getUserInfo(Long userId);
+
+    Page<HostInfoDTO> getAllHostsInfo(Pageable pageable);
+
+    HostInfoDTO getHostInfo(Long userId);
 }

@@ -5,18 +5,21 @@ import com.codegym.exception.PhoneAlreadyExistsException;
 import com.codegym.exception.UsernameAlreadyExistsException;
 import com.codegym.mapper.UserMapper;
 import com.codegym.model.auth.UserPrincipal;
+import com.codegym.model.dto.HostInfoDTO;
 import com.codegym.model.dto.UserInfoDTO;
 import com.codegym.model.User;
 import com.codegym.model.dto.UserProfileDTO;
 import com.codegym.repository.IUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -111,5 +114,20 @@ public class UserService implements IUserService, UserDetailsService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchUserExistsException("NO USER PRESENT WITH ID = " + userId));
         return userMapper.toUserInfoDTO(user);
+    }
+
+    @Override
+    public Page<HostInfoDTO> getAllHostsInfo(Pageable pageable) {
+        List<HostInfoDTO> hosts = userRepository.getAllHostsInfo();
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), hosts.size());
+        List<HostInfoDTO> pagedList = hosts.subList(start, end);
+        return new PageImpl<>(pagedList, pageable, hosts.size());
+    }
+
+
+    @Override
+    public HostInfoDTO getHostInfo(Long userId) {
+        return userRepository.getHostInfo(userId);
     }
 }

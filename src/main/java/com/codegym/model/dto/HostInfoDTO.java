@@ -1,15 +1,14 @@
 package com.codegym.model.dto;
 
-import com.codegym.model.constants.UserStatus;
-
 import java.math.BigDecimal;
 
-public class HostInfoDTO {
-    private Long id;
-    private String username;
-    private UserStatus status;
-    private String fullName;
-    private String phone;
-    private int housesForRent;
-    private BigDecimal income;
+public interface HostInfoDTO {
+    Long getId();
+    String getUsername();
+    String getStatus();
+    String getFullName();
+    String getAddress();
+    String getPhone();
+    Integer getHousesForRent();
+    BigDecimal getTotalIncome();
 }

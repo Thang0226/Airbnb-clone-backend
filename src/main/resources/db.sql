@@ -59,7 +59,44 @@ begin
     ORDER BY h.price DESC;
 end;
 
+drop procedure if exists get_host_info;
+create procedure get_host_info(in _id bigint)
+begin
+    select u.id as id,
+           u.username as username,
+           u.status as status,
+           u.full_name as fullName,
+           u.address as address,
+           u.phone as phone,
+           COALESCE(COUNT(DISTINCT h.id), 0) AS housesForRent,
+           COALESCE(SUM((DATEDIFF(b.end_date, b.start_date) + 1) * b.price), 0) AS totalIncome
+    from users u
+    left join houses h on u.id = h.host_id
+    left join bookings b on h.id = b.house_id and b.status = 'CONFIRMED'
+    left join users_roles ur on u.id = ur.user_id
+    where u.id = _id and ur.roles_id = 2
+    GROUP BY u.id;
+end;
+call get_host_info(2);
 
+drop procedure if exists get_all_hosts_info;
+create procedure get_all_hosts_info()
+begin
+    select u.id as id,
+           u.username as username,
+           u.status as status,
+           u.full_name as fullName,
+           u.address as address,
+           u.phone as phone,
+           COALESCE(COUNT(DISTINCT h.id), 0) AS housesForRent,
+           COALESCE(SUM((DATEDIFF(b.end_date, b.start_date) + 1) * b.price), 0) AS totalIncome
+    from users u
+             left join houses h on u.id = h.host_id
+             left join bookings b on h.id = b.house_id and b.status = 'CONFIRMED'
+             left join users_roles ur on u.id = ur.user_id
+    where ur.roles_id = 2
+    GROUP BY u.id;
+end;
 
 # Change database collate to case-sensitive comparing with varchar
 ALTER TABLE users MODIFY username VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
