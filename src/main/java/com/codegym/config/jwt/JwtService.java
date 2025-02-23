@@ -18,9 +18,9 @@ import java.util.*;
 
 @Service
 public class JwtService {
-    @Value("${secret_key}")
+    @Value("${SECRET_KEY}")
     private String SECRET_KEY;
-    @Value("${expire_time}")
+    @Value("${EXPIRE_TIME}")
     private int EXPIRE_TIME;
 
     @Autowired

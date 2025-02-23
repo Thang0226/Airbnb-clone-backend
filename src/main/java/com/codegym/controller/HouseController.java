@@ -68,7 +68,7 @@ public class HouseController {
         return ResponseEntity.ok(houses);
     }
 
-    @Value("${file_upload}")
+    @Value("${FILE_UPLOAD}")
     private String UPLOAD_DIR;
 
     @PostMapping(path ="/create", consumes = { "multipart/form-data" })

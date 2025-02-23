@@ -64,7 +64,7 @@ public class UserController {
     @Autowired
     private IHostRequestService hostRequestService;
 
-    @Value("${file_upload}")
+    @Value("${FILE_UPLOAD}")
     private String fileUpload;
     @Value("${DEFAULT_PASSWORD}")
     private String defaultPassword;
