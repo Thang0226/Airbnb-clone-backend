@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Repository
 public interface IBookingRepository extends JpaRepository<Booking, Long> {
@@ -18,4 +19,6 @@ public interface IBookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT COALESCE(SUM((DATEDIFF(b.endDate, b.startDate)) * b.price), 0) " +
             "FROM Booking b JOIN b.user u JOIN b.house h WHERE u.id = :userId AND b.status = 'CHECKED_OUT'")
     BigDecimal getTotalRentPaidByUserId(@Param("userId")Long userId);
+
+    List<Booking> findBookingsByHouseId(Long houseId);
 }

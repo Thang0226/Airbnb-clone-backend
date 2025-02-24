@@ -16,4 +16,7 @@ public interface IAvailabilityRepository extends JpaRepository<Availability, Lon
     Availability findByDateRange(@Param("startDate") LocalDate startDate,
                                  @Param("endDate") LocalDate endDate,
                                  @Param("house") House house);
+
+    @Query(value="SELECT a.endDate FROM Availability a WHERE a.house = :house AND a.startDate <= :date AND :date <= a.endDate")
+    LocalDate findNearestAvailableDate(House house, LocalDate date);
 }

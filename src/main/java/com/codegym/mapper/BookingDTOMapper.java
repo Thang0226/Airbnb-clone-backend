@@ -39,4 +39,14 @@ public abstract class BookingDTOMapper {
         booking.setUser(user.get());
         return booking;
     };
+
+    public BookingDTO toBookingDTO(Booking booking) {
+        BookingDTO bookingDTO = new BookingDTO();
+        bookingDTO.setHouseId(booking.getHouse().getId());
+        bookingDTO.setUserId(booking.getUser().getId());
+        bookingDTO.setStartDate(booking.getStartDate());
+        bookingDTO.setEndDate(booking.getEndDate());
+        bookingDTO.setPrice(booking.getPrice());
+        return bookingDTO;
+    }
 }

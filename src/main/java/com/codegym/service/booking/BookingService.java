@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -83,5 +84,10 @@ public class BookingService implements IBookingService {
     @Override
     public BigDecimal getTotalRentPaidByUserId(Long userId) {
         return bookingRepository.getTotalRentPaidByUserId(userId);
+    }
+
+    @Override
+    public List<Booking> getBookingsByHouseId(Long houseId) {
+        return bookingRepository.findBookingsByHouseId(houseId);
     }
 }

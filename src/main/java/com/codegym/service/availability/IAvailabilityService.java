@@ -2,10 +2,14 @@ package com.codegym.service.availability;
 
 import com.codegym.model.Availability;
 import com.codegym.model.Booking;
+import com.codegym.model.House;
 import com.codegym.service.IGenerateService;
+
+import java.time.LocalDate;
 
 public interface IAvailabilityService extends IGenerateService<Availability> {
 
     Availability getAvailabilityCoversBookingTime(Booking booking);
 
+    LocalDate findNearestAvailableDate(House house, LocalDate date);
 }

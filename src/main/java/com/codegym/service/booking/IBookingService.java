@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public interface IBookingService extends IGenerateService<Booking> {
     Page<Booking> getBookingsByUserId(Long userId, Pageable pageable);
@@ -14,4 +15,6 @@ public interface IBookingService extends IGenerateService<Booking> {
     Page<UserRentalHistoryDTO> getUserRentalHistory(Long userID, Pageable pageable);
 
     BigDecimal getTotalRentPaidByUserId(Long userId);
+
+    List<Booking> getBookingsByHouseId(Long houseId);
 }

@@ -3,8 +3,10 @@ package com.codegym.controller;
 import com.codegym.mapper.BookingDTOMapper;
 import com.codegym.model.*;
 import com.codegym.model.dto.BookingDTO;
+import com.codegym.model.dto.HouseDateDTO;
 import com.codegym.model.dto.SearchDTO;
-import com.codegym.service.booking.BookingService;
+import com.codegym.service.availability.IAvailabilityService;
+import com.codegym.service.booking.IBookingService;
 import com.codegym.service.user.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -37,9 +39,11 @@ public class HouseController {
     private IUserService userService;
 
     @Autowired
-    private BookingService bookingService;
+    private IBookingService bookingService;
     @Autowired
     private BookingDTOMapper bookingDTOMapper;
+    @Autowired
+    private IAvailabilityService availabilityService;
 
     @GetMapping
     public ResponseEntity<List<House>> getHousesForAvailable() {
@@ -54,6 +58,23 @@ public class HouseController {
         return house.map(value ->
                         new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping("/{id}/booked-dates")
+    public ResponseEntity<List<BookingDTO>> getBookedDates(@PathVariable Long id){
+        List<Booking> bookings = bookingService.getBookingsByHouseId(id);
+        List<BookingDTO> bookingDTOs = bookings.stream().map(booking -> bookingDTOMapper.toBookingDTO(booking)).toList();
+        return ResponseEntity.ok(bookingDTOs);
+    }
+
+    @PostMapping("/house-date")
+    public ResponseEntity<?> getNearestAvailableDateOfHouse(@RequestBody HouseDateDTO houseDateDTO){
+        Optional<House> houseOptional = houseService.findById(houseDateDTO.getHouseId());
+        if (houseOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("House not found");
+        }
+        LocalDate nearestAvailableDate = availabilityService.findNearestAvailableDate(houseOptional.get(), houseDateDTO.getDate());
+        return ResponseEntity.ok(nearestAvailableDate);
     }
 
     @PostMapping

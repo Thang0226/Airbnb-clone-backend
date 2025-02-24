@@ -42,4 +42,9 @@ public class AvailabilityService implements IAvailabilityService {
         House bookingHouse = booking.getHouse();
         return availabilityRepository.findByDateRange(startDate, endDate, bookingHouse);
     }
+
+    @Override
+    public LocalDate findNearestAvailableDate(House house, LocalDate date) {
+        return availabilityRepository.findNearestAvailableDate(house, date);
+    }
 }
