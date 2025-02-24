@@ -40,6 +40,14 @@ public class HouseController {
         return ResponseEntity.ok(houses);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<House> getHouseById(@PathVariable Long id){
+        Optional<House> house = houseService.findById(id);
+        return house.map(value ->
+                        new ResponseEntity<>(value, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
     @PostMapping
     public ResponseEntity<List<House>> searchHouses(@RequestBody SearchDTO searchDTO) {
         List<House> houses;
