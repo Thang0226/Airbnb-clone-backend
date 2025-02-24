@@ -15,7 +15,7 @@ public interface IBookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT b FROM Booking b JOIN b.user u WHERE u.id = :userId AND b.status = 'CONFIRMED'")
     Page<Booking> findBookingsByUserId(@Param("userId")Long userId, Pageable pageable);
 
-    @Query("SELECT COALESCE(SUM((DATEDIFF(b.endDate, b.startDate)) * h.price), 0) " +
+    @Query("SELECT COALESCE(SUM((DATEDIFF(b.endDate, b.startDate)) * b.price), 0) " +
             "FROM Booking b JOIN b.user u JOIN b.house h WHERE u.id = :userId AND b.status = 'CONFIRMED'")
     BigDecimal getTotalRentPaidByUserId(@Param("userId")Long userId);
 }

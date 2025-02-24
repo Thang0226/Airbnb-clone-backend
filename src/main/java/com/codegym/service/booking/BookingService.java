@@ -1,7 +1,6 @@
 package com.codegym.service.booking;
 import com.codegym.mapper.BookingMapper;
 import com.codegym.model.Booking;
-import com.codegym.model.dto.UserInfoDTO;
 import com.codegym.model.dto.UserRentalHistoryDTO;
 import com.codegym.repository.IBookingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +15,9 @@ import java.util.Optional;
 public class BookingService implements IBookingService {
     @Autowired
     private IBookingRepository bookingRepository;
+
+    @Autowired
+    private BookingMapper bookingMapper;
 
     @Override
     public Iterable<Booking> findAll() {
@@ -45,7 +47,7 @@ public class BookingService implements IBookingService {
     @Override
     public Page<UserRentalHistoryDTO> getUserRentalHistory(Long userID, Pageable pageable) {
         Page<Booking> bookings = getBookingsByUserId(userID, pageable);
-        return BookingMapper.toUserRentalHistory(bookings);
+        return bookings.map(bookingMapper::toUserRentalHistoryDTO);
     }
 
     @Override

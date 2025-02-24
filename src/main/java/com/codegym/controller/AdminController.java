@@ -2,6 +2,7 @@ package com.codegym.controller;
 
 import com.codegym.model.User;
 import com.codegym.model.constants.UserStatus;
+import com.codegym.model.dto.HostInfoDTO;
 import com.codegym.model.dto.UserInfoDTO;
 import com.codegym.model.dto.UserRentalHistoryDTO;
 import com.codegym.service.booking.IBookingService;
@@ -45,13 +46,6 @@ public class AdminController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-//    @PutMapping("/{id}")
-//    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @ModelAttribute UserForm userForm, BindingResult result) {
-//        Optional<User> userOptional = userService.findById(id);
-//        return getResponseEntity(userForm, userOptional, result);
-//    }
-
-
     @DeleteMapping("/users/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         userService.deleteById(id);
@@ -94,5 +88,19 @@ public class AdminController {
     public ResponseEntity<?> getUserPayment(@PathVariable Long id) {
         BigDecimal userTotalRentPaid = bookingService.getTotalRentPaidByUserId(id);
         return new ResponseEntity<>(userTotalRentPaid, HttpStatus.OK);
+    }
+
+    @GetMapping("/hosts")
+    public ResponseEntity<Page<HostInfoDTO>> getAllHosts(Pageable pageable) {
+        return new ResponseEntity<>(userService.getAllHostsInfo(pageable), HttpStatus.OK);
+    }
+
+    @GetMapping("/host-details/{id}")
+    public ResponseEntity<?> getHostInfo(@PathVariable Long id) {
+        HostInfoDTO hostInfo = userService.getHostInfo(id);
+        if (hostInfo == null) {
+            return new ResponseEntity<>("User with id " + id + " is not a host", HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(hostInfo, HttpStatus.OK);
     }
 }
