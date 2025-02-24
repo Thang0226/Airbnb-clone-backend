@@ -1,6 +1,7 @@
 package com.codegym.mapper;
 
 import com.codegym.model.Booking;
+import com.codegym.model.dto.BookingDTO;
 import com.codegym.model.dto.UserRentalHistoryDTO;
 import org.mapstruct.*;
 
@@ -16,6 +17,12 @@ public interface BookingMapper {
     @Mapping(target = "rentalDay", expression = "java(calculateRentalDays(booking.getStartDate(), booking.getEndDate()))")
     @Mapping(target = "rentPaid", expression = "java(calculateRentPaid(booking.getStartDate(), booking.getEndDate(), booking.getPrice()))")
     UserRentalHistoryDTO toUserRentalHistoryDTO(Booking booking);
+
+    @Mapping(target = "houseName", expression = "java(booking.getHouse().getHouseName())")
+    @Mapping(target = "customerName", expression = "java(booking.getUser().getFullName())")
+    @Mapping(target = "rentalDay", expression = "java(calculateRentalDays(booking.getStartDate(), booking.getEndDate()))")
+    @Mapping(target = "totalCost", expression = "java(calculateRentPaid(booking.getStartDate(), booking.getEndDate(), booking.getPrice()))")
+    BookingDTO toBookingDTO(Booking booking);
 
     default long calculateRentalDays(LocalDate startDate, LocalDate endDate) {
         return startDate != null && endDate != null ? Math.max(ChronoUnit.DAYS.between(startDate, endDate), 0) : 0;
