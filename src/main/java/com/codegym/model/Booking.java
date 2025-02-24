@@ -26,6 +26,8 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     private BookingStatus status;
 
+    private LocalDateTime createdDate;
+
     private LocalDateTime updatedAt;
 
     private Integer price;

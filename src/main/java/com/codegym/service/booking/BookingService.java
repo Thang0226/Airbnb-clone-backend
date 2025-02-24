@@ -1,6 +1,7 @@
 package com.codegym.service.booking;
 import com.codegym.mapper.BookingMapper;
 import com.codegym.model.Booking;
+import com.codegym.model.dto.BookingDTO;
 import com.codegym.model.dto.UserRentalHistoryDTO;
 import com.codegym.repository.IBookingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,5 +54,11 @@ public class BookingService implements IBookingService {
     @Override
     public BigDecimal getTotalRentPaidByUserId(Long userId) {
         return bookingRepository.getTotalRentPaidByUserId(userId);
+    }
+
+    @Override
+    public Page<BookingDTO> getAllBookings(Pageable pageable) {
+        Page<Booking> bookings = bookingRepository.findAll(pageable);
+        return bookings.map(bookingMapper::toBookingDTO);
     }
 }
