@@ -1,7 +1,10 @@
 package com.codegym.controller;
 
+import com.codegym.mapper.BookingDTOMapper;
 import com.codegym.model.*;
+import com.codegym.model.dto.BookingDTO;
 import com.codegym.model.dto.SearchDTO;
+import com.codegym.service.booking.BookingService;
 import com.codegym.service.user.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +35,11 @@ public class HouseController {
     private IHouseService houseService;
     @Autowired
     private IUserService userService;
+
+    @Autowired
+    private BookingService bookingService;
+    @Autowired
+    private BookingDTOMapper bookingDTOMapper;
 
     @GetMapping
     public ResponseEntity<List<House>> getHousesForAvailable() {
@@ -181,4 +189,15 @@ public class HouseController {
         house.getHouseImages().add(defaultImage);
     }
 
+    @PostMapping("/rent-house")
+    public ResponseEntity<?> rentHouse(@ModelAttribute BookingDTO bookingDTO) {
+        Booking booking = bookingDTOMapper.toBooking(bookingDTO);
+        try {
+            bookingService.save(booking);
+            return ResponseEntity.ok("Rent house successfully");
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create house booking: " + e.getMessage());
+        }
+    }
 }
