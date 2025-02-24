@@ -1,6 +1,6 @@
 package com.codegym.model;
 
-
+import com.codegym.model.constants.HouseStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -29,6 +29,8 @@ public class House {
     private String description;
     private int price;
 
+    @Enumerated(EnumType.STRING)
+    private HouseStatus status;
 
     @OneToMany(mappedBy = "house", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference

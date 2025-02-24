@@ -1,8 +1,12 @@
 package com.codegym.controller;
 
+import com.codegym.model.dto.BookingDTO;
 import com.codegym.service.booking.IBookingService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -18,7 +22,8 @@ public class BookingController {
     private IBookingService bookingService;
 
     @GetMapping
-    public ResponseEntity<?> getBookings(Pageable pageable) {
-        return new ResponseEntity<>(bookingService.getAllBookings(pageable), HttpStatus.OK) ;
+    public ResponseEntity<PagedModel<?>> getBookings(Pageable pageable, PagedResourcesAssembler<BookingDTO> assembler) {
+        Page<BookingDTO> bookings = bookingService.getAllBookings(pageable);
+        return new ResponseEntity<>(assembler.toModel(bookings), HttpStatus.OK);
     }
 }
