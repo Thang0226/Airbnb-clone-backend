@@ -61,4 +61,9 @@ public class BookingService implements IBookingService {
         Page<Booking> bookings = bookingRepository.findAll(pageable);
         return bookings.map(bookingMapper::toBookingDTO);
     }
+
+    public Page<BookingDTO> getAllBookingsByHostId(Long userId, Pageable pageable) {
+        Page<Booking> bookings = bookingRepository.findBookingsByHostId(userId, pageable);
+        return bookings.map(bookingMapper::toBookingDTO);
+    }
 }

@@ -17,4 +17,6 @@ public interface IBookingService extends IGenerateService<Booking> {
     BigDecimal getTotalRentPaidByUserId(Long userId);
 
     Page<BookingDTO> getAllBookings(Pageable pageable);
+
+    Page<BookingDTO> getAllBookingsByHostId(Long userId, Pageable pageable);
 }
