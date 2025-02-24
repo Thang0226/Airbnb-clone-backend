@@ -32,14 +32,6 @@ public class AdminController {
         return new ResponseEntity<>(userService.getAllUsersInfo(pageable), HttpStatus.OK);
     }
 
-    @GetMapping("/users/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        Optional<User> user = userService.findById(id);
-        return user.map(value ->
-                        new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
-
     @PostMapping("/users")
     public ResponseEntity<?> addUser(@RequestBody User user) {
         userService.save(user);
@@ -71,9 +63,12 @@ public class AdminController {
         }
     }
 
-    @GetMapping("/user-details/{id}")
-    public ResponseEntity<UserInfoDTO> getUserInfo(@PathVariable Long id) {
+    @GetMapping("/users/{id}")
+    public ResponseEntity<?> getUserInfo(@PathVariable Long id) {
         UserInfoDTO userInfo = userService.getUserInfo(id);
+        if (userInfo == null) {
+            return new ResponseEntity<>("User not founded", HttpStatus.NOT_FOUND);
+        }
         return new ResponseEntity<>(userInfo, HttpStatus.OK);
     }
 
@@ -95,7 +90,7 @@ public class AdminController {
         return new ResponseEntity<>(userService.getAllHostsInfo(pageable), HttpStatus.OK);
     }
 
-    @GetMapping("/host-details/{id}")
+    @GetMapping("/hosts/{id}")
     public ResponseEntity<?> getHostInfo(@PathVariable Long id) {
         HostInfoDTO hostInfo = userService.getHostInfo(id);
         if (hostInfo == null) {

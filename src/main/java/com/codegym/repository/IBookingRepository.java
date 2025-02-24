@@ -12,10 +12,10 @@ import java.math.BigDecimal;
 
 @Repository
 public interface IBookingRepository extends JpaRepository<Booking, Long> {
-    @Query("SELECT b FROM Booking b JOIN b.user u WHERE u.id = :userId AND b.status = 'CONFIRMED'")
+    @Query("SELECT b FROM Booking b JOIN b.user u WHERE u.id = :userId AND b.status = 'CHECKED_OUT'")
     Page<Booking> findBookingsByUserId(@Param("userId")Long userId, Pageable pageable);
 
     @Query("SELECT COALESCE(SUM((DATEDIFF(b.endDate, b.startDate)) * b.price), 0) " +
-            "FROM Booking b JOIN b.user u JOIN b.house h WHERE u.id = :userId AND b.status = 'CONFIRMED'")
+            "FROM Booking b JOIN b.user u JOIN b.house h WHERE u.id = :userId AND b.status = 'CHECKED_OUT'")
     BigDecimal getTotalRentPaidByUserId(@Param("userId")Long userId);
 }
