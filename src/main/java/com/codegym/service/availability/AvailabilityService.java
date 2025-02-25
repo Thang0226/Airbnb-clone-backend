@@ -47,4 +47,10 @@ public class AvailabilityService implements IAvailabilityService {
     public LocalDate findNearestAvailableDate(House house, LocalDate date) {
         return availabilityRepository.findNearestAvailableDate(house, date);
     }
+
+    @Override
+    public LocalDate findSoonestAvailableDate(House house) {
+        Availability soonestAvailability = availabilityRepository.findTopByHouseOrderByStartDateAsc(house);
+        return soonestAvailability.getStartDate();
+    }
 }

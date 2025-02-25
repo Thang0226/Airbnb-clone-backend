@@ -67,7 +67,17 @@ public class HouseController {
         return ResponseEntity.ok(bookingDTOs);
     }
 
-    @PostMapping("/house-date")
+    @GetMapping("/{id}/house-soonest-date")
+    public ResponseEntity<?> findSoonestDate(@PathVariable Long id){
+        Optional<House> houseOptional = houseService.findById(id);
+        if (houseOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("House not found");
+        }
+        LocalDate soonestAvailableDate = availabilityService.findSoonestAvailableDate(houseOptional.get());
+        return ResponseEntity.ok(soonestAvailableDate);
+    }
+
+    @PostMapping("/house-edge-date")
     public ResponseEntity<?> getNearestAvailableDateOfHouse(@RequestBody HouseDateDTO houseDateDTO){
         Optional<House> houseOptional = houseService.findById(houseDateDTO.getHouseId());
         if (houseOptional.isEmpty()) {
@@ -75,6 +85,18 @@ public class HouseController {
         }
         LocalDate nearestAvailableDate = availabilityService.findNearestAvailableDate(houseOptional.get(), houseDateDTO.getDate());
         return ResponseEntity.ok(nearestAvailableDate);
+    }
+
+    @PostMapping("/rent-house")
+    public ResponseEntity<?> rentHouse(@RequestBody BookingDTO bookingDTO) {
+        Booking booking = bookingDTOMapper.toBooking(bookingDTO);
+        try {
+            bookingService.save(booking);
+            return ResponseEntity.ok("Rent house successfully");
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create house booking: " + e.getMessage());
+        }
     }
 
     @PostMapping
@@ -208,17 +230,5 @@ public class HouseController {
         defaultImage.setFileName(defaultFileName);
         defaultImage.setHouse(house);
         house.getHouseImages().add(defaultImage);
-    }
-
-    @PostMapping("/rent-house")
-    public ResponseEntity<?> rentHouse(@ModelAttribute BookingDTO bookingDTO) {
-        Booking booking = bookingDTOMapper.toBooking(bookingDTO);
-        try {
-            bookingService.save(booking);
-            return ResponseEntity.ok("Rent house successfully");
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create house booking: " + e.getMessage());
-        }
     }
 }

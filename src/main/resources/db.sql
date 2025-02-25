@@ -99,6 +99,8 @@ begin
     GROUP BY u.id;
 end;
 
+
+
 # Change database collate to case-sensitive comparing with varchar
 ALTER TABLE users MODIFY username VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
 
