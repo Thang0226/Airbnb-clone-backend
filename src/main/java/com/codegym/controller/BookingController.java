@@ -38,7 +38,7 @@ public class BookingController {
     }
 
     @GetMapping("/{username}")
-    public ResponseEntity<?> getBookingsByUserName(@PathVariable String username, Pageable pageable) {
+    public ResponseEntity<?> getBookingsByUsernameOfHost(@PathVariable String username, Pageable pageable) {
         Optional<User> user = userService.findByUsername(username);
         if (user.isEmpty()) {
             return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
@@ -48,7 +48,7 @@ public class BookingController {
     }
 
     @GetMapping("/user/{username}")
-    public ResponseEntity<?> getBookingsByUsername(@PathVariable String username) {
+    public ResponseEntity<?> getBookingsByUsernameOfUser(@PathVariable String username) {
         Optional<User> userOptional = userService.findByUsername(username);
         if (userOptional.isEmpty()) {
             return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
