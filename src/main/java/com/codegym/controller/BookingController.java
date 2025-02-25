@@ -2,6 +2,7 @@ package com.codegym.controller;
 
 import com.codegym.model.User;
 import com.codegym.model.dto.BookingDTO;
+import com.codegym.model.dto.BookingSearchDTO;
 import com.codegym.service.booking.IBookingService;
 import com.codegym.service.user.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,26 @@ public class BookingController {
             return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
         }
         Page<BookingDTO> bookings = bookingService.getAllBookingsByHostId(user.get().getId(),pageable);
+        return new ResponseEntity<>(bookings, HttpStatus.OK);
+    }
+
+    @PostMapping("/search/{username}")
+    public ResponseEntity<?> searchBookings(
+            @RequestBody BookingSearchDTO bookingSearchDTO,
+            @PathVariable String username,
+            Pageable pageable) {
+        Optional<User> user = userService.findByUsername(username);
+        if (user.isEmpty()) {
+            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+        }
+        Page<BookingDTO> bookings = bookingService.searchBookingsByHostId(
+                user.get().getId(),
+                bookingSearchDTO.getHouseName(),
+                bookingSearchDTO.getStartDate(),
+                bookingSearchDTO.getEndDate(),
+                bookingSearchDTO.getStatus(),
+                pageable
+        );
         return new ResponseEntity<>(bookings, HttpStatus.OK);
     }
 }
