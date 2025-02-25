@@ -1,7 +1,10 @@
 package com.codegym.controller;
 
+import com.codegym.mapper.BookingDTOMapper;
+import com.codegym.model.Booking;
 import com.codegym.model.User;
 import com.codegym.model.dto.BookingDTO;
+import com.codegym.model.dto.UserBookingDTO;
 import com.codegym.service.booking.IBookingService;
 import com.codegym.service.user.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.util.List;
 
 @RestController
 @CrossOrigin("*")
@@ -21,6 +25,8 @@ import java.util.Optional;
 public class BookingController {
     @Autowired
     private IBookingService bookingService;
+    @Autowired
+    private BookingDTOMapper bookingDTOMapper;
 
     @Autowired
     private IUserService userService;
@@ -39,5 +45,16 @@ public class BookingController {
         }
         Page<BookingDTO> bookings = bookingService.getAllBookingsByHostId(user.get().getId(),pageable);
         return new ResponseEntity<>(bookings, HttpStatus.OK);
+    }
+
+    @GetMapping("/user/{id}")
+    public ResponseEntity<?> getBookingsByUserId(@PathVariable Long id) {
+        Optional<User> userOptional = userService.findById(id);
+        if (userOptional.isEmpty()) {
+            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+        }
+        List<Booking> bookings = bookingService.findAllByUserId(id);
+        List<UserBookingDTO> userBookings = bookings.stream().map(booking -> bookingDTOMapper.toUserBookingDTO(booking)).toList();
+        return new ResponseEntity<>(userBookings, HttpStatus.OK);
     }
 }

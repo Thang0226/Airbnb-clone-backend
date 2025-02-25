@@ -22,4 +22,6 @@ public interface IBookingService extends IGenerateService<Booking> {
     Page<BookingDTO> getAllBookings(Pageable pageable);
 
     Page<BookingDTO> getAllBookingsByHostId(Long userId, Pageable pageable);
+
+    List<Booking> findAllByUserId(Long userId);
 }

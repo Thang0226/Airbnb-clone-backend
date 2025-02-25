@@ -64,7 +64,7 @@ public class HouseController {
     @GetMapping("/{id}/booked-dates")
     public ResponseEntity<List<NewBookingDTO>> getBookedDates(@PathVariable Long id){
         List<Booking> bookings = bookingService.getBookingsByHouseId(id);
-        List<NewBookingDTO> newBookingDTOS = bookings.stream().map(booking -> bookingDTOMapper.toBookingDTO(booking)).toList();
+        List<NewBookingDTO> newBookingDTOS = bookings.stream().map(booking -> bookingDTOMapper.toNewBookingDTO(booking)).toList();
         return ResponseEntity.ok(newBookingDTOS);
     }
 

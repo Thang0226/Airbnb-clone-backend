@@ -5,6 +5,7 @@ import com.codegym.model.House;
 import com.codegym.model.User;
 import com.codegym.model.constants.BookingStatus;
 import com.codegym.model.dto.NewBookingDTO;
+import com.codegym.model.dto.UserBookingDTO;
 import com.codegym.service.house.IHouseService;
 import com.codegym.service.user.IUserService;
 import org.mapstruct.Mapper;
@@ -40,7 +41,7 @@ public abstract class BookingDTOMapper {
         return booking;
     };
 
-    public NewBookingDTO toBookingDTO(Booking booking) {
+    public NewBookingDTO toNewBookingDTO(Booking booking) {
         NewBookingDTO newBookingDTO = new NewBookingDTO();
         newBookingDTO.setHouseId(booking.getHouse().getId());
         newBookingDTO.setUserId(booking.getUser().getId());
@@ -48,5 +49,19 @@ public abstract class BookingDTOMapper {
         newBookingDTO.setEndDate(booking.getEndDate());
         newBookingDTO.setPrice(booking.getPrice());
         return newBookingDTO;
+    }
+
+    public UserBookingDTO toUserBookingDTO(Booking booking) {
+        UserBookingDTO userBookingDTO = new UserBookingDTO();
+        userBookingDTO.setId(booking.getId());
+        userBookingDTO.setBookingStatus(booking.getStatus());
+        userBookingDTO.setStartDate(booking.getStartDate());
+        userBookingDTO.setEndDate(booking.getEndDate());
+        userBookingDTO.setTotalCost(booking.getPrice());
+        House house = booking.getHouse();
+        userBookingDTO.setAddress(house.getAddress());
+        userBookingDTO.setHouseName(house.getHouseName());
+        userBookingDTO.setHouseStatus(house.getStatus());
+        return userBookingDTO;
     }
 }

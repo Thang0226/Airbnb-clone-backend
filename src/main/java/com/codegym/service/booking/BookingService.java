@@ -92,7 +92,7 @@ public class BookingService implements IBookingService {
 
     @Override
     public List<Booking> getBookingsByHouseId(Long houseId) {
-        return bookingRepository.findBookingsByHouseId(houseId);
+        return bookingRepository.findAllByHouseId(houseId);
     }
 
     @Override
@@ -105,5 +105,10 @@ public class BookingService implements IBookingService {
     public Page<BookingDTO> getAllBookingsByHostId(Long userId, Pageable pageable) {
         Page<Booking> bookings = bookingRepository.findBookingsByHostId(userId, pageable);
         return bookings.map(bookingMapper::toBookingDTO);
+    }
+
+    @Override
+    public List<Booking> findAllByUserId(Long userId) {
+        return bookingRepository.findAllByUserId(userId);
     }
 }
