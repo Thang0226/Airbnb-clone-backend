@@ -61,6 +61,9 @@ public class HouseService implements IHouseService {
         }
         return houses;
     }
+
+    @Override
+    public List<House> findHousesByHostId(Long id) {
+        return houseRepository.findHousesByHost_Id(id);
+    }
 }
-
-
