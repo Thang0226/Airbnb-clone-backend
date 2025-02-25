@@ -93,6 +93,7 @@ public class BookingService implements IBookingService {
     @Override
     public List<Booking> getBookingsByHouseId(Long houseId) {
         return bookingRepository.findBookingsByHouseId(houseId);
+    }
 
     @Override
     public Page<BookingDTO> getAllBookings(Pageable pageable) {
