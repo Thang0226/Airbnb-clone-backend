@@ -47,13 +47,13 @@ public class BookingController {
         return new ResponseEntity<>(bookings, HttpStatus.OK);
     }
 
-    @GetMapping("/user/{id}")
-    public ResponseEntity<?> getBookingsByUserId(@PathVariable Long id) {
-        Optional<User> userOptional = userService.findById(id);
+    @GetMapping("/user/{username}")
+    public ResponseEntity<?> getBookingsByUsername(@PathVariable String username) {
+        Optional<User> userOptional = userService.findByUsername(username);
         if (userOptional.isEmpty()) {
             return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
         }
-        List<Booking> bookings = bookingService.findAllByUserId(id);
+        List<Booking> bookings = bookingService.findAllByUserId(userOptional.get().getId());
         List<UserBookingDTO> userBookings = bookings.stream().map(booking -> bookingDTOMapper.toUserBookingDTO(booking)).toList();
         return new ResponseEntity<>(userBookings, HttpStatus.OK);
     }
