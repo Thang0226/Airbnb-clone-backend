@@ -2,6 +2,7 @@ package com.codegym.controller;
 
 import com.codegym.mapper.BookingDTOMapper;
 import com.codegym.model.*;
+import com.codegym.model.constants.HouseStatus;
 import com.codegym.model.dto.NewBookingDTO;
 import com.codegym.model.dto.HouseDateDTO;
 import com.codegym.model.dto.SearchDTO;
@@ -92,6 +93,14 @@ public class HouseController {
         Booking booking = bookingDTOMapper.toBooking(newBookingDTO);
         try {
             bookingService.save(booking);
+            Optional<House> houseOptional = houseService.findById(newBookingDTO.getHouseId());
+            if (houseOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("House not found");
+            } else {
+                House house = houseOptional.get();
+                house.setStatus(HouseStatus.RENTED);
+                houseService.save(house);
+            }
             return ResponseEntity.ok("Rent house successfully");
         } catch (Exception e) {
             System.out.println(e.getMessage());
