@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 public interface IBookingService extends IGenerateService<Booking> {
     Page<Booking> getBookingsByUserId(Long userId, Pageable pageable);
@@ -17,6 +18,8 @@ public interface IBookingService extends IGenerateService<Booking> {
     Page<UserRentalHistoryDTO> getUserRentalHistory(Long userID, Pageable pageable);
 
     BigDecimal getTotalRentPaidByUserId(Long userId);
+
+    List<Booking> getBookingsByHouseId(Long houseId);
 
     Page<BookingDTO> getAllBookings(Pageable pageable);
 
@@ -29,4 +32,6 @@ public interface IBookingService extends IGenerateService<Booking> {
             LocalDate endDate,
             String status,
             Pageable pageable);
+
+    List<Booking> findAllByUserId(Long userId);
 }
