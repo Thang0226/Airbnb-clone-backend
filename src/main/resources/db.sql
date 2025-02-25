@@ -111,6 +111,8 @@ create procedure search_bookings_of_host(
     in _status varchar(255)
 )
 begin
+    SET _house_name = NULLIF(_house_name, '');
+    SET _status = NULLIF(_status, '');
     SELECT
         b.id,
         b.end_date,
@@ -124,8 +126,8 @@ begin
     FROM bookings b
     JOIN houses h on b.house_id = h.id
     WHERE (_house_name IS NULL OR TRIM(_house_name) = '' OR LOWER(h.house_name) LIKE LOWER(CONCAT('%', _house_name, '%')))
-        AND (_start_date is null or b.start_date <= _start_date)
-        AND (_end_date is null or b.end_date >= _end_date)
+        AND (_start_date IS NULL OR b.start_date >= _start_date)
+        AND (_end_date IS NULL OR b.end_date <= _end_date)
         and (_status is null or b.status = _status)
         and (h.host_id = _id)
     ORDER BY b.id DESC;

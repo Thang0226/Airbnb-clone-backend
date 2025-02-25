@@ -42,7 +42,7 @@ public class BookingController {
         return new ResponseEntity<>(bookings, HttpStatus.OK);
     }
 
-    @PostMapping("/search/{username}")
+    @PostMapping("/{username}/search")
     public ResponseEntity<?> searchBookings(
             @RequestBody BookingSearchDTO bookingSearchDTO,
             @PathVariable String username,
