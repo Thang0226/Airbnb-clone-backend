@@ -42,6 +42,9 @@ public class BookingService implements IBookingService {
         bookingRepository.save(booking);
         // 2. Get availability that has the time of booking
         Availability availability = availabilityService.getAvailabilityCoversBookingTime(booking);
+        if (availability == null) {
+            throw new RuntimeException("Can't find availability");
+        }
         // 3. Remove this availability & insert two new availabilities on the two time end if not fully booked
         availabilityService.deleteById(availability.getId());
         House house = booking.getHouse();
@@ -49,15 +52,15 @@ public class BookingService implements IBookingService {
         LocalDate bookingEndDate = booking.getEndDate();
         LocalDate availStartDate = availability.getStartDate();
         LocalDate availEndDate = availability.getEndDate();
-        Availability firstAvail = new Availability();
-        Availability secondAvail = new Availability();
         if (bookingStartDate.isAfter(availStartDate)) {
+            Availability firstAvail = new Availability();
             firstAvail.setStartDate(availStartDate);
             firstAvail.setEndDate(bookingStartDate.minusDays(1));
             firstAvail.setHouse(house);
             availabilityService.save(firstAvail);
         }
         if (bookingEndDate.isBefore(availEndDate)) {
+            Availability secondAvail = new Availability();
             secondAvail.setStartDate(bookingEndDate.plusDays(1));
             secondAvail.setEndDate(availEndDate);
             secondAvail.setHouse(house);
