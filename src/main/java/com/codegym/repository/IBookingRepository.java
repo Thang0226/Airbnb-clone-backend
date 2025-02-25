@@ -20,7 +20,9 @@ public interface IBookingRepository extends JpaRepository<Booking, Long> {
             "FROM Booking b JOIN b.user u JOIN b.house h WHERE u.id = :userId AND b.status = 'CHECKED_OUT'")
     BigDecimal getTotalRentPaidByUserId(@Param("userId")Long userId);
 
-    List<Booking> findBookingsByHouseId(Long houseId);
+    List<Booking> findAllByHouseId(Long houseId);
+
+    List<Booking> findAllByUserId(Long userId);
   
     @Query("SELECT b FROM Booking b JOIN b.house h WHERE h.host.id = :userId")
     Page<Booking> findBookingsByHostId(Long userId, Pageable pageable);
