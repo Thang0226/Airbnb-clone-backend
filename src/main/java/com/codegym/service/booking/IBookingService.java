@@ -1,6 +1,7 @@
 package com.codegym.service.booking;
 
 import com.codegym.model.Booking;
+import com.codegym.model.dto.BookingDTO;
 import com.codegym.model.dto.UserRentalHistoryDTO;
 import com.codegym.service.IGenerateService;
 import org.springframework.data.domain.Page;
@@ -17,4 +18,8 @@ public interface IBookingService extends IGenerateService<Booking> {
     BigDecimal getTotalRentPaidByUserId(Long userId);
 
     List<Booking> getBookingsByHouseId(Long houseId);
+
+    Page<BookingDTO> getAllBookings(Pageable pageable);
+
+    Page<BookingDTO> getAllBookingsByHostId(Long userId, Pageable pageable);
 }

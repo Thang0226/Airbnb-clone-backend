@@ -3,6 +3,7 @@ import com.codegym.mapper.BookingMapper;
 import com.codegym.model.Availability;
 import com.codegym.model.Booking;
 import com.codegym.model.House;
+import com.codegym.model.dto.BookingDTO;
 import com.codegym.model.dto.UserRentalHistoryDTO;
 import com.codegym.repository.IBookingRepository;
 import com.codegym.service.availability.IAvailabilityService;
@@ -92,5 +93,16 @@ public class BookingService implements IBookingService {
     @Override
     public List<Booking> getBookingsByHouseId(Long houseId) {
         return bookingRepository.findBookingsByHouseId(houseId);
+
+    @Override
+    public Page<BookingDTO> getAllBookings(Pageable pageable) {
+        Page<Booking> bookings = bookingRepository.findAll(pageable);
+        return bookings.map(bookingMapper::toBookingDTO);
+    }
+
+    @Override
+    public Page<BookingDTO> getAllBookingsByHostId(Long userId, Pageable pageable) {
+        Page<Booking> bookings = bookingRepository.findBookingsByHostId(userId, pageable);
+        return bookings.map(bookingMapper::toBookingDTO);
     }
 }
