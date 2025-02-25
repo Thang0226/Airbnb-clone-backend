@@ -2,6 +2,7 @@ package com.codegym.service.booking;
 import com.codegym.mapper.BookingMapper;
 import com.codegym.model.Availability;
 import com.codegym.model.Booking;
+import com.codegym.model.constants.BookingStatus;
 import com.codegym.model.House;
 import com.codegym.model.dto.BookingDTO;
 import com.codegym.model.dto.UserRentalHistoryDTO;
@@ -9,6 +10,7 @@ import com.codegym.repository.IBookingRepository;
 import com.codegym.service.availability.IAvailabilityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class BookingService implements IBookingService {
+public  class BookingService implements IBookingService {
     @Autowired
     private IBookingRepository bookingRepository;
     @Autowired
@@ -107,6 +109,21 @@ public class BookingService implements IBookingService {
         return bookings.map(bookingMapper::toBookingDTO);
     }
 
+    public Page<BookingDTO> searchBookingsByHostId( Long userId,
+                                                    String houseName,
+                                                    LocalDate startDate,
+                                                    LocalDate endDate,
+                                                    String status,
+                                                    Pageable pageable) {
+        List<Booking> bookings = bookingRepository.searchBookingsByHostId(
+                userId, houseName, startDate, endDate, status);
+        List<BookingDTO> bookingDTOs = bookings.stream()
+                .map(bookingMapper::toBookingDTO)
+                .toList();
+
+        return new PageImpl<>(bookingDTOs, pageable, bookings.size());
+    }
+  
     @Override
     public List<Booking> findAllByUserId(Long userId) {
         return bookingRepository.findAllByUserId(userId);

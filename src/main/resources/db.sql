@@ -104,7 +104,36 @@ end;
 # Change database collate to case-sensitive comparing with varchar
 ALTER TABLE users MODIFY username VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
 
-
+drop procedure if exists search_bookings_of_host;
+create procedure search_bookings_of_host(
+    in _id bigint,
+    in _house_name varchar(255),
+    in _start_date date,
+    in _end_date date,
+    in _status varchar(255)
+)
+begin
+    SET _house_name = NULLIF(_house_name, '');
+    SET _status = NULLIF(_status, '');
+    SELECT
+        b.id,
+        b.end_date,
+        b.start_date,
+        b.status,
+        b.updated_at,
+        b.house_id,
+        b.user_id,
+        b.price,
+        b.created_date
+    FROM bookings b
+    JOIN houses h on b.house_id = h.id
+    WHERE (_house_name IS NULL OR TRIM(_house_name) = '' OR LOWER(h.house_name) LIKE LOWER(CONCAT('%', _house_name, '%')))
+        AND (_start_date IS NULL OR b.start_date >= _start_date)
+        AND (_end_date IS NULL OR b.end_date <= _end_date)
+        and (_status is null or b.status = _status)
+        and (h.host_id = _id)
+    ORDER BY b.id DESC;
+end;
 
 # Data
 INSERT INTO roles (name)
