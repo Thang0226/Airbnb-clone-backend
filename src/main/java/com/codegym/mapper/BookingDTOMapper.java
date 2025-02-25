@@ -4,7 +4,7 @@ import com.codegym.model.Booking;
 import com.codegym.model.House;
 import com.codegym.model.User;
 import com.codegym.model.constants.BookingStatus;
-import com.codegym.model.dto.BookingDTO;
+import com.codegym.model.dto.NewBookingDTO;
 import com.codegym.service.house.IHouseService;
 import com.codegym.service.user.IUserService;
 import org.mapstruct.Mapper;
@@ -20,33 +20,33 @@ public abstract class BookingDTOMapper {
     @Autowired
     protected IUserService userService;
 
-    public Booking toBooking(BookingDTO bookingDTO) {
+    public Booking toBooking(NewBookingDTO newBookingDTO) {
         Booking booking = new Booking();
-        booking.setStartDate(bookingDTO.getStartDate());
-        booking.setEndDate(bookingDTO.getEndDate());
-        booking.setPrice(bookingDTO.getPrice());
+        booking.setStartDate(newBookingDTO.getStartDate());
+        booking.setEndDate(newBookingDTO.getEndDate());
+        booking.setPrice(newBookingDTO.getPrice());
         booking.setUpdatedAt(LocalDateTime.now());
         booking.setStatus(BookingStatus.WAITING);
-        Optional<House> house = houseService.findById(bookingDTO.getHouseId());
+        Optional<House> house = houseService.findById(newBookingDTO.getHouseId());
         if (house.isEmpty()) {
-            throw new RuntimeException("Could not find house with id: " + bookingDTO.getHouseId());
+            throw new RuntimeException("Could not find house with id: " + newBookingDTO.getHouseId());
         }
-        Optional<User> user = userService.findById(bookingDTO.getUserId());
+        Optional<User> user = userService.findById(newBookingDTO.getUserId());
         if (user.isEmpty()) {
-            throw new RuntimeException("Could not find user with id: " + bookingDTO.getUserId());
+            throw new RuntimeException("Could not find user with id: " + newBookingDTO.getUserId());
         }
         booking.setHouse(house.get());
         booking.setUser(user.get());
         return booking;
     };
 
-    public BookingDTO toBookingDTO(Booking booking) {
-        BookingDTO bookingDTO = new BookingDTO();
-        bookingDTO.setHouseId(booking.getHouse().getId());
-        bookingDTO.setUserId(booking.getUser().getId());
-        bookingDTO.setStartDate(booking.getStartDate());
-        bookingDTO.setEndDate(booking.getEndDate());
-        bookingDTO.setPrice(booking.getPrice());
-        return bookingDTO;
+    public NewBookingDTO toBookingDTO(Booking booking) {
+        NewBookingDTO newBookingDTO = new NewBookingDTO();
+        newBookingDTO.setHouseId(booking.getHouse().getId());
+        newBookingDTO.setUserId(booking.getUser().getId());
+        newBookingDTO.setStartDate(booking.getStartDate());
+        newBookingDTO.setEndDate(booking.getEndDate());
+        newBookingDTO.setPrice(booking.getPrice());
+        return newBookingDTO;
     }
 }

@@ -1,11 +1,8 @@
 package com.codegym.mapper;
 
 import com.codegym.model.Booking;
-import com.codegym.model.dto.BookingDTO;
 import com.codegym.model.dto.UserRentalHistoryDTO;
-import com.codegym.repository.IHouseRepository;
 import org.mapstruct.*;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

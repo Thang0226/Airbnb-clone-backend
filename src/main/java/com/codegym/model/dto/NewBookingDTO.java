@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookingDTO {
+public class NewBookingDTO {
     private Long houseId;
     private Long userId;
     private LocalDate startDate;

@@ -2,7 +2,7 @@ package com.codegym.controller;
 
 import com.codegym.mapper.BookingDTOMapper;
 import com.codegym.model.*;
-import com.codegym.model.dto.BookingDTO;
+import com.codegym.model.dto.NewBookingDTO;
 import com.codegym.model.dto.HouseDateDTO;
 import com.codegym.model.dto.SearchDTO;
 import com.codegym.service.availability.IAvailabilityService;
@@ -61,10 +61,10 @@ public class HouseController {
     }
 
     @GetMapping("/{id}/booked-dates")
-    public ResponseEntity<List<BookingDTO>> getBookedDates(@PathVariable Long id){
+    public ResponseEntity<List<NewBookingDTO>> getBookedDates(@PathVariable Long id){
         List<Booking> bookings = bookingService.getBookingsByHouseId(id);
-        List<BookingDTO> bookingDTOs = bookings.stream().map(booking -> bookingDTOMapper.toBookingDTO(booking)).toList();
-        return ResponseEntity.ok(bookingDTOs);
+        List<NewBookingDTO> newBookingDTOS = bookings.stream().map(booking -> bookingDTOMapper.toBookingDTO(booking)).toList();
+        return ResponseEntity.ok(newBookingDTOS);
     }
 
     @GetMapping("/{id}/house-soonest-date")
@@ -88,8 +88,8 @@ public class HouseController {
     }
 
     @PostMapping("/rent-house")
-    public ResponseEntity<?> rentHouse(@RequestBody BookingDTO bookingDTO) {
-        Booking booking = bookingDTOMapper.toBooking(bookingDTO);
+    public ResponseEntity<?> rentHouse(@RequestBody NewBookingDTO newBookingDTO) {
+        Booking booking = bookingDTOMapper.toBooking(newBookingDTO);
         try {
             bookingService.save(booking);
             return ResponseEntity.ok("Rent house successfully");
