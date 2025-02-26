@@ -21,6 +21,7 @@ import com.codegym.service.house.IHouseService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -347,6 +348,22 @@ public class HouseController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Username not found");
         }
         Page<HouseListDTO> houses = houseService.getHouseListByHostId(userOptional.get().getId(), pageable);
+        return ResponseEntity.ok(houses);
+    }
+
+    @PostMapping("/host-house-list/{username}/search")
+    public ResponseEntity<?> searchHostsHouses(
+            @PathVariable String username,
+            @RequestParam(required = false, defaultValue = "") String houseName,
+            @RequestParam(required = false, defaultValue = "") String status,
+            Pageable pageable) {
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Username not found"));
+        Page<HouseListDTO> houses = houseService.searchHostHouse(
+                user.getId(),
+                houseName,
+                status,
+                pageable);
         return ResponseEntity.ok(houses);
     }
 }
