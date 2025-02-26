@@ -31,4 +31,7 @@ public interface IHouseRepository extends JpaRepository<House, Long> {
           @Param("minBathrooms") Integer minBathrooms,
           @Param("minPrice") Integer minPrice,
           @Param("maxPrice") Integer maxPrice);
+
+
+  List<House> findHousesByHost_Id(Long hostId);
 }

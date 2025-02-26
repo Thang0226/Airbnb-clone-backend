@@ -14,4 +14,5 @@ public interface IHouseService extends IGenerateService<House> {
 
     List<House> searchHousesDesc(String address, LocalDate checkIn, LocalDate checkOut, Integer minBedrooms, Integer minBathrooms, Integer minPrice, Integer maxPrice);
 
+    List<House> findHousesByHostId(Long id);
 }
