@@ -1,4 +1,4 @@
-package com.codegym.model.dto;
+package com.codegym.model.dto.user;
 
 import com.codegym.model.constants.BookingStatus;
 import com.codegym.model.constants.HouseStatus;

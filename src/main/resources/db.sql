@@ -135,6 +135,27 @@ begin
     ORDER BY b.id DESC;
 end;
 
+drop procedure if exists get_host_houses_list;
+create procedure get_host_houses_list(
+    in _id bigint,
+    IN _limit INT,
+    IN _offset INT
+)
+begin
+    select
+        h.id as id,
+        h.house_name as houseName,
+        h.price as price,
+        h.address as address,
+        COALESCE(SUM((DATEDIFF(b.end_date, b.start_date) + 1) * b.price), 0) AS totalRevenue,
+        h.status as status
+    from houses h
+        left join bookings b on h.id = b.house_id and b.status = 'CHECKED_OUT'
+    where h.host_id = _id
+    GROUP BY h.id
+    LIMIT _limit OFFSET _offset;
+end;
+
 # Data
 INSERT INTO roles (name)
 VALUES

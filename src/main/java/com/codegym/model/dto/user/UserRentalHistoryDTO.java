@@ -1,6 +1,5 @@
-package com.codegym.model.dto;
+package com.codegym.model.dto.user;
 
-import com.codegym.model.constants.BookingStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,13 +8,12 @@ import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
-public class BookingDTO {
+public class UserRentalHistoryDTO {
     private Long id;
     private String houseName;
+    private BigDecimal rentalPrice;
     private LocalDate startDate;
     private LocalDate endDate;
-    private Long rentalDay;
-    private String customerName;
-    private BigDecimal totalCost;
-    private BookingStatus status;
+    private long rentalDay;
+    private BigDecimal rentPaid;
 }

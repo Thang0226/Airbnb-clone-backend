@@ -2,9 +2,9 @@ package com.codegym.controller;
 
 import com.codegym.model.User;
 import com.codegym.model.constants.UserStatus;
-import com.codegym.model.dto.HostInfoDTO;
-import com.codegym.model.dto.UserInfoDTO;
-import com.codegym.model.dto.UserRentalHistoryDTO;
+import com.codegym.model.dto.host.HostInfoDTO;
+import com.codegym.model.dto.user.UserInfoDTO;
+import com.codegym.model.dto.user.UserRentalHistoryDTO;
 import com.codegym.service.booking.IBookingService;
 import com.codegym.service.user.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;

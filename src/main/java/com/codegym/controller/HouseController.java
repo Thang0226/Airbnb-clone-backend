@@ -4,7 +4,7 @@ import com.codegym.mapper.BookingDTOMapper;
 import com.codegym.model.*;
 import com.codegym.model.constants.HouseStatus;
 import com.codegym.model.dto.NewBookingDTO;
-import com.codegym.model.dto.HouseDateDTO;
+import com.codegym.model.dto.house.HouseDateDTO;
 import com.codegym.model.dto.SearchDTO;
 import com.codegym.service.availability.IAvailabilityService;
 import com.codegym.service.booking.IBookingService;
@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.codegym.model.dto.HouseDTO;
+import com.codegym.model.dto.house.HouseDTO;
 import com.codegym.service.house.IHouseService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
