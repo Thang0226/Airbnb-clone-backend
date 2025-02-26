@@ -41,4 +41,12 @@ public interface IHouseRepository extends JpaRepository<House, Long> {
                                             @Param("limit") int limit,
                                             @Param("offset") int offset
   );
+
+  @Query(nativeQuery = true, value = "call search_host_houses(:hostId, :houseName, :status, :limit, :offset)")
+  List<HouseListDTO> searchHostHouse( @Param("hostId") Long hostId,
+                                      @Param("houseName") String houseName,
+                                      @Param("status") String status,
+                                      @Param("limit") int limit,
+                                      @Param("offset") int offset
+  );
 }

@@ -80,4 +80,13 @@ public class HouseService implements IHouseService {
 
         return new PageImpl<>(houses, pageable, houses.size());
     }
+
+    @Override
+    public Page<HouseListDTO> searchHostHouse(Long id, String houseName, String status, Pageable pageable) {
+        int limit = pageable.getPageSize();
+        int offset = (int) pageable.getOffset();
+
+        List<HouseListDTO> houses = houseRepository.searchHostHouse(id, houseName, status, limit, offset);
+        return new PageImpl<>(houses, pageable, houses.size());
+    }
 }
