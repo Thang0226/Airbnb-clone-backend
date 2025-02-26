@@ -16,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.List;
 
@@ -56,5 +58,23 @@ public class BookingController {
         List<Booking> bookings = bookingService.findAllByUserId(userOptional.get().getId());
         List<UserBookingDTO> userBookings = bookings.stream().map(booking -> bookingDTOMapper.toUserBookingDTO(booking)).toList();
         return new ResponseEntity<>(userBookings, HttpStatus.OK);
+    }
+
+    @PostMapping("/{id}")
+    public ResponseEntity<?> deleteUserBooking(@PathVariable Long id, @RequestBody String username) {
+        Optional<Booking> bookingOptional = bookingService.findById(id);
+        if (bookingOptional.isEmpty()) {
+            return new ResponseEntity<>("Booking not found", HttpStatus.NOT_FOUND);
+        }
+        Booking booking = bookingOptional.get();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startTime = booking.getStartDate().atTime(12, 0);
+        long hoursBefore = ChronoUnit.HOURS.between(now, startTime);
+        if (hoursBefore < 24) {
+            return new ResponseEntity<>("Not allowed to cancel booking at less than 24h before check-in time", HttpStatus.BAD_REQUEST);
+        }
+
+        bookingService.deleteById(id);
+        return getBookingsByUsernameOfUser(username);
     }
 }
