@@ -21,4 +21,8 @@ public interface IAvailabilityRepository extends JpaRepository<Availability, Lon
     LocalDate findNearestAvailableDate(House house, LocalDate date);
 
     Availability findTopByHouseOrderByStartDateAsc(House house);
+
+    Availability findByHouseAndStartDate(House house, LocalDate startDate);
+
+    Availability findByHouseAndEndDate(House house, LocalDate endDate);
 }
