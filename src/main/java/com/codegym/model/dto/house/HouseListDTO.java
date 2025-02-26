@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public interface HouseListDTO {
     Long getId();
-    String getName();
+    String getHouseName();
     BigDecimal getPrice();
     String getAddress();
     BigDecimal getTotalRevenue();
