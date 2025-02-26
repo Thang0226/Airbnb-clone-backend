@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -48,6 +49,9 @@ public class HouseController {
     private BookingDTOMapper bookingDTOMapper;
     @Autowired
     private IAvailabilityService availabilityService;
+
+    @Autowired
+    private NotificationController notificationController;
 
     @GetMapping
     public ResponseEntity<List<House>> getHousesForAvailable() {
@@ -107,13 +111,17 @@ public class HouseController {
         try {
             bookingService.save(booking);
             Optional<House> houseOptional = houseService.findById(newBookingDTO.getHouseId());
-            if (houseOptional.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("House not found");
-            } else {
-                House house = houseOptional.get();
-                house.setStatus(HouseStatus.RENTED);
-                houseService.save(house);
-            }
+            if (houseOptional.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("House not found");
+            House house = houseOptional.get();
+            house.setStatus(HouseStatus.RENTED);
+            houseService.save(house);
+
+            // Notify host
+            User host = house.getHost();
+            String message = '"'+booking.getUser().getUsername()+'"'+" booked the house "+'"'+booking.getHouse().getHouseName()+'"'
+                    + " on " + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            notificationController.sendNotification(host, message);
+
             return ResponseEntity.ok("Rent house successfully");
         } catch (Exception e) {
             System.out.println(e.getMessage());

@@ -82,7 +82,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(new AntPathRequestMatcher("/images/**")).permitAll()
+                        .requestMatchers("/images/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/api/users/login", "api/users/login-gg", "/api/users/register/**").permitAll()
                                 .requestMatchers("/api/houses").permitAll()
                         .requestMatchers("/api/users/change_password", "/api/users/logout").authenticated()
