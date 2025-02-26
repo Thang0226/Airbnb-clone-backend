@@ -407,3 +407,39 @@ VALUES
 
   ('2025-05-01', '2025-05-31', 'WAITING', '2025-03-16 14:30:00', 42000000, 10, 11),
   ('2025-08-01', '2025-08-29', 'WAITING', '2025-03-16 14:30:00', 40600000, 10, 11);
+
+insert into notifications (created_at, message, host_id)
+values
+    ('2025-02-16 14:30:00', '"John Doe" booked the house "Hoàn Kiếm Villa" on 16/02/2025', 2),
+    ('2025-02-17 14:30:00', '"John Doe" booked the house "Hoàn Kiếm Villa" on 17/02/2025', 2),
+    ('2025-02-18 14:30:00', '"Michael Johnson" booked the house "Hoàn Kiếm Villa" on 18/02/2025', 2),
+    ('2025-02-19 14:30:00', '"Michael Johnson" booked the house "Hoàn Kiếm Villa" on 19/02/2025', 2),
+
+    ('2025-02-20 14:30:00', '"Sarah Smith" booked the house "Ba Đình Villa" on 20/02/2025', 2),
+    ('2025-02-21 14:30:00', '"Sarah Smith" booked the house "Ba Đình Villa" on 21/02/2025', 2),
+    ('2025-02-22 14:30:00', '"David Wilson" booked the house "Ba Đình Villa" on 22/02/2025', 2),
+
+    ('2025-02-23 14:30:00', '"Lisa Taylor" booked the house "Tây Hồ Lakeview Apartment" on 23/02/2025', 2),
+    ('2025-02-24 14:30:00', '"Robert Miller" booked the house "Tây Hồ Lakeview Apartment" on 24/02/2025', 2),
+
+    ('2025-02-25 14:30:00', '"Jennifer Davis" booked the house "Kim Mã Studio" on 25/02/2025', 2),
+    ('2025-02-26 14:30:00', '"Jennifer Davis" booked the house "Kim Mã Studio" on 26/02/2025', 2),
+    ('2025-02-27 14:30:00', '"Jennifer Davis" booked the house "Kim Mã Studio" on 27/02/2025', 2),
+
+    ('2025-02-28 14:30:00', '"John Doe" booked the house "Old Quarter Charm House" on 28/02/2025', 2),
+    ('2025-02-28 14:30:00', '"Michael Johnson" booked the house "Old Quarter Charm House" on 29/02/2025', 2),
+
+    ('2025-02-16 14:30:00', '"Sarah Smith" booked the house "Láng Hạ Modern Condo" on 16/02/2025', 3),
+    ('2025-02-17 14:30:00', '"David Wilson" booked the house "Láng Hạ Modern Condo" on 17/02/2025', 3),
+
+    ('2025-02-18 14:30:00', '"Lisa Taylor" booked the house "Thanh Xuân Luxury Condo" on 18/02/2025', 3),
+    ('2025-02-19 14:30:00', '"Robert Miller" booked the house "Thanh Xuân Luxury Condo" on 19/02/2025', 3),
+
+    ('2025-02-20 14:30:00', '"Emily Brown" booked the house "West Lake Retreat" on 20/02/2025', 3),
+    ('2025-02-21 14:30:00', '"William Jones" booked the house "West Lake Retreat" on 21/02/2025', 3),
+
+    ('2025-02-22 14:30:00', '"Michael Johnson" booked the house "Đội Cấn Family House" on 22/02/2025', 3),
+    ('2025-02-23 14:30:00', '"Sarah Smith" booked the house "Đội Cấn Family House" on 23/02/2025', 3),
+
+    ('2025-02-24 14:30:00', '"Lisa Taylor" booked the house "French Colonial Residence" on 24/02/2025', 3),
+    ('2025-02-25 14:30:00', '"Lisa Taylor" booked the house "French Colonial Residence" on 25/02/2025', 3);
