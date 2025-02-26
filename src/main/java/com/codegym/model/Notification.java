@@ -1,5 +1,6 @@
 package com.codegym.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -14,6 +15,7 @@ public class Notification {
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @JsonIgnore
     private User host;
     private String message;
     private LocalDateTime createdAt;
