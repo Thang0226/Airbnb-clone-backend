@@ -14,4 +14,8 @@ public interface IAvailabilityService extends IGenerateService<Availability> {
     LocalDate findNearestAvailableDate(House house, LocalDate date);
 
     LocalDate findSoonestAvailableDate(House house);
+
+    Availability findByStartDate(House house, LocalDate date);
+
+    Availability findByEndDate(House house, LocalDate date);
 }

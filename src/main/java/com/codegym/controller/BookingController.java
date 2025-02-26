@@ -53,7 +53,7 @@ public class BookingController {
     public ResponseEntity<?> getBookingsByUsernameOfUser(@PathVariable String username) {
         Optional<User> userOptional = userService.findByUsername(username);
         if (userOptional.isEmpty()) {
-            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("User not found by username: " + username, HttpStatus.NOT_FOUND);
         }
         List<Booking> bookings = bookingService.findAllByUserId(userOptional.get().getId());
         List<UserBookingDTO> userBookings = bookings.stream().map(booking -> bookingDTOMapper.toUserBookingDTO(booking)).toList();
