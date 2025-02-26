@@ -1,7 +1,13 @@
 package com.codegym.controller;
 
+import com.codegym.mapper.BookingDTOMapper;
 import com.codegym.model.*;
+import com.codegym.model.constants.HouseStatus;
+import com.codegym.model.dto.NewBookingDTO;
+import com.codegym.model.dto.HouseDateDTO;
 import com.codegym.model.dto.SearchDTO;
+import com.codegym.service.availability.IAvailabilityService;
+import com.codegym.service.booking.IBookingService;
 import com.codegym.service.user.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +39,13 @@ public class HouseController {
     @Autowired
     private IUserService userService;
 
+    @Autowired
+    private IBookingService bookingService;
+    @Autowired
+    private BookingDTOMapper bookingDTOMapper;
+    @Autowired
+    private IAvailabilityService availabilityService;
+
     @GetMapping
     public ResponseEntity<List<House>> getHousesForAvailable() {
         List<House> houses;
@@ -48,6 +61,7 @@ public class HouseController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+
     @GetMapping("/host/{hostId}")
     public ResponseEntity<?> getAllHouseByHostId(@PathVariable Long hostId) {
         List<House> houses = houseService.findHousesByHostId(hostId);
@@ -55,6 +69,53 @@ public class HouseController {
             return new ResponseEntity<>("No houses found for this host", HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(houses, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/booked-dates")
+    public ResponseEntity<List<NewBookingDTO>> getBookedDates(@PathVariable Long id){
+        List<Booking> bookings = bookingService.getBookingsByHouseId(id);
+        List<NewBookingDTO> newBookingDTOS = bookings.stream().map(booking -> bookingDTOMapper.toNewBookingDTO(booking)).toList();
+        return ResponseEntity.ok(newBookingDTOS);
+    }
+
+    @GetMapping("/{id}/house-soonest-date")
+    public ResponseEntity<?> findSoonestDate(@PathVariable Long id){
+        Optional<House> houseOptional = houseService.findById(id);
+        if (houseOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("House not found");
+        }
+        LocalDate soonestAvailableDate = availabilityService.findSoonestAvailableDate(houseOptional.get());
+        return ResponseEntity.ok(soonestAvailableDate);
+    }
+
+    @PostMapping("/house-edge-date")
+    public ResponseEntity<?> getNearestAvailableDateOfHouse(@RequestBody HouseDateDTO houseDateDTO){
+        Optional<House> houseOptional = houseService.findById(houseDateDTO.getHouseId());
+        if (houseOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("House not found");
+        }
+        LocalDate nearestAvailableDate = availabilityService.findNearestAvailableDate(houseOptional.get(), houseDateDTO.getDate());
+        return ResponseEntity.ok(nearestAvailableDate);
+    }
+
+    @PostMapping("/rent-house")
+    public ResponseEntity<?> rentHouse(@RequestBody NewBookingDTO newBookingDTO) {
+        Booking booking = bookingDTOMapper.toBooking(newBookingDTO);
+        try {
+            bookingService.save(booking);
+            Optional<House> houseOptional = houseService.findById(newBookingDTO.getHouseId());
+            if (houseOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("House not found");
+            } else {
+                House house = houseOptional.get();
+                house.setStatus(HouseStatus.RENTED);
+                houseService.save(house);
+            }
+            return ResponseEntity.ok("Rent house successfully");
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create house booking: " + e.getMessage());
+        }
     }
 
     @PostMapping
@@ -267,5 +328,4 @@ public class HouseController {
         defaultImage.setHouse(house);
         house.getHouseImages().add(defaultImage);
     }
-
 }
