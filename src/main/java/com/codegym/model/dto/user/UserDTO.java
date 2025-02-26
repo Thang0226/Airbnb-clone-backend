@@ -1,4 +1,4 @@
-package com.codegym.model.dto;
+package com.codegym.model.dto.user;
 
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;

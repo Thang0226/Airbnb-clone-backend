@@ -1,9 +1,9 @@
 package com.codegym.service.user;
 
-import com.codegym.model.dto.HostInfoDTO;
-import com.codegym.model.dto.UserInfoDTO;
+import com.codegym.model.dto.host.HostInfoDTO;
+import com.codegym.model.dto.user.UserInfoDTO;
 import com.codegym.model.User;
-import com.codegym.model.dto.UserProfileDTO;
+import com.codegym.model.dto.user.UserProfileDTO;
 import com.codegym.service.IGenerateService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

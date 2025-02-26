@@ -1,8 +1,8 @@
 package com.codegym.mapper;
 
 import com.codegym.model.User;
-import com.codegym.model.dto.UserInfoDTO;
-import com.codegym.model.dto.UserProfileDTO;
+import com.codegym.model.dto.user.UserInfoDTO;
+import com.codegym.model.dto.user.UserProfileDTO;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")

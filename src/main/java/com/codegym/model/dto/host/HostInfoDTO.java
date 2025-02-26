@@ -1,4 +1,4 @@
-package com.codegym.model.dto;
+package com.codegym.model.dto.host;
 
 import java.math.BigDecimal;
 

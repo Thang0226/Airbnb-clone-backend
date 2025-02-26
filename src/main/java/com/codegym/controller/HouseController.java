@@ -4,16 +4,19 @@ import com.codegym.mapper.BookingDTOMapper;
 import com.codegym.model.*;
 import com.codegym.model.constants.HouseStatus;
 import com.codegym.model.dto.NewBookingDTO;
-import com.codegym.model.dto.HouseDateDTO;
+import com.codegym.model.dto.house.HouseDateDTO;
 import com.codegym.model.dto.SearchDTO;
+import com.codegym.model.dto.house.HouseListDTO;
 import com.codegym.service.availability.IAvailabilityService;
 import com.codegym.service.booking.IBookingService;
 import com.codegym.service.user.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.codegym.model.dto.HouseDTO;
+import com.codegym.model.dto.house.HouseDTO;
 import com.codegym.service.house.IHouseService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -327,5 +330,15 @@ public class HouseController {
         defaultImage.setFileName(defaultFileName);
         defaultImage.setHouse(house);
         house.getHouseImages().add(defaultImage);
+    }
+
+    @GetMapping("/host-house-list/{username}")
+    public ResponseEntity<?> getHostsHouses(@PathVariable String username, Pageable pageable) {
+        Optional<User> userOptional = userService.findByUsername(username);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Username not found");
+        }
+        Page<HouseListDTO> houses = houseService.getHouseListByHostId(userOptional.get().getId(), pageable);
+        return ResponseEntity.ok(houses);
     }
 }

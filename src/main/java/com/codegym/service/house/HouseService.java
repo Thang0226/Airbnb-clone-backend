@@ -2,8 +2,12 @@ package com.codegym.service.house;
 
 
 import com.codegym.model.House;
+import com.codegym.model.dto.house.HouseListDTO;
 import com.codegym.repository.IHouseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -65,5 +69,15 @@ public class HouseService implements IHouseService {
     @Override
     public List<House> findHousesByHostId(Long id) {
         return houseRepository.findHousesByHost_Id(id);
+    }
+
+    @Override
+    public Page<HouseListDTO> getHouseListByHostId(Long id, Pageable pageable) {
+        int limit = pageable.getPageSize();
+        int offset = (int) pageable.getOffset();
+
+        List<HouseListDTO> houses = houseRepository.findHouseListByHostId(id, limit, offset);
+
+        return new PageImpl<>(houses, pageable, houses.size());
     }
 }

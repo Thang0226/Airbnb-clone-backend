@@ -1,6 +1,8 @@
 package com.codegym.repository;
 
 import com.codegym.model.House;
+import com.codegym.model.dto.house.HouseListDTO;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -32,6 +34,11 @@ public interface IHouseRepository extends JpaRepository<House, Long> {
           @Param("minPrice") Integer minPrice,
           @Param("maxPrice") Integer maxPrice);
 
-
   List<House> findHousesByHost_Id(Long hostId);
+
+  @Query(nativeQuery = true, value = "call get_host_houses_list(:hostId, :limit, :offset)")
+  List<HouseListDTO> findHouseListByHostId( @Param("hostId") Long hostId,
+                                            @Param("limit") int limit,
+                                            @Param("offset") int offset
+  );
 }
