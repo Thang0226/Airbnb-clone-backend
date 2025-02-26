@@ -46,6 +46,9 @@ public class HouseController {
     @Autowired
     private IAvailabilityService availabilityService;
 
+    @Autowired
+    private NotificationController notificationController;
+
     @GetMapping
     public ResponseEntity<List<House>> getHousesForAvailable() {
         List<House> houses;
@@ -104,13 +107,14 @@ public class HouseController {
         try {
             bookingService.save(booking);
             Optional<House> houseOptional = houseService.findById(newBookingDTO.getHouseId());
-            if (houseOptional.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("House not found");
-            } else {
-                House house = houseOptional.get();
-                house.setStatus(HouseStatus.RENTED);
-                houseService.save(house);
-            }
+            if (houseOptional.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("House not found");
+            House house = houseOptional.get();
+            house.setStatus(HouseStatus.RENTED);
+            houseService.save(house);
+            // Notify host
+            String hostUsername = house.getHost().getUsername();
+            notificationController.sendNotification(hostUsername, house.getHost().getUsername());
+
             return ResponseEntity.ok("Rent house successfully");
         } catch (Exception e) {
             System.out.println(e.getMessage());
