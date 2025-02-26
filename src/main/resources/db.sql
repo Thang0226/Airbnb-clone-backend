@@ -5,6 +5,7 @@ drop table if exists bookings;
 drop table if exists availabilities;
 drop table if exists houses;
 drop table if exists host_requests;
+drop table if exists notifications;
 drop table if exists users;
 drop table if exists users_temporary;
 drop table if exists roles;

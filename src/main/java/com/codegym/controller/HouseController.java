@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -111,9 +112,12 @@ public class HouseController {
             House house = houseOptional.get();
             house.setStatus(HouseStatus.RENTED);
             houseService.save(house);
+
             // Notify host
-            String hostUsername = house.getHost().getUsername();
-            notificationController.sendNotification(hostUsername, house.getHost().getUsername());
+            User host = house.getHost();
+            String message = booking.getUser().getUsername() + " booked the house " + booking.getHouse().getHouseName()
+                    + " on " + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            notificationController.sendNotification(host, message);
 
             return ResponseEntity.ok("Rent house successfully");
         } catch (Exception e) {

@@ -1,6 +1,7 @@
 package com.codegym.service.notification;
 
 import com.codegym.model.Notification;
+import com.codegym.model.User;
 import com.codegym.repository.INotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,7 @@ public class NotificationService implements INotificationService {
     }
 
     @Override
-    public List<Notification> findByHostUsername(String hostUsername) {
-        return notificationRepository.findByHostUsernameOrderByCreatedAtDesc(hostUsername);
+    public List<Notification> findByHost(User host) {
+        return notificationRepository.findAllByHostOrderByCreatedAtDesc(host);
     }
 }
