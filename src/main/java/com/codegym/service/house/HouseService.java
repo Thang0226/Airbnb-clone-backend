@@ -1,9 +1,11 @@
 package com.codegym.service.house;
 
 
+import com.codegym.model.Availability;
 import com.codegym.model.House;
 import com.codegym.model.dto.house.HouseListDTO;
 import com.codegym.repository.IHouseRepository;
+import com.codegym.service.availability.IAvailabilityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -20,6 +22,9 @@ public class HouseService implements IHouseService {
     @Autowired
     private IHouseRepository houseRepository;
 
+    @Autowired
+    private IAvailabilityService availabilityService;
+
     @Override
     public List<House> findAll() {
         return houseRepository.findAll();
@@ -31,8 +36,13 @@ public class HouseService implements IHouseService {
     }
 
     @Override
-    public void save(House object) {
-        houseRepository.save(object);
+    public void save(House house) {
+        houseRepository.save(house);
+        Availability availability = new Availability();
+        availability.setStartDate(LocalDate.now());
+        availability.setEndDate(LocalDate.now().plusYears(10));
+        availability.setHouse(house);
+        availabilityService.save(availability);
     }
 
     @Override

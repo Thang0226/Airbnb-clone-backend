@@ -3,7 +3,7 @@ package com.codegym.controller;
 import com.codegym.mapper.BookingDTOMapper;
 import com.codegym.model.*;
 import com.codegym.model.constants.HouseStatus;
-import com.codegym.model.dto.NewBookingDTO;
+import com.codegym.model.dto.booking.NewBookingDTO;
 import com.codegym.model.dto.house.HouseDateDTO;
 import com.codegym.model.dto.SearchDTO;
 import com.codegym.model.dto.house.HouseListDTO;
