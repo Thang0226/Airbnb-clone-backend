@@ -24,7 +24,7 @@ public interface IBookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findAllByHouseId(Long houseId);
 
-    @Query("SELECT b FROM Booking b WHERE b.user.id = :userId ORDER BY b.startDate DESC")
+    @Query("SELECT b FROM Booking b WHERE b.user.id = :userId ORDER BY b.updatedAt DESC")
     List<Booking> findAllByUserId(Long userId);
   
     @Query("SELECT b FROM Booking b JOIN b.house h WHERE h.host.id = :userId ORDER BY b.id DESC")
