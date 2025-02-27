@@ -5,7 +5,7 @@ import com.codegym.model.House;
 import com.codegym.model.User;
 import com.codegym.model.constants.BookingStatus;
 import com.codegym.model.dto.NewBookingDTO;
-import com.codegym.model.dto.UserBookingDTO;
+import com.codegym.model.dto.user.UserBookingDTO;
 import com.codegym.service.house.IHouseService;
 import com.codegym.service.user.IUserService;
 import org.mapstruct.Mapper;

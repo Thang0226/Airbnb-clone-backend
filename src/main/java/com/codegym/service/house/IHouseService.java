@@ -1,12 +1,11 @@
 package com.codegym.service.house;
 
 import com.codegym.model.House;
-import com.codegym.model.dto.HouseDTO;
+import com.codegym.model.dto.house.HouseListDTO;
 import com.codegym.service.IGenerateService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -20,11 +19,7 @@ public interface IHouseService extends IGenerateService<House> {
 
     List<House> findHousesByHostId(Long id);
 
-    void addHouseImages(Long id, List<MultipartFile> images) ;
+    Page<HouseListDTO> getHouseListByHostId(Long id, Pageable pageable);
 
-    void removeHouseImage(Long id, Long imageId) ;
-
-    HouseDTO updateHouseDetails(Long id, HouseDTO houseDTO);
-
-    ResponseEntity<String> validateInput(HouseDTO houseDTO);
+    Page<HouseListDTO> searchHostHouse(Long id, String houseName, String status, Pageable pageable);
 }

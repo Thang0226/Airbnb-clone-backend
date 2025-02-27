@@ -1,8 +1,8 @@
 package com.codegym.mapper;
 
 import com.codegym.model.Booking;
-import com.codegym.model.dto.BookingDTO;
-import com.codegym.model.dto.UserRentalHistoryDTO;
+import com.codegym.model.dto.booking.BookingDTO;
+import com.codegym.model.dto.user.UserRentalHistoryDTO;
 import org.mapstruct.*;
 
 import java.math.BigDecimal;

@@ -5,6 +5,7 @@ drop table if exists bookings;
 drop table if exists availabilities;
 drop table if exists houses;
 drop table if exists host_requests;
+drop table if exists notifications;
 drop table if exists users;
 drop table if exists users_temporary;
 drop table if exists roles;
@@ -133,6 +134,55 @@ begin
         and (_status is null or b.status = _status)
         and (h.host_id = _id)
     ORDER BY b.id DESC;
+end;
+
+drop procedure if exists get_host_houses_list;
+create procedure get_host_houses_list(
+    in _id bigint,
+    IN _limit INT,
+    IN _offset INT
+)
+begin
+    select
+        h.id as id,
+        h.house_name as houseName,
+        h.price as price,
+        h.address as address,
+        COALESCE(SUM((DATEDIFF(b.end_date, b.start_date) + 1) * b.price), 0) AS totalRevenue,
+        h.status as status
+    from houses h
+        left join bookings b on h.id = b.house_id and b.status = 'CHECKED_OUT'
+    where h.host_id = _id
+    GROUP BY h.id
+    LIMIT _limit OFFSET _offset;
+end;
+
+drop procedure if exists search_host_houses;
+create procedure search_host_houses(
+    in _id bigint,
+    in _house_name varchar(255),
+    in _status varchar(255),
+    IN _limit INT,
+    IN _offset INT
+)
+begin
+    SET _house_name = NULLIF(_house_name, '');
+    SET _status = NULLIF(_status, '');
+    select
+        h.id as id,
+        h.house_name as houseName,
+        h.price as price,
+        h.address as address,
+        COALESCE(SUM((DATEDIFF(b.end_date, b.start_date) + 1) * b.price), 0) AS totalRevenue,
+        h.status as status
+    from houses h
+             left join bookings b on h.id = b.house_id and b.status = 'CHECKED_OUT'
+    where
+        (_house_name IS NULL OR TRIM(_house_name) = '' OR LOWER(h.house_name) LIKE LOWER(CONCAT('%', _house_name, '%')))
+        and (_status is null or h.status = _status)
+        and h.host_id = _id
+    GROUP BY h.id
+    LIMIT _limit OFFSET _offset;
 end;
 
 # Data
@@ -371,49 +421,74 @@ values
     ('2025-06-01', '2025-07-31', 10),
     ('2025-11-30', '2027-10-10', 10);
 
-insert into bookings (start_date, end_date, status, updated_at, price, house_id, user_id)
+INSERT INTO bookings (start_date, end_date, status, updated_at, price, house_id, user_id)
+VALUES
+  ('2025-04-16', '2025-04-30', 'WAITING', '2025-03-16 14:30:00', 11200000, 1, 4),
+  ('2025-05-16', '2025-05-30', 'WAITING', '2025-03-16 14:30:00', 11200000, 1, 4),
+  ('2025-06-01', '2025-06-09', 'WAITING', '2025-03-16 14:30:00', 6400000, 1, 5),
+  ('2025-07-01', '2025-07-29', 'WAITING', '2025-03-16 14:30:00', 23200000, 1, 5),
+
+  ('2025-04-01', '2025-04-09', 'WAITING', '2025-03-16 14:30:00', 12000000, 2, 6),
+  ('2025-05-01', '2025-05-09', 'WAITING', '2025-03-16 14:30:00', 12000000, 2, 6),
+  ('2025-06-01', '2025-06-30', 'WAITING', '2025-03-16 14:30:00', 43500000, 2, 7),
+
+  ('2025-05-01', '2025-05-31', 'WAITING', '2025-03-16 14:30:00', 27000000, 3, 8),
+  ('2025-07-16', '2025-07-30', 'WAITING', '2025-03-16 14:30:00', 12600000, 3, 9),
+
+  ('2025-02-26', '2025-02-28', 'WAITING', '2025-03-16 14:30:00', 1200000, 4, 10),
+  ('2025-03-16', '2025-05-14', 'WAITING', '2025-03-16 14:30:00', 36000000, 4, 10),
+  ('2025-07-01', '2025-07-14', 'WAITING', '2025-03-16 14:30:00', 8400000, 4, 10),
+
+  ('2025-06-01', '2025-07-14', 'WAITING', '2025-03-16 14:30:00', 35700000, 5, 4),
+  ('2025-09-01', '2025-09-29', 'WAITING', '2025-03-16 14:30:00', 23800000, 5, 5),
+
+  ('2025-05-01', '2025-06-14', 'WAITING', '2025-03-16 14:30:00', 42750000, 6, 6),
+  ('2025-08-01', '2025-10-30', 'WAITING', '2025-03-16 14:30:00', 85500000, 6, 7),
+
+  ('2025-04-16', '2025-04-30', 'WAITING', '2025-03-16 14:30:00', 15000000, 7, 8),
+  ('2025-06-16', '2025-09-29', 'WAITING', '2025-03-16 14:30:00', 106000000, 7, 9),
+
+  ('2025-05-16', '2025-05-31', 'WAITING', '2025-03-16 14:30:00', 10500000, 8, 10),
+  ('2025-08-01', '2025-10-14', 'WAITING', '2025-03-16 14:30:00', 51800000, 8, 4),
+
+  ('2025-06-01', '2025-07-14', 'WAITING', '2025-03-16 14:30:00', 51600000, 9, 5),
+  ('2025-09-01', '2025-09-14', 'WAITING', '2025-03-16 14:30:00', 16800000, 9, 6),
+
+  ('2025-05-01', '2025-05-31', 'WAITING', '2025-03-16 14:30:00', 42000000, 10, 11),
+  ('2025-08-01', '2025-08-29', 'WAITING', '2025-03-16 14:30:00', 40600000, 10, 11);
+
+insert into notifications (created_at, message, host_id)
 values
--- House 1
-    ('2025-04-16', '2025-04-30', 'WAITING', '2025-03-16 14:30:00',800000, 1, 4),
-    ('2025-05-16', '2025-05-30', 'WAITING', '2025-03-16 14:30:00',800000, 1, 4),
-    ('2025-06-01', '2025-06-09', 'WAITING', '2025-06-01 09:45:00',800000, 1,5),
-    ('2025-07-01', '2025-07-29', 'WAITING', '2025-06-01 09:45:00',800000, 1,5),
+    ('2025-02-16 14:30:00', '"John Doe" booked the house "Hoàn Kiếm Villa" on 16/02/2025', 2),
+    ('2025-02-17 14:30:00', '"John Doe" booked the house "Hoàn Kiếm Villa" on 17/02/2025', 2),
+    ('2025-02-18 14:30:00', '"Michael Johnson" booked the house "Hoàn Kiếm Villa" on 18/02/2025', 2),
+    ('2025-02-19 14:30:00', '"Michael Johnson" booked the house "Hoàn Kiếm Villa" on 19/02/2025', 2),
 
+    ('2025-02-20 14:30:00', '"Sarah Smith" booked the house "Ba Đình Villa" on 20/02/2025', 2),
+    ('2025-02-21 14:30:00', '"Sarah Smith" booked the house "Ba Đình Villa" on 21/02/2025', 2),
+    ('2025-02-22 14:30:00', '"David Wilson" booked the house "Ba Đình Villa" on 22/02/2025', 2),
 
--- House 2
-    ('2025-04-01', '2025-04-09', 'WAITING', '2025-03-01 11:00:00', 1500000, 2, 6),
-    ('2025-05-01', '2025-05-09', 'WAITING', '2025-04-01 11:00:00', 1500000, 2, 6),
-    ('2025-06-01', '2025-06-30', 'WAITING', '2025-05-01 13:15:00', 1500000, 2, 7),
+    ('2025-02-23 14:30:00', '"Lisa Taylor" booked the house "Tây Hồ Lakeview Apartment" on 23/02/2025', 2),
+    ('2025-02-24 14:30:00', '"Robert Miller" booked the house "Tây Hồ Lakeview Apartment" on 24/02/2025', 2),
 
--- House 3 (gaps: May 1-May 31, Jul 16-Oct 30)
-    ('2025-05-01', '2025-05-31', 'WAITING', '2025-04-01 15:45:00', 900000, 3, 8),
-    ('2025-07-16', '2025-07-30', 'WAITING', '2025-06-16 12:00:00', 900000, 3, 9),
+    ('2025-02-25 14:30:00', '"Jennifer Davis" booked the house "Kim Mã Studio" on 25/02/2025', 2),
+    ('2025-02-26 14:30:00', '"Jennifer Davis" booked the house "Kim Mã Studio" on 26/02/2025', 2),
+    ('2025-02-23 14:30:00', '"Jennifer Davis" booked the house "Kim Mã Studio" on 23/02/2025', 2),
 
--- House 4 (gaps: Mar 16-May 14, Jul 1-Sep 14)
-    ('2025-02-26', '2025-02-28', 'WAITING', '2025-02-16 14:20:00', 600000, 4, 10),
-    ('2025-03-16', '2025-05-14', 'WAITING', '2025-02-16 14:20:00', 600000, 4, 10),
-    ('2025-07-01', '2025-07-14', 'WAITING', '2025-06-01 16:45:00', 600000, 4, 10),
+    ('2025-02-24 14:30:00', '"John Doe" booked the house "Old Quarter Charm House" on 24/02/2025', 2),
+    ('2025-02-25 14:30:00', '"Michael Johnson" booked the house "Old Quarter Charm House" on 25/02/2025', 2),
 
--- House 5 (gaps: Jun 1-Jul 14, Sep 1-Nov 29)
-    ('2025-06-01', '2025-07-14', 'WAITING', '2025-05-01 10:15:00', 850000, 5, 4),
-    ('2025-09-01', '2025-09-29', 'WAITING', '2025-08-01 13:30:00', 850000, 5, 5),
+    ('2025-02-16 14:30:00', '"Sarah Smith" booked the house "Láng Hạ Modern Condo" on 16/02/2025', 3),
+    ('2025-02-17 14:30:00', '"David Wilson" booked the house "Láng Hạ Modern Condo" on 17/02/2025', 3),
 
--- House 6 (gaps: May 1-Jun 14, Aug 1-Oct 30)
-    ('2025-05-01', '2025-06-14', 'WAITING', '2025-04-01 11:20:00', 950000, 6, 6),
-    ('2025-08-01', '2025-10-30', 'WAITING', '2025-07-01 15:00:00', 950000, 6, 7),
+    ('2025-02-18 14:30:00', '"Lisa Taylor" booked the house "Thanh Xuân Luxury Condo" on 18/02/2025', 3),
+    ('2025-02-19 14:30:00', '"Robert Miller" booked the house "Thanh Xuân Luxury Condo" on 19/02/2025', 3),
 
--- House 7 (gaps: Apr 16-Apr 30, Jun 16-Sep 29)
-    ('2025-04-16', '2025-04-30', 'WAITING', '2025-03-16 09:00:00', 1000000, 7, 8),
-    ('2025-06-16', '2025-09-29', 'WAITING', '2025-05-16 14:45:00', 1000000, 7, 9),
+    ('2025-02-20 14:30:00', '"Emily Brown" booked the house "West Lake Retreat" on 20/02/2025', 3),
+    ('2025-02-21 14:30:00', '"William Jones" booked the house "West Lake Retreat" on 21/02/2025', 3),
 
--- House 8 (gaps: May 16-May 31, Aug 1-Oct 14)
-    ('2025-05-16', '2025-05-31', 'WAITING', '2025-04-16 16:15:00', 700000, 8, 10),
-    ('2025-08-01', '2025-10-14', 'WAITING', '2025-07-01 10:45:00', 700000, 8, 4),
+    ('2025-02-22 14:30:00', '"Michael Johnson" booked the house "Đội Cấn Family House" on 22/02/2025', 3),
+    ('2025-02-23 14:30:00', '"Sarah Smith" booked the house "Đội Cấn Family House" on 23/02/2025', 3),
 
--- House 9 (gaps: Jun 1-Jul 14, Sep 1-Nov 14)
-    ('2025-06-01', '2025-07-14', 'WAITING', '2025-05-01 11:30:00', 1200000, 9, 5),
-    ('2025-09-01', '2025-09-14', 'WAITING', '2025-08-01 15:45:00', 1200000, 9, 6),
-
--- House 10 (gaps: May 1-May 31, Aug 1-Nov 29)
-    ('2025-05-01', '2025-05-31', 'WAITING', '2025-04-01 14:00:00', 1400000, 10, 11),
-    ('2025-08-01', '2025-08-29', 'WAITING', '2025-07-01 10:30:00', 1400000, 10, 11);
+    ('2025-02-24 14:30:00', '"Lisa Taylor" booked the house "French Colonial Residence" on 24/02/2025', 3),
+    ('2025-02-25 14:30:00', '"Lisa Taylor" booked the house "French Colonial Residence" on 25/02/2025', 3);

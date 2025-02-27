@@ -1,4 +1,4 @@
-package com.codegym.model.dto;
+package com.codegym.model.dto.house;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

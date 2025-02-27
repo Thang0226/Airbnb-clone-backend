@@ -82,13 +82,14 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(new AntPathRequestMatcher("/images/**")).permitAll()
+                        .requestMatchers("/images/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/api/users/login", "api/users/login-gg", "/api/users/register/**").permitAll()
                                 .requestMatchers("/api/houses").permitAll()
                         .requestMatchers("/api/users/change_password", "/api/users/logout").authenticated()
                         .requestMatchers("/api/admin/**", "api/users/host-requests/**").hasRole("ADMIN")
                                 .requestMatchers("/api/bookings/user/*").hasAnyRole("USER")
-                        .requestMatchers("/api/bookings/**").hasAnyRole("ADMIN", "HOST")
+                        .requestMatchers("/api/bookings/**").hasAnyRole("ADMIN", "HOST", "USER")
 //                        .requestMatchers("/api/users/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN","ROLE_SELLER")
                                 .requestMatchers("/api/houses/**").permitAll()
                                 .requestMatchers("/api/placeholder/**").permitAll() // Cho phép tất cả truy cập API này

@@ -3,9 +3,9 @@ package com.codegym.controller;
 import com.codegym.mapper.BookingDTOMapper;
 import com.codegym.model.Booking;
 import com.codegym.model.User;
-import com.codegym.model.dto.BookingDTO;
-import com.codegym.model.dto.BookingSearchDTO;
-import com.codegym.model.dto.UserBookingDTO;
+import com.codegym.model.dto.booking.BookingDTO;
+import com.codegym.model.dto.booking.BookingSearchDTO;
+import com.codegym.model.dto.user.UserBookingDTO;
 import com.codegym.service.booking.IBookingService;
 import com.codegym.service.user.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.List;
 
@@ -72,10 +74,28 @@ public class BookingController {
     public ResponseEntity<?> getBookingsByUsernameOfUser(@PathVariable String username) {
         Optional<User> userOptional = userService.findByUsername(username);
         if (userOptional.isEmpty()) {
-            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("User not found by username: " + username, HttpStatus.NOT_FOUND);
         }
         List<Booking> bookings = bookingService.findAllByUserId(userOptional.get().getId());
         List<UserBookingDTO> userBookings = bookings.stream().map(booking -> bookingDTOMapper.toUserBookingDTO(booking)).toList();
         return new ResponseEntity<>(userBookings, HttpStatus.OK);
+    }
+
+    @PostMapping("/{id}")
+    public ResponseEntity<?> deleteUserBooking(@PathVariable Long id, @RequestBody String username) {
+        Optional<Booking> bookingOptional = bookingService.findById(id);
+        if (bookingOptional.isEmpty()) {
+            return new ResponseEntity<>("Booking not found", HttpStatus.NOT_FOUND);
+        }
+        Booking booking = bookingOptional.get();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startTime = booking.getStartDate().atTime(12, 0);
+        long hoursBefore = ChronoUnit.HOURS.between(now, startTime);
+        if (hoursBefore < 24) {
+            return new ResponseEntity<>("Not allowed to cancel booking at less than 24h before check-in time", HttpStatus.BAD_REQUEST);
+        }
+
+        bookingService.deleteById(id);
+        return getBookingsByUsernameOfUser(username);
     }
 }

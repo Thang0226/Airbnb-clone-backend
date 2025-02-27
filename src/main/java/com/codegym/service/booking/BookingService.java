@@ -2,10 +2,9 @@ package com.codegym.service.booking;
 import com.codegym.mapper.BookingMapper;
 import com.codegym.model.Availability;
 import com.codegym.model.Booking;
-import com.codegym.model.constants.BookingStatus;
 import com.codegym.model.House;
-import com.codegym.model.dto.BookingDTO;
-import com.codegym.model.dto.UserRentalHistoryDTO;
+import com.codegym.model.dto.booking.BookingDTO;
+import com.codegym.model.dto.user.UserRentalHistoryDTO;
 import com.codegym.repository.IBookingRepository;
 import com.codegym.service.availability.IAvailabilityService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +72,27 @@ public  class BookingService implements IBookingService {
 
     @Override
     public void deleteById(Long id) {
+        Optional<Booking> bookingOptional = bookingRepository.findById(id);
+        Booking booking;
+        if (bookingOptional.isEmpty()) {
+            throw new RuntimeException("Cannot find booking with id: " + id);
+        } else {
+            booking = bookingOptional.get();
+        }
+        // 1. Delete booking from DB
         bookingRepository.deleteById(id);
+        // 2. Find two availabilities at the two time end of booking of house & delete them
+        House house = booking.getHouse();
+        Availability endAvailability = availabilityService.findByStartDate(house, booking.getEndDate().plusDays(1));
+        Availability startAvailability = availabilityService.findByEndDate(house, booking.getStartDate().minusDays(1));
+        availabilityService.deleteById(startAvailability.getId());
+        availabilityService.deleteById(endAvailability.getId());
+        // 3. Create new availability record that covers all old availability time & save to DB
+        Availability newAvailability = new Availability();
+        newAvailability.setStartDate(startAvailability.getStartDate());
+        newAvailability.setEndDate(endAvailability.getEndDate());
+        newAvailability.setHouse(house);
+        availabilityService.save(newAvailability);
     }
 
     @Override
