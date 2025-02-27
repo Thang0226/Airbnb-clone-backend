@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,5 +31,12 @@ public interface IUserRepository extends JpaRepository<User, Long> {
     @Query(nativeQuery = true, value = "call get_host_info(:hostId)")
     HostInfoDTO getHostInfo(@Param("hostId") Long hostId);
 
+    @Query(nativeQuery = true, value="call get_host_income_by_month(:hostUsername, :numberOfMonth)")
+    List<Long> getHostIncomeByMonth(@Param("hostUsername") String hostUsername,
+                                       @Param("numberOfMonth") Integer numberOfMonth);
+
+    @Query(nativeQuery = true, value="call get_host_income_by_year(:hostUsername, :numberOfYear)")
+    List<Long> getHostIncomeByYear(@Param("hostUsername") String hostUsername,
+                                      @Param("numberOfYear") Integer numberOfYear);
 
 }

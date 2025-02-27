@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -33,13 +35,14 @@ public class HostController {
     }
 
     @GetMapping("/{username}/income-stats")
-    public ResponseEntity<?> getHostIncomeStats(@PathVariable String username, @RequestParam String period) {
+    public ResponseEntity<?> getHostIncomeStats(@PathVariable String username, @RequestParam(defaultValue = "month") String period) {
+        final Integer numberOfMonths = 12;
+        final Integer numberOfYears = 5;
+
         if (period == null || period.equals("month")) {
-
-        } else if (period.equals("quarter")) {
-
+            return new ResponseEntity<>(userService.getIncomeByMonth(username, numberOfMonths), HttpStatus.OK);
         } else if (period.equals("year")) {
-
+            return new ResponseEntity<>(userService.getIncomeByYear(username, numberOfYears), HttpStatus.OK);
         } else {
             return new ResponseEntity<>("Invalid period", HttpStatus.BAD_REQUEST);
         }

@@ -32,7 +32,7 @@ public interface IUserService extends IGenerateService<User> {
 
     HostInfoDTO getHostInfo(Long userId);
 
-    List<Integer> getIncomeByMonth(String hostUsername, Integer numberOfMonth);
-    List<Integer> getIncomeByQuarter(String hostUsername, Integer numberOfQuarter);
-    List<Integer> getIncomeByYear(String hostUsername, Integer numberOfYear);
+    List<Long> getIncomeByMonth(String hostUsername, Integer numberOfMonth);
+
+    List<Long> getIncomeByYear(String hostUsername, Integer numberOfYear);
 }

@@ -19,8 +19,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.util.*;
 
 @Service
 public class UserService implements IUserService, UserDetailsService {
@@ -131,15 +131,24 @@ public class UserService implements IUserService, UserDetailsService {
     }
 
     @Override
-    public List<Integer> getIncomeByMonth(String hostUsername, Integer numberOfMonth) {
-        return new Integer[0];
+    public List<Long> getIncomeByMonth(String hostUsername, Integer numberOfMonth) {
+        List<Long> incomeList = null;
+        try {
+            incomeList = userRepository.getHostIncomeByMonth(hostUsername, numberOfMonth);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return incomeList;
     }
+
     @Override
-    public List<Integer> getIncomeByQuarter(String hostUsername, Integer numberOfQuarter) {
-        return new Integer[0];
-    }
-    @Override
-    public List<Integer> getIncomeByYear(String hostUsername, Integer numberOfYear) {
-        return new Integer[0];
+    public List<Long> getIncomeByYear(String hostUsername, Integer numberOfYear) {
+        List<Long> incomeList = null;
+        try {
+            incomeList = userRepository.getHostIncomeByYear(hostUsername, numberOfYear);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return incomeList;
     }
 }

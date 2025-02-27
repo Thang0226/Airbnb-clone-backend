@@ -13,6 +13,11 @@ use airbnb;
 
 
 
+# Change database collate to case-sensitive comparing with varchar
+ALTER TABLE users MODIFY username VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
+
+
+
 # Procedures
 drop procedure if exists search_houses_asc;
 create procedure search_houses_asc(
@@ -102,57 +107,93 @@ end;
 
 DROP PROCEDURE IF EXISTS get_host_income_by_month;
 CREATE PROCEDURE get_host_income_by_month(
-    IN host_username VARCHAR(255),
-    IN num_months INT
+    IN _username VARCHAR(255),
+    IN _numMonths INT
 )
 BEGIN
-    -- Define variables for the date range
-    DECLARE start_date DATE;
-    DECLARE end_date DATE;
-
-    -- Set end_date to the last day of current month
-    SET end_date = LAST_DAY(CURRENT_DATE());
-
-    -- Set start_date to the first day of the month (num_months - 1) months ago
-    SET start_date = DATE_SUB(DATE_FORMAT(CURRENT_DATE(), '%Y-%m-01'), INTERVAL (num_months - 1) MONTH);
-
-    -- Create a temporary table to hold all months in the range
+    -- Create a temporary table to hold all months in the range, but have to use DATE type
+    -- cause SQL do not have MONTH type
     DROP TEMPORARY TABLE IF EXISTS month_range;
     CREATE TEMPORARY TABLE month_range (month_date DATE);
-
-    -- Populate the temporary table with all months in the range
     SET @counter := 0;
-    WHILE @counter < num_months DO
+    WHILE @counter < _numMonths DO
             INSERT INTO month_range (month_date)
             VALUES (DATE_SUB(DATE_FORMAT(CURRENT_DATE(), '%Y-%m-01'), INTERVAL @counter MONTH));
             SET @counter := @counter + 1;
         END WHILE;
+#     select * from month_range;
 
-    -- Query using the month range table to ensure all months are included
     SELECT
-        DATE_FORMAT(mr.month_date, '%Y-%m') AS month,
         COALESCE(SUM(b.price), 0) AS total_income
     FROM
         month_range mr
-            LEFT JOIN
-        bookings b ON DATE_FORMAT(b.updated_at, '%Y-%m') = DATE_FORMAT(mr.month_date, '%Y-%m')
-            AND b.status = 'CHECKED_OUT'
-            LEFT JOIN
-        users u ON b.user_id = u.id AND u.username = host_username
+            LEFT JOIN (
+            SELECT
+                b.updated_at,
+                b.price
+            FROM
+                bookings b
+                    JOIN
+                houses h ON b.house_id = h.id
+                    JOIN
+                users u ON h.host_id = u.id
+            WHERE
+                u.username = _username
+              AND b.status = 'CHECKED_OUT'
+        ) AS b ON DATE_FORMAT(b.updated_at, '%Y-%m') = DATE_FORMAT(mr.month_date, '%Y-%m')
     GROUP BY
-        month
+        DATE_FORMAT(mr.month_date, '%Y-%m')
     ORDER BY
-        month DESC;
+        DATE_FORMAT(mr.month_date, '%Y-%m') DESC;
 
-    -- Clean up
     DROP TEMPORARY TABLE IF EXISTS month_range;
 END;
-call get_host_income_by_month('sarah_smith', 12);
+call get_host_income_by_month('mike_j', 12);
 
+DROP PROCEDURE IF EXISTS get_host_income_by_year;
+CREATE PROCEDURE get_host_income_by_year(
+    IN _username VARCHAR(255),
+    IN _numYears INT
+)
+BEGIN
+    -- Create a temporary table to hold all years in the range, but have to use DATE type
+    -- cause SQL do not have YEAR type
+    DROP TEMPORARY TABLE IF EXISTS year_range;
+    CREATE TEMPORARY TABLE year_range (year_date DATE);
+    SET @counter := 0;
+    WHILE @counter < _numYears DO
+            INSERT INTO year_range (year_date)
+            VALUES (DATE_SUB(DATE_FORMAT(CURRENT_DATE(), '%Y-01-01'), INTERVAL @counter YEAR));
+            SET @counter := @counter + 1;
+        END WHILE;
+#     select * from year_range;
 
+    SELECT
+        COALESCE(SUM(b.price), 0) AS total_income
+    FROM
+        year_range yr
+            LEFT JOIN (
+            SELECT
+                b.updated_at,
+                b.price
+            FROM
+                bookings b
+                    JOIN
+                houses h ON b.house_id = h.id
+                    JOIN
+                users u ON h.host_id = u.id
+            WHERE
+                u.username = _username
+              AND b.status = 'CHECKED_OUT'
+        ) AS b ON YEAR(b.updated_at) = YEAR(yr.year_date)
+    GROUP BY
+        YEAR(yr.year_date)
+    ORDER BY
+        YEAR(yr.year_date) DESC;
 
-# Change database collate to case-sensitive comparing with varchar
-ALTER TABLE users MODIFY username VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
+    DROP TEMPORARY TABLE IF EXISTS year_range;
+END;
+call get_host_income_by_year('sarah_smith', 5);
 
 drop procedure if exists search_bookings_of_host;
 create procedure search_bookings_of_host(
