@@ -1,8 +1,10 @@
 package com.codegym.service.house;
 
 
+import com.codegym.exception.HouseNotFoundException;
 import com.codegym.model.Availability;
 import com.codegym.model.House;
+import com.codegym.model.constants.HouseStatus;
 import com.codegym.model.dto.house.HouseListDTO;
 import com.codegym.repository.IHouseRepository;
 import com.codegym.service.availability.IAvailabilityService;
@@ -98,5 +100,26 @@ public class HouseService implements IHouseService {
 
         List<HouseListDTO> houses = houseRepository.searchHostHouse(id, houseName, status, limit, offset);
         return new PageImpl<>(houses, pageable, houses.size());
+    }
+
+    @Override
+    public void updateHouseStatus(Long houseId, String status) {
+        House house = houseRepository.findById(houseId)
+                .orElseThrow(() -> new HouseNotFoundException("House with id " + houseId + " not found"));
+        if (house.getStatus() == HouseStatus.RENTED) {
+            throw new IllegalStateException("Cannot change status because the house is currently RENTED");
+        }
+        switch (status) {
+            case "AVAILABLE":
+                house.setStatus(HouseStatus.AVAILABLE);
+                houseRepository.save(house);
+                break;
+            case "MAINTAINING":
+                house.setStatus(HouseStatus.MAINTAINING);
+                houseRepository.save(house);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid status: " + status);
+        }
     }
 }

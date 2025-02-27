@@ -1,6 +1,6 @@
 package com.codegym.controller;
 
-import com.codegym.exception.AvailabilityNotFoundException;
+import com.codegym.exception.HouseNotFoundException;
 import com.codegym.mapper.BookingDTOMapper;
 import com.codegym.mapper.HouseMaintenanceMapper;
 import com.codegym.model.*;
@@ -388,5 +388,15 @@ public class HouseController {
     @GetMapping("/{houseId}/maintenance-records")
     public ResponseEntity<?> getMaintenanceRecords(@PathVariable Long houseId) {
         return ResponseEntity.ok(houseMaintenanceService.findByHouseId(houseId));
+    }
+
+    @PutMapping("/{houseId}/update-status")
+    public ResponseEntity<?> updateStatus(@PathVariable Long houseId, @RequestParam String status) {
+        try {
+            houseService.updateHouseStatus(houseId, status);
+            return ResponseEntity.ok("House status updated");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 }

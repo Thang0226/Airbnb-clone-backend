@@ -2,6 +2,8 @@ package com.codegym.exception;
 
 
 
+import com.codegym.exception.house_maintenance.DuplicateMaintenanceException;
+import com.codegym.exception.house_maintenance.InvalidMaintenanceDateException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,5 +52,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DuplicateMaintenanceException.class)
     public ResponseEntity<String> handleDuplicateMaintenance(DuplicateMaintenanceException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidMaintenanceDateException.class)
+    public ResponseEntity<?> handleInvalidMaintenanceDateException(InvalidMaintenanceDateException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( ex.getMessage());
     }
 }
