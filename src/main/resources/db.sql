@@ -13,6 +13,11 @@ use airbnb;
 
 
 
+# Change database collate to case-sensitive comparing with varchar
+ALTER TABLE users MODIFY username VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
+
+
+
 # Procedures
 drop procedure if exists search_houses_asc;
 create procedure search_houses_asc(
@@ -100,10 +105,95 @@ begin
     GROUP BY u.id;
 end;
 
+DROP PROCEDURE IF EXISTS get_host_income_by_month;
+CREATE PROCEDURE get_host_income_by_month(
+    IN _username VARCHAR(255),
+    IN _numMonths INT
+)
+BEGIN
+    -- Create a temporary table to hold all months in the range, but have to use DATE type
+    -- cause SQL do not have MONTH type
+    DROP TEMPORARY TABLE IF EXISTS month_range;
+    CREATE TEMPORARY TABLE month_range (month_date DATE);
+    SET @counter := 0;
+    WHILE @counter < _numMonths DO
+            INSERT INTO month_range (month_date)
+            VALUES (DATE_SUB(DATE_FORMAT(CURRENT_DATE(), '%Y-%m-01'), INTERVAL @counter MONTH));
+            SET @counter := @counter + 1;
+        END WHILE;
+#     select * from month_range;
 
+    SELECT
+        COALESCE(SUM(b.price), 0) AS total_income
+    FROM
+        month_range mr
+            LEFT JOIN (
+            SELECT
+                b.updated_at,
+                b.price
+            FROM
+                bookings b
+                    JOIN
+                houses h ON b.house_id = h.id
+                    JOIN
+                users u ON h.host_id = u.id
+            WHERE
+                u.username = _username
+              AND b.status = 'CHECKED_OUT'
+        ) AS b ON DATE_FORMAT(b.updated_at, '%Y-%m') = DATE_FORMAT(mr.month_date, '%Y-%m')
+    GROUP BY
+        DATE_FORMAT(mr.month_date, '%Y-%m')
+    ORDER BY
+        DATE_FORMAT(mr.month_date, '%Y-%m') DESC;
 
-# Change database collate to case-sensitive comparing with varchar
-ALTER TABLE users MODIFY username VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
+    DROP TEMPORARY TABLE IF EXISTS month_range;
+END;
+call get_host_income_by_month('mike_j', 12);
+
+DROP PROCEDURE IF EXISTS get_host_income_by_year;
+CREATE PROCEDURE get_host_income_by_year(
+    IN _username VARCHAR(255),
+    IN _numYears INT
+)
+BEGIN
+    -- Create a temporary table to hold all years in the range, but have to use DATE type
+    -- cause SQL do not have YEAR type
+    DROP TEMPORARY TABLE IF EXISTS year_range;
+    CREATE TEMPORARY TABLE year_range (year_date DATE);
+    SET @counter := 0;
+    WHILE @counter < _numYears DO
+            INSERT INTO year_range (year_date)
+            VALUES (DATE_SUB(DATE_FORMAT(CURRENT_DATE(), '%Y-01-01'), INTERVAL @counter YEAR));
+            SET @counter := @counter + 1;
+        END WHILE;
+#     select * from year_range;
+
+    SELECT
+        COALESCE(SUM(b.price), 0) AS total_income
+    FROM
+        year_range yr
+            LEFT JOIN (
+            SELECT
+                b.updated_at,
+                b.price
+            FROM
+                bookings b
+                    JOIN
+                houses h ON b.house_id = h.id
+                    JOIN
+                users u ON h.host_id = u.id
+            WHERE
+                u.username = _username
+              AND b.status = 'CHECKED_OUT'
+        ) AS b ON YEAR(b.updated_at) = YEAR(yr.year_date)
+    GROUP BY
+        YEAR(yr.year_date)
+    ORDER BY
+        YEAR(yr.year_date) DESC;
+
+    DROP TEMPORARY TABLE IF EXISTS year_range;
+END;
+call get_host_income_by_year('sarah_smith', 5);
 
 drop procedure if exists search_bookings_of_host;
 create procedure search_bookings_of_host(
@@ -365,131 +455,96 @@ values
     ('2025-02-20 13:07:43.708469', 5),
     ('2025-02-09 13:07:43.708469', 6);
 
-insert into availabilities (start_date, end_date, house_id)
-values
--- House 1
-    ('2025-03-01', '2025-04-15', 1),
+INSERT INTO availabilities (start_date, end_date, house_id)
+VALUES
+    ('2023-01-01', '2024-06-30', 1),
+    ('2024-07-30', '2025-04-15', 1),
     ('2025-05-01', '2025-05-15', 1),
     ('2025-05-31', '2025-05-31', 1),
-    ('2025-06-10', '2025-06-30', 1),
-    ('2025-07-30', '2027-10-10', 1),
+    ('2025-06-10', '2027-12-31', 1),
 
--- House 2
-    ('2025-02-15', '2025-03-31', 2),
-    ('2025-04-10', '2025-04-30', 2),
-    ('2025-05-10', '2025-05-31', 2),
-    ('2025-07-01', '2027-10-10', 2),
+    ('2023-01-01', '2024-03-31', 2),
+    ('2024-04-10', '2024-04-30', 2),
+    ('2024-05-10', '2024-05-31', 2),
+    ('2024-07-01', '2027-12-31', 2),
 
--- House 3
-    ('2025-03-15', '2025-04-30', 3),
-    ('2025-06-01', '2025-07-15', 3),
-    ('2025-07-31', '2027-10-10',3),
+    ('2023-01-01', '2024-04-30', 3),
+    ('2024-06-01', '2024-07-15', 3),
+    ('2024-07-31', '2027-12-31', 3),
 
--- House 4
-    ('2025-02-01', '2025-02-25', 4),
-    ('2025-03-01', '2025-03-15', 4),
-    ('2025-05-15', '2025-06-30', 4),
-    ('2025-07-15', '2027-10-10', 4),
+    ('2023-01-01', '2024-03-15', 4),
+    ('2024-05-15', '2024-06-30', 4),
+    ('2024-07-15', '2025-02-25', 4),
+    ('2025-03-01', '2027-12-31', 4),
 
--- House 5
-    ('2025-04-01', '2025-05-31', 5),
-    ('2025-07-15', '2025-08-31', 5),
-    ('2025-09-30', '2027-10-10', 5),
+    ('2023-01-01', '2024-05-31', 5),
+    ('2024-06-15', '2024-08-31', 5),
+    ('2024-09-30', '2027-12-31', 5),
 
--- House 6
-    ('2025-03-01', '2025-04-30', 6),
-    ('2025-06-15', '2025-07-31', 6),
-    ('2025-10-31', '2027-10-10', 6),
+    ('2023-01-01', '2024-09-30', 6),
+    ('2024-10-31', '2025-04-30', 6),
+    ('2025-06-15', '2027-12-31', 6),
 
--- House 7
-    ('2025-02-15', '2025-04-15', 7),
-    ('2025-05-01', '2025-06-15', 7),
-    ('2025-09-30', '2027-10-10', 7),
+    ('2023-01-01', '2024-09-15', 7),
+    ('2024-09-30', '2025-04-15', 7),
+    ('2025-05-01', '2027-12-31', 7),
 
--- House 8
-    ('2025-03-15', '2025-05-15', 8),
-    ('2025-06-01', '2025-07-31', 8),
-    ('2025-10-15', '2027-10-10', 8),
+    ('2023-01-01', '2024-09-30', 8),
+    ('2024-10-15', '2025-05-15', 8),
+    ('2025-06-01', '2027-12-31', 8),
 
--- House 9
-    ('2025-04-01', '2025-05-31', 9),
-    ('2025-07-15', '2025-08-31', 9),
-    ('2025-11-15', '2027-10-10', 9),
+    ('2023-01-01', '2024-08-31', 9),
+    ('2024-09-15', '2025-05-31', 9),
+    ('2025-06-15', '2027-12-31', 9),
 
--- House 10
-    ('2025-03-01', '2025-04-30', 10),
-    ('2025-06-01', '2025-07-31', 10),
-    ('2025-11-30', '2027-10-10', 10);
+    ('2023-01-01', '2024-07-31', 10),
+    ('2024-08-30', '2025-04-30', 10),
+    ('2025-06-01', '2027-12-31', 10);
 
 INSERT INTO bookings (start_date, end_date, status, updated_at, price, house_id, user_id)
 VALUES
-  ('2025-04-16', '2025-04-30', 'WAITING', '2025-02-16 14:30:00', 11200000, 1, 4),
-  ('2025-05-16', '2025-05-30', 'WAITING', '2025-02-17 14:30:00', 11200000, 1, 4),
-  ('2025-06-01', '2025-06-09', 'WAITING', '2025-02-18 14:30:00', 6400000, 1, 5),
-  ('2025-07-01', '2025-07-29', 'WAITING', '2025-02-19 14:30:00', 23200000, 1, 5),
+    ('2024-07-01', '2024-07-29', 'CHECKED_OUT', '2024-07-29 14:30:00', 23200000, 1, 5),
+    ('2025-04-16', '2025-04-30', 'WAITING', '2025-02-16 14:30:00', 11200000, 1, 4),
+    ('2025-05-16', '2025-05-30', 'WAITING', '2025-02-17 14:30:00', 11200000, 1, 4),
+    ('2025-06-01', '2025-06-09', 'WAITING', '2025-02-18 14:30:00', 6400000, 1, 5),
 
-  ('2025-04-01', '2025-04-09', 'WAITING', '2025-01-16 14:30:00', 12000000, 2, 6),
-  ('2025-05-01', '2025-05-09', 'WAITING', '2025-01-17 14:30:00', 12000000, 2, 6),
-  ('2025-06-01', '2025-06-30', 'WAITING', '2025-01-18 14:30:00', 43500000, 2, 7),
+    ('2024-04-01', '2024-04-09', 'CHECKED_OUT', '2024-04-09 14:30:00', 12000000, 2, 6),
+    ('2024-05-01', '2024-05-09', 'CHECKED_OUT', '2024-05-09 14:30:00', 12000000, 2, 6),
+    ('2024-06-01', '2024-06-30', 'CHECKED_OUT', '2024-06-30 14:30:00', 43500000, 2, 7),
 
-  ('2025-05-01', '2025-05-31', 'WAITING', '2025-02-20 14:30:00', 27000000, 3, 8),
-  ('2025-07-16', '2025-07-30', 'WAITING', '2025-02-21 14:30:00', 12600000, 3, 9),
+    ('2024-05-01', '2024-05-31', 'CHECKED_OUT', '2024-05-31 14:30:00', 27000000, 3, 8),
+    ('2024-07-16', '2024-07-30', 'CHECKED_OUT', '2024-07-30 14:30:00', 12600000, 3, 9),
 
-  ('2025-02-26', '2025-02-28', 'CHECKED_IN', '2025-02-22 14:30:00', 1200000, 4, 10),
-  ('2025-03-16', '2025-05-14', 'WAITING', '2025-02-23 14:30:00', 36000000, 4, 10),
-  ('2025-07-01', '2025-07-14', 'WAITING', '2025-02-24 14:30:00', 8400000, 4, 10),
+    ('2024-03-16', '2024-05-14', 'CHECKED_OUT', '2024-05-14 14:30:00', 36000000, 4, 10),
+    ('2024-07-01', '2024-07-14', 'CHECKED_OUT', '2024-07-14 14:30:00', 8400000, 4, 10),
+    ('2025-02-26', '2025-02-28', 'CHECKED_IN', '2024-02-26 14:30:00', 1200000, 4, 10),
 
-  ('2025-06-01', '2025-07-14', 'WAITING', '2025-02-25 14:30:00', 35700000, 5, 4),
-  ('2025-09-01', '2025-09-29', 'WAITING', '2025-02-20 14:30:00', 23800000, 5, 5),
+    ('2024-06-01', '2024-06-14', 'CHECKED_OUT', '2024-06-14 14:30:00', 35700000, 5, 4),
+    ('2024-09-01', '2024-09-29', 'CHECKED_OUT', '2024-09-29 14:30:00', 23800000, 5, 5),
 
-  ('2025-05-01', '2025-06-14', 'WAITING', '2025-02-16 14:30:00', 42750000, 6, 6),
-  ('2025-08-01', '2025-10-30', 'WAITING', '2025-02-16 14:30:00', 85500000, 6, 7),
+    ('2024-10-01', '2024-10-30', 'CHECKED_OUT', '2024-10-30 14:30:00', 85500000, 6, 7),
+    ('2025-05-01', '2025-06-14', 'WAITING', '2025-02-16 14:30:00', 42750000, 6, 6),
 
-  ('2025-04-16', '2025-04-30', 'WAITING', '2025-02-17 14:30:00', 15000000, 7, 8),
-  ('2025-06-16', '2025-09-29', 'WAITING', '2025-02-17 14:30:00', 106000000, 7, 9),
+    ('2024-09-16', '2024-09-29', 'CHECKED_OUT', '2024-09-29 14:30:00', 106000000, 7, 9),
+    ('2025-04-16', '2025-04-30', 'WAITING', '2025-02-17 14:30:00', 15000000, 7, 8),
 
-  ('2025-05-16', '2025-05-31', 'WAITING', '2025-02-18 14:30:00', 10500000, 8, 10),
-  ('2025-08-01', '2025-10-14', 'WAITING', '2025-02-18 14:30:00', 51800000, 8, 4),
+    ('2024-10-01', '2024-10-14', 'CHECKED_OUT', '2024-10-14 14:30:00', 51800000, 8, 4),
+    ('2025-05-16', '2025-05-31', 'WAITING', '2025-02-18 14:30:00', 10500000, 8, 10),
 
-  ('2025-06-01', '2025-07-14', 'WAITING', '2025-02-19 14:30:00', 51600000, 9, 5),
-  ('2025-09-01', '2025-09-14', 'WAITING', '2025-02-19 14:30:00', 16800000, 9, 6),
+    ('2024-09-01', '2024-09-14', 'CHECKED_OUT', '2024-09-14 14:30:00', 16800000, 9, 6),
+    ('2025-06-01', '2025-06-14', 'WAITING', '2025-02-14 14:30:00', 51600000, 9, 5),
 
-  ('2025-05-01', '2025-05-31', 'WAITING', '2025-02-20 14:30:00', 42000000, 10, 11),
-  ('2025-08-01', '2025-08-29', 'WAITING', '2025-02-17 14:30:00', 40600000, 10, 11);
+    ('2024-08-01', '2024-08-29', 'CHECKED_OUT', '2024-08-29 14:30:00', 40600000, 10, 11),
+    ('2025-05-01', '2025-05-31', 'WAITING', '2025-02-20 14:30:00', 42000000, 10, 11);
 
-insert into notifications (created_at, message, host_id)
-values
-    ('2025-02-16 14:30:00', '"John Doe" BOOKED the house "Hoàn Kiếm Villa" on 16/02/2025', 2),
-    ('2025-02-17 14:30:00', '"John Doe" BOOKED the house "Hoàn Kiếm Villa" on 17/02/2025', 2),
-    ('2025-02-18 14:30:00', '"Michael Johnson" BOOKED the house "Hoàn Kiếm Villa" on 18/02/2025', 2),
-    ('2025-02-19 14:30:00', '"Michael Johnson" BOOKED the house "Hoàn Kiếm Villa" on 19/02/2025', 2),
-
-    ('2025-02-20 14:30:00', '"Sarah Smith" BOOKED the house "Ba Đình Villa" on 20/02/2025', 2),
-    ('2025-02-21 14:30:00', '"Sarah Smith" BOOKED the house "Ba Đình Villa" on 21/02/2025', 2),
-    ('2025-02-22 14:30:00', '"David Wilson" BOOKED the house "Ba Đình Villa" on 22/02/2025', 2),
-
-    ('2025-02-23 14:30:00', '"Lisa Taylor" BOOKED the house "Tây Hồ Lakeview Apartment" on 23/02/2025', 2),
-    ('2025-02-24 14:30:00', '"Robert Miller" BOOKED the house "Tây Hồ Lakeview Apartment" on 24/02/2025', 2),
-
-    ('2025-02-25 14:30:00', '"Jennifer Davis" BOOKED the house "Kim Mã Studio" on 25/02/2025', 2),
-    ('2025-02-26 14:30:00', '"Jennifer Davis" BOOKED the house "Kim Mã Studio" on 26/02/2025', 2),
-    ('2025-02-23 14:30:00', '"Jennifer Davis" BOOKED the house "Kim Mã Studio" on 23/02/2025', 2),
-
-    ('2025-02-24 14:30:00', '"John Doe" BOOKED the house "Old Quarter Charm House" on 24/02/2025', 2),
-    ('2025-02-25 14:30:00', '"Michael Johnson" BOOKED the house "Old Quarter Charm House" on 25/02/2025', 2),
-
-    ('2025-02-16 14:30:00', '"Sarah Smith" BOOKED the house "Láng Hạ Modern Condo" on 16/02/2025', 3),
-    ('2025-02-17 14:30:00', '"David Wilson" BOOKED the house "Láng Hạ Modern Condo" on 17/02/2025', 3),
-
-    ('2025-02-18 14:30:00', '"Lisa Taylor" BOOKED the house "Thanh Xuân Luxury Condo" on 18/02/2025', 3),
-    ('2025-02-19 14:30:00', '"Robert Miller" BOOKED the house "Thanh Xuân Luxury Condo" on 19/02/2025', 3),
-
-    ('2025-02-20 14:30:00', '"Emily Brown" BOOKED the house "West Lake Retreat" on 20/02/2025', 3),
-    ('2025-02-21 14:30:00', '"William Jones" BOOKED the house "West Lake Retreat" on 21/02/2025', 3),
-
-    ('2025-02-22 14:30:00', '"Michael Johnson" BOOKED the house "Đội Cấn Family House" on 22/02/2025', 3),
-    ('2025-02-23 14:30:00', '"Sarah Smith" BOOKED the house "Đội Cấn Family House" on 23/02/2025', 3),
-
-    ('2025-02-24 14:30:00', '"Lisa Taylor" BOOKED the house "French Colonial Residence" on 24/02/2025', 3),
-    ('2025-02-25 14:30:00', '"Lisa Taylor" BOOKED the house "French Colonial Residence" on 25/02/2025', 3);
+INSERT INTO notifications (created_at, message, host_id)
+VALUES
+    ('2025-02-16 14:30:00', '"Lisa Taylor" BOOKED the house "Hoàn Kiếm Villa" on 16/02/2025', 2),
+    ('2025-02-17 14:30:00', '"Lisa Taylor" BOOKED the house "Hoàn Kiếm Villa" on 17/02/2025', 2),
+    ('2025-02-18 14:30:00', '"David Wilson" BOOKED the house "Hoàn Kiếm Villa" on 18/02/2025', 2),
+    ('2025-02-16 14:30:00', '"William Jones" BOOKED the house "Láng Hạ Modern Condo" on 16/02/2025', 3),
+    ('2025-02-17 14:30:00', '"Jennifer Davis" BOOKED the house "Thanh Xuân Luxury Condo" on 17/02/2025', 3),
+    ('2025-02-18 14:30:00', '"Mary Anderson" BOOKED the house "West Lake Retreat" on 18/02/2025', 3),
+    ('2025-02-14 14:30:00', '"Lisa Taylor" BOOKED the house "Đội Cấn Family House" on 14/02/2025', 3),
+    ('2025-02-20 14:30:00', '"Jennifer Davis" BOOKED the house "French Colonial Residence" on 20/02/2025', 3);
 

@@ -3,6 +3,7 @@ import com.codegym.mapper.BookingMapper;
 import com.codegym.model.Availability;
 import com.codegym.model.Booking;
 import com.codegym.model.House;
+import com.codegym.model.constants.BookingStatus;
 import com.codegym.model.dto.booking.BookingDTO;
 import com.codegym.model.dto.user.UserRentalHistoryDTO;
 import com.codegym.repository.IBookingRepository;
@@ -80,7 +81,8 @@ public  class BookingService implements IBookingService {
             booking = bookingOptional.get();
         }
         // 1. Delete booking from DB
-        bookingRepository.deleteById(id);
+        booking.setStatus(BookingStatus.CANCELED);
+        bookingRepository.save(booking);
         // 2. Find two availabilities at the two time end of booking of house & delete them
         House house = booking.getHouse();
         Availability endAvailability = availabilityService.findByStartDate(house, booking.getEndDate().plusDays(1));
@@ -113,7 +115,7 @@ public  class BookingService implements IBookingService {
 
     @Override
     public List<Booking> getBookingsByHouseId(Long houseId) {
-        return bookingRepository.findAllByHouseId(houseId);
+        return bookingRepository.findAllByHouseId(houseId, BookingStatus.CANCELED);
     }
 
     @Override
@@ -145,6 +147,6 @@ public  class BookingService implements IBookingService {
   
     @Override
     public List<Booking> findAllByUserId(Long userId) {
-        return bookingRepository.findAllByUserId(userId);
+        return bookingRepository.findAllByUserId(userId, BookingStatus.CANCELED);
     }
 }
