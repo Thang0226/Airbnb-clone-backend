@@ -22,4 +22,6 @@ public interface IHouseService extends IGenerateService<House> {
     Page<HouseListDTO> getHouseListByHostId(Long id, Pageable pageable);
 
     Page<HouseListDTO> searchHostHouse(Long id, String houseName, String status, Pageable pageable);
+
+    void updateHouseStatus(Long houseId, String status);
 }

@@ -1,14 +1,18 @@
 package com.codegym.controller;
 
+import com.codegym.exception.HouseNotFoundException;
 import com.codegym.mapper.BookingDTOMapper;
+import com.codegym.mapper.HouseMaintenanceMapper;
 import com.codegym.model.*;
 import com.codegym.model.constants.HouseStatus;
-import com.codegym.model.dto.NewBookingDTO;
+import com.codegym.model.dto.booking.NewBookingDTO;
 import com.codegym.model.dto.house.HouseDateDTO;
 import com.codegym.model.dto.SearchDTO;
 import com.codegym.model.dto.house.HouseListDTO;
+import com.codegym.model.dto.house.HouseMaintenanceRecordDTO;
 import com.codegym.service.availability.IAvailabilityService;
 import com.codegym.service.booking.IBookingService;
+import com.codegym.service.house.IHouseMaintenanceService;
 import com.codegym.service.user.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -52,7 +56,13 @@ public class HouseController {
     private IAvailabilityService availabilityService;
 
     @Autowired
+    private IHouseMaintenanceService houseMaintenanceService;
+
+    @Autowired
     private NotificationController notificationController;
+
+    @Autowired
+    private HouseMaintenanceMapper houseMaintenanceMapper;
 
     @GetMapping
     public ResponseEntity<List<House>> getHousesForAvailable() {
@@ -365,5 +375,28 @@ public class HouseController {
                 status,
                 pageable);
         return ResponseEntity.ok(houses);
+    }
+
+    @PostMapping("/create-maintenance-record")
+    public ResponseEntity<?> createMaintenanceRecord(@RequestBody HouseMaintenanceRecordDTO dto) {
+        HouseMaintenance houseMaintenance = houseMaintenanceMapper.toHouseMaintenance(dto, houseService);
+        houseMaintenanceService.save(houseMaintenance);
+        HouseMaintenanceRecordDTO responseDTO = houseMaintenanceMapper.toHouseMaintenanceRecordDTO(houseMaintenance);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
+    }
+
+    @GetMapping("/{houseId}/maintenance-records")
+    public ResponseEntity<?> getMaintenanceRecords(@PathVariable Long houseId) {
+        return ResponseEntity.ok(houseMaintenanceService.findByHouseId(houseId));
+    }
+
+    @PutMapping("/{houseId}/update-status")
+    public ResponseEntity<?> updateStatus(@PathVariable Long houseId, @RequestParam String status) {
+        try {
+            houseService.updateHouseStatus(houseId, status);
+            return ResponseEntity.ok("House status updated");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 }
