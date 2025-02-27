@@ -2,6 +2,7 @@ package com.codegym.controller;
 
 import com.codegym.mapper.BookingDTOMapper;
 import com.codegym.model.Booking;
+import com.codegym.model.House;
 import com.codegym.model.User;
 import com.codegym.model.dto.booking.BookingDTO;
 import com.codegym.model.dto.booking.BookingSearchDTO;
@@ -17,7 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.List;
@@ -33,6 +36,9 @@ public class BookingController {
 
     @Autowired
     private IUserService userService;
+
+    @Autowired
+    private NotificationController notificationController;
 
     @GetMapping
     public ResponseEntity<PagedModel<?>> getBookings(Pageable pageable, PagedResourcesAssembler<BookingDTO> assembler) {
@@ -81,7 +87,7 @@ public class BookingController {
         return new ResponseEntity<>(userBookings, HttpStatus.OK);
     }
 
-    @PostMapping("/{id}")
+    @PostMapping("/{id}/cancel")
     public ResponseEntity<?> deleteUserBooking(@PathVariable Long id, @RequestBody String username) {
         Optional<Booking> bookingOptional = bookingService.findById(id);
         if (bookingOptional.isEmpty()) {
@@ -96,6 +102,13 @@ public class BookingController {
         }
 
         bookingService.deleteById(id);
+        // Notify host
+        House house = booking.getHouse();
+        User host = house.getHost();
+        String message = '"'+booking.getUser().getUsername()+'"'+" CANCELED booking of the house "+'"'+booking.getHouse().getHouseName()+'"'
+                + " on " + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        notificationController.sendNotification(host, message);
+
         return getBookingsByUsernameOfUser(username);
     }
 }

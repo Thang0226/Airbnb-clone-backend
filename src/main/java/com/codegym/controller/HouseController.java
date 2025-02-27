@@ -119,7 +119,7 @@ public class HouseController {
 
             // Notify host
             User host = house.getHost();
-            String message = '"'+booking.getUser().getUsername()+'"'+" booked the house "+'"'+booking.getHouse().getHouseName()+'"'
+            String message = '"'+booking.getUser().getUsername()+'"'+" BOOKED the house "+'"'+booking.getHouse().getHouseName()+'"'
                     + " on " + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
             notificationController.sendNotification(host, message);
 
