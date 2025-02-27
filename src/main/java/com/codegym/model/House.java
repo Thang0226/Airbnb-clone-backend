@@ -26,6 +26,7 @@ public class House {
     private String address;
     private int bedrooms;
     private int bathrooms;
+    @Column(length = 2000)
     private String description;
     private int price;
 
