@@ -160,9 +160,9 @@ public class HouseController {
         return ResponseEntity.ok(houses);
     }
 
+    // Create House
     @Value("${FILE_UPLOAD}")
     private String UPLOAD_DIR;
-
     @PostMapping(path ="/create", consumes = { "multipart/form-data" })
     public ResponseEntity<?> createHouse(@ModelAttribute HouseDTO houseDTO) {
         try {
@@ -245,23 +245,47 @@ public class HouseController {
                     .body("Failed to create house: " + e.getMessage());
         }
     }
+    private void addDefaultImage(House house) throws IOException {
+        String defaultFileName = "default.png";
+        Path sourcePath = Paths.get("src/main/resources/default.png");
+        Path targetPath = Paths.get(UPLOAD_DIR, defaultFileName);
+
+        // Create directories if they do not exist
+        Files.createDirectories(targetPath.getParent());
+
+        // Only copy if default image doesn't exist in upload directory
+        if (!Files.exists(targetPath)) {
+            Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+        }
+
+        HouseImage defaultImage = new HouseImage();
+        defaultImage.setFileName(defaultFileName);
+        defaultImage.setHouse(house);
+        house.getHouseImages().add(defaultImage);
+    }
 
 
-
-    // Upload images:
+    // Update House + Upload images:
+    @PutMapping("/update/{houseId}")
+    public ResponseEntity<?> updateHouse(@PathVariable Long houseId, @ModelAttribute HouseDTO houseDTO) {
+        try {
+            houseService.updateHouse(houseId, houseDTO);
+            // Return the updated house
+            Optional<House> updatedHouse = houseService.findById(houseId);
+            if (updatedHouse.isPresent()) {
+                return ResponseEntity.ok(updatedHouse.get());
+            }
+            return ResponseEntity.ok("House updated successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update house: " + e.getMessage());
+        }
+    }
     @GetMapping("/{houseId}/images")
     public ResponseEntity<List<HouseImage>> getHouseImages(@PathVariable Long houseId) {
         return ResponseEntity.ok(houseService.findImagesByHouseId(houseId));
     }
-//    @PostMapping("/{houseId}/images")
-//    public ResponseEntity<String> uploadImages(@PathVariable Long houseId, @RequestParam("files") List<MultipartFile> files) {
-//        try {
-//            houseService.saveHouseImages(houseId, files, new ArrayList<>());
-//            return ResponseEntity.ok("Images uploaded.");
-//        } catch (IOException e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload images.");
-//        }
-//    }
     @DeleteMapping("/images/{imageId}")
     public ResponseEntity<?> deleteImage(@PathVariable Long imageId, @RequestParam Long houseId) {
         try {
@@ -285,44 +309,6 @@ public class HouseController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete image: " + e.getMessage());
         }
     }
-    @PutMapping("/update/{houseId}")
-    public ResponseEntity<?> updateHouse(@PathVariable Long houseId, @ModelAttribute HouseDTO houseDTO) {
-        try {
-            houseService.updateHouse(houseId, houseDTO);
-            // Return the updated house
-            Optional<House> updatedHouse = houseService.findById(houseId);
-            if (updatedHouse.isPresent()) {
-                return ResponseEntity.ok(updatedHouse.get());
-            }
-            return ResponseEntity.ok("House updated successfully.");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update house: " + e.getMessage());
-        }
-    }
-
-    // For create house
-    private void addDefaultImage(House house) throws IOException {
-        String defaultFileName = "default.png";
-        Path sourcePath = Paths.get("src/main/resources/default.png");
-        Path targetPath = Paths.get(UPLOAD_DIR, defaultFileName);
-
-        // Create directories if they do not exist
-        Files.createDirectories(targetPath.getParent());
-
-        // Only copy if default image doesn't exist in upload directory
-        if (!Files.exists(targetPath)) {
-            Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-        }
-
-        HouseImage defaultImage = new HouseImage();
-        defaultImage.setFileName(defaultFileName);
-        defaultImage.setHouse(house);
-        house.getHouseImages().add(defaultImage);
-    }
-
-    // end upload image
 
 
 

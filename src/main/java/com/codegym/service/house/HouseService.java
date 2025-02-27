@@ -10,6 +10,7 @@ import com.codegym.repository.IHouseImageRepository;
 import com.codegym.repository.IHouseRepository;
 import com.codegym.service.user.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -21,7 +22,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -110,13 +113,14 @@ public class HouseService implements IHouseService {
         return new PageImpl<>(houses, pageable, houses.size());
     }
 
-// Upload image: find image by house id, save, delete
 
     @Override
     public List<HouseImage> findImagesByHouseId(Long houseId) {
         return houseImageRepository.findByHouseId(houseId);
     }
-
+    // Update house details
+    @Value("${FILE_UPLOAD}")
+    private String UPLOAD_DIR;
     @Override
     public void updateHouse(Long houseId, HouseDTO houseDTO) throws IOException {
         House house = houseRepository.findById(houseId)
@@ -151,43 +155,8 @@ public class HouseService implements IHouseService {
             }
         }
 
-        // Handle image updates
+        // Update images
         handleHouseImages(house, houseDTO);
-//        // Merge new + old images
-//        List<HouseImage> existingImages = houseImageRepository.findByHouseId(houseId);
-//        List<Long> existingImageIds = houseDTO.getExistingImageIds();
-//
-//        // Remove images that were NOT included in the request
-//        List<HouseImage> updatedImages = existingImages.stream()
-//                .filter(img -> existingImageIds.contains(img.getId()))
-//                .toList();
-//
-//        // Add new images
-//        if (houseDTO.getHouseImages() != null && !houseDTO.getHouseImages().isEmpty()) {
-//            for (MultipartFile file : houseDTO.getHouseImages()) {
-//                if (file.getContentType() == null || (!file.getContentType().equals("image/jpeg") && !file.getContentType().equals("image/png"))) {
-//                    continue; // Skip invalid image types
-//                }
-//
-//                HouseImage newImage = new HouseImage();
-//                newImage.setFileName(file.getOriginalFilename());
-//                newImage.setData(file.getBytes());
-//                newImage.setHouse(house);
-//                updatedImages.add(newImage);
-//            }
-//        }
-//
-//        // If no images remain, add a default image
-//        if (updatedImages.isEmpty()) {
-//            HouseImage defaultImage = new HouseImage();
-//            defaultImage.setFileName("default.png");
-//            defaultImage.setData(loadDefaultImage());
-//            defaultImage.setHouse(house);
-//            updatedImages.add(defaultImage);
-//        }
-//
-//        house.setHouseImages(updatedImages);
-        // Save all updates
         houseRepository.save(house);
     }
     private void handleHouseImages(House house, HouseDTO houseDTO) throws IOException {
@@ -219,91 +188,23 @@ public class HouseService implements IHouseService {
                     continue;
                 }
 
+                // Add to folder
+                String fileName = file.getOriginalFilename();
+                Path filePath = Paths.get(UPLOAD_DIR, fileName);
+                // Create directories if they do not exist
+                Files.createDirectories(filePath.getParent());
+                // Save file to disk
+                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
                 HouseImage newImage = new HouseImage();
-                newImage.setFileName(file.getOriginalFilename());
-//                newImage.setData(file.getBytes());
+                newImage.setFileName(fileName);
                 newImage.setHouse(house);
                 updatedImages.add(newImage);
             }
         }
 
-        // 5. Check if we have any images (from updatedImages)
-        // If not, add a default image
-        // Only add default image if no images remain AND no new images were uploaded
-//        if (updatedImages.isEmpty()) {
-//            // Look for existing default image
-//            HouseImage defaultImage = allExistingImages.stream()
-//                    .filter(img -> "default.png".equals(img.getFileName()))
-//                    .findFirst()
-//                    .orElse(null);
-//
-//            if (defaultImage == null) {
-//                // Create new default image
-//                defaultImage = new HouseImage();
-//                defaultImage.setFileName("default.png");
-//                defaultImage.setData(loadDefaultImage());
-//                defaultImage.setHouse(house);
-//            }
-//
-//            updatedImages.add(defaultImage);
-//        } else {
-//            // If we have actual images, make sure we remove any default image
-//            updatedImages = updatedImages.stream()
-//                    .filter(img -> !"default.png".equals(img.getFileName()))
-//                    .collect(Collectors.toList());
-//        }
-
         // 6. Update the house with the final list of images
         house.getHouseImages().clear();
         house.getHouseImages().addAll(updatedImages);
     }
-
-    @Override
-    public void saveHouseImages(Long houseId, List<MultipartFile> files, List<Long> existingImageIds) throws IOException {
-        House house = houseRepository.findById(houseId)
-                .orElseThrow(() -> new RuntimeException("House not found"));
-
-        // Keep images user didn't delete
-        List<HouseImage> existingImages = houseImageRepository.findByHouseId(houseId)
-                .stream()
-                .filter(image -> existingImageIds.contains(image.getId())) // Only keep images user didn't delete
-                .toList();
-
-        // Add new images
-        for (MultipartFile file : files) {
-            HouseImage image = new HouseImage();
-            image.setFileName(file.getOriginalFilename());
-//            image.setData(file.getBytes());
-            image.setHouse(house);
-            existingImages.add(image);
-        }
-
-        // Save updated image list
-        house.setHouseImages(existingImages);
-        houseRepository.save(house);
-    }
-
-    @Override
-    public void deleteHouseImage(Long imageId, Long houseId) {
-        houseImageRepository.deleteById(imageId);
-
-//        if (houseImageRepository.findByHouseId(houseId).isEmpty()) {
-//            HouseImage defaultImage = new HouseImage();
-//            defaultImage.setFileName("default.png");
-//            defaultImage.setData(loadDefaultImage());
-//            defaultImage.setHouse(houseRepository.findById(houseId).orElseThrow());
-//            houseImageRepository.save(defaultImage);
-//        }
-    }
-
-//    private byte[] loadDefaultImage() {
-//        // Load default image from resources
-//        try {
-//            Resource resource = new ClassPathResource("src/main/resources/default.png");
-//            return FileCopyUtils.copyToByteArray(resource.getInputStream());
-////            return Files.readAllBytes(Paths.get(""));
-//        } catch (IOException e) {
-//            throw new RuntimeException("Default image not found.");
-//        }
-//    }
 }

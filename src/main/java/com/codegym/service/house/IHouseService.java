@@ -29,9 +29,5 @@ public interface IHouseService extends IGenerateService<House> {
 
 
     List<HouseImage> findImagesByHouseId(Long houseId);
-
     void updateHouse(Long houseId, HouseDTO houseDTO) throws IOException;
-
-    void saveHouseImages(Long houseId, List<MultipartFile> files, List<Long> existingImageIds) throws IOException;
-    void deleteHouseImage(Long imageId, Long houseId);
 }
