@@ -28,4 +28,6 @@ public interface IUserRepository extends JpaRepository<User, Long> {
 
     @Query(nativeQuery = true, value = "call get_host_info(:hostId)")
     HostInfoDTO getHostInfo(@Param("hostId") Long hostId);
+
+
 }

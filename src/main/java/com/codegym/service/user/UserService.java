@@ -125,9 +125,21 @@ public class UserService implements IUserService, UserDetailsService {
         return new PageImpl<>(pagedList, pageable, hosts.size());
     }
 
-
     @Override
     public HostInfoDTO getHostInfo(Long userId) {
         return userRepository.getHostInfo(userId);
+    }
+
+    @Override
+    public List<Integer> getIncomeByMonth(String hostUsername, Integer numberOfMonth) {
+        return new Integer[0];
+    }
+    @Override
+    public List<Integer> getIncomeByQuarter(String hostUsername, Integer numberOfQuarter) {
+        return new Integer[0];
+    }
+    @Override
+    public List<Integer> getIncomeByYear(String hostUsername, Integer numberOfYear) {
+        return new Integer[0];
     }
 }

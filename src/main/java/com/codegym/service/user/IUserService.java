@@ -8,6 +8,7 @@ import com.codegym.service.IGenerateService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface IUserService extends IGenerateService<User> {
@@ -30,4 +31,8 @@ public interface IUserService extends IGenerateService<User> {
     Page<HostInfoDTO> getAllHostsInfo(Pageable pageable);
 
     HostInfoDTO getHostInfo(Long userId);
+
+    List<Integer> getIncomeByMonth(String hostUsername, Integer numberOfMonth);
+    List<Integer> getIncomeByQuarter(String hostUsername, Integer numberOfQuarter);
+    List<Integer> getIncomeByYear(String hostUsername, Integer numberOfYear);
 }
