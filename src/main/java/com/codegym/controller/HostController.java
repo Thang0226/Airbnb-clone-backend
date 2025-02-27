@@ -31,4 +31,17 @@ public class HostController {
         List<Notification> notifications = notificationService.findByHost(host);
         return new ResponseEntity<>(notifications, HttpStatus.OK);
     }
+
+    @GetMapping("/{username}/income-stats")
+    public ResponseEntity<?> getHostIncomeStats(@PathVariable String username, @RequestParam String period) {
+        if (period == null || period.equals("month")) {
+
+        } else if (period.equals("quarter")) {
+
+        } else if (period.equals("year")) {
+
+        } else {
+            return new ResponseEntity<>("Invalid period", HttpStatus.BAD_REQUEST);
+        }
+    }
 }

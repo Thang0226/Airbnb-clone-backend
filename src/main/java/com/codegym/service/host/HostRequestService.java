@@ -31,4 +31,19 @@ public class HostRequestService implements IHostRequestService {
     public void deleteById(Long id) {
         hostRepository.deleteById(id);
     }
+
+    @Override
+    public Integer[] getIncomeByMonth(String hostUsername, Integer numberOfMonth) {
+        return new Integer[0];
+    }
+
+    @Override
+    public Integer[] getIncomeByQuarter(String hostUsername, Integer numberOfQuarter) {
+        return new Integer[0];
+    }
+
+    @Override
+    public Integer[] getIncomeByYear(String hostUsername, Integer numberOfYear) {
+        return new Integer[0];
+    }
 }
