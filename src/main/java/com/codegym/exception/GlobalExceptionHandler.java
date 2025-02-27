@@ -36,4 +36,19 @@ public class GlobalExceptionHandler {
                 "User " + ex.getMessage() + " does not exist",
                 HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(AvailabilityNotFoundException.class)
+    public ResponseEntity<String> handleAvailabilityNotFound(AvailabilityNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(HouseNotFoundException.class)
+    public ResponseEntity<String> handleHouseNotFound(HouseNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(DuplicateMaintenanceException.class)
+    public ResponseEntity<String> handleDuplicateMaintenance(DuplicateMaintenanceException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
 }
