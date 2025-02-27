@@ -16,4 +16,5 @@ public class HouseDTO {
      private Integer price;
      private List<MultipartFile> houseImages;
      private String username;
+     private List<String> existingFiles;
 }

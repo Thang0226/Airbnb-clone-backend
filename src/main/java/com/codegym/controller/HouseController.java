@@ -25,9 +25,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
 
 @RestController
 @CrossOrigin("*")
@@ -152,16 +151,8 @@ public class HouseController {
     @PostMapping(path ="/create", consumes = { "multipart/form-data" })
     public ResponseEntity<?> createHouse(@ModelAttribute HouseDTO houseDTO) {
         try {
-            // Validate house data
-            if (houseDTO.getBedrooms() == null || houseDTO.getBedrooms() < 1 || houseDTO.getBedrooms() > 10) {
-                return ResponseEntity.badRequest().body("Bedrooms must be between 1 and 10");
-            }
-            if (houseDTO.getBathrooms() == null || houseDTO.getBathrooms() < 1 || houseDTO.getBathrooms() > 3) {
-                return ResponseEntity.badRequest().body("Bathrooms must be between 1 and 3");
-            }
-            if (houseDTO.getPrice() == null || houseDTO.getPrice() < 100000) {
-                return ResponseEntity.badRequest().body("Price must be at least 100,000 VND");
-            }
+            ResponseEntity<String> badRequestBody = validateInput(houseDTO);
+            if (badRequestBody != null) return badRequestBody;
 
             // Create house entity
             House house = new House();
@@ -232,32 +223,65 @@ public class HouseController {
         }
     }
 
-    @PutMapping("/update/{houseId}")
-    public ResponseEntity<?> updateHouse(@PathVariable Long houseId, @ModelAttribute HouseDTO houseDTO) {
+
+
+    @PutMapping(path = "/update/{id}", consumes = { "multipart/form-data" })
+    public ResponseEntity<?> updateHouse(@PathVariable Long id,
+                                         @RequestParam(value = "houseName", required = false) String houseName,
+                                         @RequestParam(value = "address", required = false) String address,
+                                         @RequestParam(value = "bedrooms", required = false) Integer bedrooms,
+                                         @RequestParam(value = "bathrooms", required = false) Integer bathrooms,
+                                         @RequestParam(value = "description", required = false) String description,
+                                         @RequestParam(value = "price", required = false) Integer price,
+                                         @RequestParam(value = "username", required = false) String username,
+                                         @RequestParam(value = "houseImages", required = false) List<MultipartFile> houseImages,
+                                         @RequestParam(value = "existingFiles", required = false) List<String> existingFiles) {
+        try {
+            HouseDTO houseDTO = new HouseDTO();
+            houseDTO.setHouseName(houseName);
+            houseDTO.setAddress(address);
+            houseDTO.setBedrooms(bedrooms);
+            houseDTO.setBathrooms(bathrooms);
+            houseDTO.setDescription(description);
+            houseDTO.setPrice(price);
+            houseDTO.setUsername(username);
+            houseDTO.setHouseImages(houseImages);
+            houseDTO.setExistingFiles(existingFiles);
+
+            ResponseEntity<String> validation = houseService.validateInput(houseDTO);
+            if (validation != null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            Optional<House> optionalHouse = houseService.findById(id);
+            if (optionalHouse.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            HouseDTO updatedHouse = houseService.updateHouseDetails(id, houseDTO);
+            return new ResponseEntity<>(updatedHouse, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        /*
         try {
             Optional<House> selectedHouse = houseService.findById(houseId);
-            if(!selectedHouse.isPresent()){
+            if(selectedHouse.isEmpty()){
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("House not found");
             }
             House house = selectedHouse.get();
 
-            if (houseDTO.getBedrooms() == null || houseDTO.getBedrooms() < 1 || houseDTO.getBedrooms() > 10) {
-                return ResponseEntity.badRequest().body("Bedrooms must be between 1 and 10");
-            }
-            if (houseDTO.getBathrooms() == null || houseDTO.getBathrooms() < 1 || houseDTO.getBathrooms() > 3) {
-                return ResponseEntity.badRequest().body("Bathrooms must be between 1 and 3");
-            }
-            if (houseDTO.getPrice() == null || houseDTO.getPrice() < 100000) {
-                return ResponseEntity.badRequest().body("Price must be at least 100,000 VND");
-            }
+            // Validate
+            ResponseEntity<String> badRequestBody = validateInput(houseDTO);
+            if (badRequestBody != null) return badRequestBody;
 
+            // If new details are null, keep the existing value
             house.setHouseName(houseDTO.getHouseName() != null ? houseDTO.getHouseName() : house.getHouseName());
             house.setAddress(houseDTO.getAddress() != null ? houseDTO.getAddress() : house.getAddress());
-            house.setBedrooms(houseDTO.getBedrooms());
-            house.setBathrooms(houseDTO.getBathrooms());
+            house.setBedrooms(houseDTO.getBedrooms() != null ? houseDTO.getBedrooms() : house.getBedrooms());
+            house.setBathrooms(houseDTO.getBathrooms() != null ? houseDTO.getBathrooms() : house.getBathrooms());
             house.setDescription(houseDTO.getDescription() != null ? houseDTO.getDescription() : house.getDescription());
-            house.setPrice(houseDTO.getPrice());
+            house.setPrice(houseDTO.getPrice() != null ? houseDTO.getPrice() : house.getPrice());
 
+            // Find if username has role Host
             if (houseDTO.getUsername() != null) {
                 Optional<User> userOptional = userService.findByUsername(houseDTO.getUsername());
                 if (userOptional.isPresent()) {
@@ -266,39 +290,60 @@ public class HouseController {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username not found");
                 }
             }
+
+            // Handle Images Upload
             List<MultipartFile> newHouseImages = houseDTO.getHouseImages();
+            List<String> existingFiles = houseDTO.getExistingFiles();
+
             if (newHouseImages != null && !newHouseImages.isEmpty()) {
-                // Clear existing images
-                house.getHouseImages().clear();
+                // Clear all existing images, including default.png
+//                for (HouseImage image : house.getHouseImages()) {
+//                    Path imagePath = Paths.get(UPLOAD_DIR, image.getFileName());
+//                    Files.deleteIfExists(imagePath);
+//                }
+//                house.getHouseImages().clear();
 
                 for (MultipartFile image : newHouseImages) {
                     String contentType = image.getContentType();
-                    if (contentType == null || (!contentType.equals("image/jpeg") && !contentType.equals("image/png"))) {
-                        continue; // Skip invalid image types
+                    if (contentType != null && (contentType.equals("image/jpeg") || contentType.equals("image/png"))) {
+                        String fileName = image.getOriginalFilename();
+                        Path filePath = Paths.get(UPLOAD_DIR, fileName);
+                        Files.createDirectories(filePath.getParent());
+                        Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+                        HouseImage houseImage = new HouseImage();
+                        houseImage.setFileName(fileName);
+                        houseImage.setHouse(house);
+                        house.getHouseImages().add(houseImage);
                     }
-
-                    String fileName = image.getOriginalFilename();
-                    Path filePath = Paths.get(UPLOAD_DIR, fileName);
-
-                    // Create directories if they do not exist
-                    Files.createDirectories(filePath.getParent());
-
-                    // Save file to disk
-                    Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-                    // Create and add new HouseImage entity
-                    HouseImage houseImage = new HouseImage();
-                    houseImage.setFileName(fileName);
-                    houseImage.setHouse(house);
-                    house.getHouseImages().add(houseImage);
                 }
-
-                // If no valid images were added, add default image
+            }
+            else if (existingFiles != null && !existingFiles.isEmpty()) {
+                Set<String> filesToKeep = new HashSet<>(existingFiles);
+                List<HouseImage> imagesToRemove = new ArrayList<>();
+                for (HouseImage image : house.getHouseImages()) {
+                    if (!filesToKeep.contains(image.getFileName()) && !image.getFileName().equals("default.png")) {
+                        imagesToRemove.add(image);
+                        Path imagePath = Paths.get(UPLOAD_DIR, image.getFileName());
+                        Files.deleteIfExists(imagePath);
+                    }
+                }
+                house.getHouseImages().removeAll(imagesToRemove);
+            }
+            else {
+                List<HouseImage> imagesToRemove = new ArrayList<>();
+                for (HouseImage image : house.getHouseImages()) {
+                    if (!image.getFileName().equals("default.png")) {
+                        imagesToRemove.add(image);
+                        Path imagePath = Paths.get(UPLOAD_DIR, image.getFileName());
+                        Files.deleteIfExists(imagePath);
+                    }
+                }
+                house.getHouseImages().removeAll(imagesToRemove);
                 if (house.getHouseImages().isEmpty()) {
                     addDefaultImage(house);
                 }
             }
-
             // Save updated house
             houseService.save(house);
             return ResponseEntity.ok(house);
@@ -308,6 +353,58 @@ public class HouseController {
                     .body("Failed to update house: " + e.getMessage());
         }
 
+        */
+    }
+    // Remove image from clicking X icon
+    @DeleteMapping("/update/{id}/images/{imageId}")
+    public ResponseEntity<?> removeImage(@PathVariable Long id, @PathVariable Long imageId) {
+        try {
+            Optional<House> optionalHouse = houseService.findById(id);
+            if (optionalHouse.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            houseService.removeHouseImage(id, imageId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    // Add new images (triggered by file upload)
+    @PostMapping("/{id}/images")
+    public ResponseEntity<Void> addImages(@PathVariable Long id, @RequestParam("images") List<MultipartFile> images) {
+        try {
+            Optional<House> optionalHouse = houseService.findById(id);
+            if (optionalHouse.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            houseService.addHouseImages(id, images);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+    private static ResponseEntity<String> validateInput(HouseDTO houseDTO) {
+        // Validate house data
+        if (houseDTO.getBedrooms() == null || houseDTO.getBedrooms() < 1 || houseDTO.getBedrooms() > 10) {
+            return ResponseEntity.badRequest().body("Bedrooms must be between 1 and 10");
+        }
+        if (houseDTO.getBathrooms() == null || houseDTO.getBathrooms() < 1 || houseDTO.getBathrooms() > 3) {
+            return ResponseEntity.badRequest().body("Bathrooms must be between 1 and 3");
+        }
+        if (houseDTO.getPrice() == null || houseDTO.getPrice() < 100000) {
+            return ResponseEntity.badRequest().body("Price must be at least 100,000 VND");
+        }
+        return null;
     }
 
     private void addDefaultImage(House house) throws IOException {
@@ -328,4 +425,5 @@ public class HouseController {
         defaultImage.setHouse(house);
         house.getHouseImages().add(defaultImage);
     }
+
 }
