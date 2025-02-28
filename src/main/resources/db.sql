@@ -145,7 +145,7 @@ BEGIN
     GROUP BY
         DATE_FORMAT(mr.month_date, '%Y-%m')
     ORDER BY
-        DATE_FORMAT(mr.month_date, '%Y-%m') DESC;
+        DATE_FORMAT(mr.month_date, '%Y-%m');
 
     DROP TEMPORARY TABLE IF EXISTS month_range;
 END;
@@ -190,7 +190,7 @@ BEGIN
     GROUP BY
         YEAR(yr.year_date)
     ORDER BY
-        YEAR(yr.year_date) DESC;
+        YEAR(yr.year_date);
 
     DROP TEMPORARY TABLE IF EXISTS year_range;
 END;
