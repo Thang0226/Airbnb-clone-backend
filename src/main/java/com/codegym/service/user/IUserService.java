@@ -1,12 +1,14 @@
 package com.codegym.service.user;
 
-import com.codegym.model.dto.UserInfoDTO;
+import com.codegym.model.dto.host.HostInfoDTO;
+import com.codegym.model.dto.user.UserInfoDTO;
 import com.codegym.model.User;
-import com.codegym.model.dto.UserProfileDTO;
+import com.codegym.model.dto.user.UserProfileDTO;
 import com.codegym.service.IGenerateService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface IUserService extends IGenerateService<User> {
@@ -23,4 +25,14 @@ public interface IUserService extends IGenerateService<User> {
     UserProfileDTO getUserProfile(String userName);
   
     Page<UserInfoDTO> getAllUsersInfo(Pageable pageable);
+
+    UserInfoDTO getUserInfo(Long userId);
+
+    Page<HostInfoDTO> getAllHostsInfo(Pageable pageable);
+
+    HostInfoDTO getHostInfo(Long userId);
+
+    List<Long> getIncomeByMonth(String hostUsername, Integer numberOfMonth);
+
+    List<Long> getIncomeByYear(String hostUsername, Integer numberOfYear);
 }

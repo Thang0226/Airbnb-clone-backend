@@ -1,7 +1,8 @@
 package com.codegym.model.constants;
 
 public enum BookingStatus {
-
-        PENDING,
-        CONFIRMED
+        WAITING,
+        CHECKED_IN,
+        CHECKED_OUT,
+        CANCELED,
 }

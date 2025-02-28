@@ -22,9 +22,9 @@ public class HouseImage {
     @JsonProperty("id")
     private Long id;
     private String fileName;
+
     @ManyToOne
     @JoinColumn(name = "house_id")
     @JsonBackReference
-    @JsonIgnoreProperties("houseImages")
     private House house;
 }

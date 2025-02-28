@@ -2,8 +2,11 @@ package com.codegym.controller;
 
 import com.codegym.model.User;
 import com.codegym.model.constants.UserStatus;
-import com.codegym.model.dto.UserInfoDTO;
-import com.codegym.service.user.UserService;
+import com.codegym.model.dto.host.HostInfoDTO;
+import com.codegym.model.dto.user.UserInfoDTO;
+import com.codegym.model.dto.user.UserRentalHistoryDTO;
+import com.codegym.service.booking.IBookingService;
+import com.codegym.service.user.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,7 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @RestController
@@ -19,19 +22,14 @@ import java.util.Optional;
 @RequestMapping("/api/admin")
 public class AdminController {
     @Autowired
-    private UserService userService;
+    private IUserService userService;
+
+    @Autowired
+    private IBookingService bookingService;
 
     @GetMapping("/users")
     public ResponseEntity<Page<UserInfoDTO>> getAllUsers(Pageable pageable) {
         return new ResponseEntity<>(userService.getAllUsersInfo(pageable), HttpStatus.OK);
-    }
-
-    @GetMapping("/users/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        Optional<User> user = userService.findById(id);
-        return user.map(value ->
-                        new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @PostMapping("/users")
@@ -39,13 +37,6 @@ public class AdminController {
         userService.save(user);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
-
-//    @PutMapping("/{id}")
-//    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @ModelAttribute UserForm userForm, BindingResult result) {
-//        Optional<User> userOptional = userService.findById(id);
-//        return getResponseEntity(userForm, userOptional, result);
-//    }
-
 
     @DeleteMapping("/users/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
@@ -70,5 +61,41 @@ public class AdminController {
             userService.save(user);
             return new ResponseEntity<>("User unlocked", HttpStatus.OK);
         }
+    }
+
+    @GetMapping("/users/{id}")
+    public ResponseEntity<?> getUserInfo(@PathVariable Long id) {
+        UserInfoDTO userInfo = userService.getUserInfo(id);
+        if (userInfo == null) {
+            return new ResponseEntity<>("User not founded", HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(userInfo, HttpStatus.OK);
+    }
+
+    @GetMapping("/user-rental-history/{id}")
+    public ResponseEntity<Page<UserRentalHistoryDTO>> getUserRentalHistory(@PathVariable Long id, Pageable pageable) {
+        Page<UserRentalHistoryDTO> userRentalHistory = bookingService.getUserRentalHistory(id, pageable);
+
+        return new ResponseEntity<>(userRentalHistory, HttpStatus.OK);
+    }
+
+    @GetMapping("/user-payment/{id}")
+    public ResponseEntity<?> getUserPayment(@PathVariable Long id) {
+        BigDecimal userTotalRentPaid = bookingService.getTotalRentPaidByUserId(id);
+        return new ResponseEntity<>(userTotalRentPaid, HttpStatus.OK);
+    }
+
+    @GetMapping("/hosts")
+    public ResponseEntity<Page<HostInfoDTO>> getAllHosts(Pageable pageable) {
+        return new ResponseEntity<>(userService.getAllHostsInfo(pageable), HttpStatus.OK);
+    }
+
+    @GetMapping("/hosts/{id}")
+    public ResponseEntity<?> getHostInfo(@PathVariable Long id) {
+        HostInfoDTO hostInfo = userService.getHostInfo(id);
+        if (hostInfo == null) {
+            return new ResponseEntity<>("User with id " + id + " is not a host", HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(hostInfo, HttpStatus.OK);
     }
 }

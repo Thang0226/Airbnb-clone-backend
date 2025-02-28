@@ -3,12 +3,19 @@ drop table if exists users_roles;
 drop table if exists house_images;
 drop table if exists bookings;
 drop table if exists availabilities;
+drop table if exists house_maintenance;
 drop table if exists houses;
 drop table if exists host_requests;
+drop table if exists notifications;
 drop table if exists users;
 drop table if exists users_temporary;
 drop table if exists roles;
 use airbnb;
+
+
+
+# Change database collate to case-sensitive comparing with varchar
+ALTER TABLE users MODIFY username VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
 
 
 
@@ -29,7 +36,7 @@ begin
              LEFT JOIN availabilities a ON a.house_id = h.id
     WHERE ( minBedrooms IS NULL OR h.bedrooms >= minBedrooms )
       AND ( minBathrooms IS NULL OR h.bathrooms >= minBathrooms )
-      AND ( address IS NULL OR TRIM(address) = '' OR LOWER(h.address) LIKE LOWER(CONCAT('%', address, '%')) )
+      AND ( address IS NULL OR TRIM(address) = '' OR LOWER(h.address) LIKE CONCAT('%', LOWER(address), '%'))
       AND ( checkIn IS NULL OR (a.start_date <= checkIn AND a.end_date >= checkOut) )
       AND ( minPrice IS NULL OR h.price >= minPrice )
       AND ( maxPrice IS NULL OR h.price <= maxPrice )
@@ -59,12 +66,215 @@ begin
     ORDER BY h.price DESC;
 end;
 
+drop procedure if exists get_host_info;
+create procedure get_host_info(in _id bigint)
+begin
+    select u.id as id,
+           u.username as username,
+           u.avatar as avatar,
+           u.status as status,
+           u.full_name as fullName,
+           u.address as address,
+           u.phone as phone,
+           COALESCE(COUNT(DISTINCT h.id), 0) AS housesForRent,
+           COALESCE(SUM((DATEDIFF(b.end_date, b.start_date) + 1) * b.price), 0) AS totalIncome
+    from users u
+    left join houses h on u.id = h.host_id
+    left join bookings b on h.id = b.house_id and b.status = 'CHECKED_OUT'
+    left join users_roles ur on u.id = ur.user_id
+    where u.id = _id and ur.roles_id = 2
+    GROUP BY u.id;
+end;
+call get_host_info(2);
 
+drop procedure if exists get_all_hosts_info;
+create procedure get_all_hosts_info()
+begin
+    select u.id as id,
+           u.username as username,
+           u.status as status,
+           u.full_name as fullName,
+           u.address as address,
+           u.phone as phone,
+           COALESCE(COUNT(DISTINCT h.id), 0) AS housesForRent,
+           COALESCE(SUM((DATEDIFF(b.end_date, b.start_date) + 1) * b.price), 0) AS totalIncome
+    from users u
+             left join houses h on u.id = h.host_id
+             left join bookings b on h.id = b.house_id and b.status = 'CHECKED_OUT'
+             left join users_roles ur on u.id = ur.user_id
+    where ur.roles_id = 2
+    GROUP BY u.id;
+end;
 
-# Change database collate to case-sensitive comparing with varchar
-ALTER TABLE users MODIFY username VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
+DROP PROCEDURE IF EXISTS get_host_income_by_month;
+CREATE PROCEDURE get_host_income_by_month(
+    IN _username VARCHAR(255),
+    IN _numMonths INT
+)
+BEGIN
+    -- Create a temporary table to hold all months in the range, but have to use DATE type
+    -- cause SQL do not have MONTH type
+    DROP TEMPORARY TABLE IF EXISTS month_range;
+    CREATE TEMPORARY TABLE month_range (month_date DATE);
+    SET @counter := 0;
+    WHILE @counter < _numMonths DO
+            INSERT INTO month_range (month_date)
+            VALUES (DATE_SUB(DATE_FORMAT(CURRENT_DATE(), '%Y-%m-01'), INTERVAL @counter MONTH));
+            SET @counter := @counter + 1;
+        END WHILE;
+#     select * from month_range;
 
+    SELECT
+        COALESCE(SUM(b.price), 0) AS total_income
+    FROM
+        month_range mr
+            LEFT JOIN (
+            SELECT
+                b.updated_at,
+                b.price
+            FROM
+                bookings b
+                    JOIN
+                houses h ON b.house_id = h.id
+                    JOIN
+                users u ON h.host_id = u.id
+            WHERE
+                u.username = _username
+              AND b.status = 'CHECKED_OUT'
+        ) AS b ON DATE_FORMAT(b.updated_at, '%Y-%m') = DATE_FORMAT(mr.month_date, '%Y-%m')
+    GROUP BY
+        DATE_FORMAT(mr.month_date, '%Y-%m')
+    ORDER BY
+        DATE_FORMAT(mr.month_date, '%Y-%m') DESC;
 
+    DROP TEMPORARY TABLE IF EXISTS month_range;
+END;
+call get_host_income_by_month('mike_j', 12);
+
+DROP PROCEDURE IF EXISTS get_host_income_by_year;
+CREATE PROCEDURE get_host_income_by_year(
+    IN _username VARCHAR(255),
+    IN _numYears INT
+)
+BEGIN
+    -- Create a temporary table to hold all years in the range, but have to use DATE type
+    -- cause SQL do not have YEAR type
+    DROP TEMPORARY TABLE IF EXISTS year_range;
+    CREATE TEMPORARY TABLE year_range (year_date DATE);
+    SET @counter := 0;
+    WHILE @counter < _numYears DO
+            INSERT INTO year_range (year_date)
+            VALUES (DATE_SUB(DATE_FORMAT(CURRENT_DATE(), '%Y-01-01'), INTERVAL @counter YEAR));
+            SET @counter := @counter + 1;
+        END WHILE;
+#     select * from year_range;
+
+    SELECT
+        COALESCE(SUM(b.price), 0) AS total_income
+    FROM
+        year_range yr
+            LEFT JOIN (
+            SELECT
+                b.updated_at,
+                b.price
+            FROM
+                bookings b
+                    JOIN
+                houses h ON b.house_id = h.id
+                    JOIN
+                users u ON h.host_id = u.id
+            WHERE
+                u.username = _username
+              AND b.status = 'CHECKED_OUT'
+        ) AS b ON YEAR(b.updated_at) = YEAR(yr.year_date)
+    GROUP BY
+        YEAR(yr.year_date)
+    ORDER BY
+        YEAR(yr.year_date) DESC;
+
+    DROP TEMPORARY TABLE IF EXISTS year_range;
+END;
+call get_host_income_by_year('sarah_smith', 5);
+
+drop procedure if exists search_bookings_of_host;
+create procedure search_bookings_of_host(
+    in _id bigint,
+    in _house_name varchar(255),
+    in _start_date date,
+    in _end_date date,
+    in _status varchar(255)
+)
+begin
+    SET _house_name = NULLIF(_house_name, '');
+    SET _status = NULLIF(_status, '');
+    SELECT
+        b.id,
+        b.end_date,
+        b.start_date,
+        b.status,
+        b.updated_at,
+        b.house_id,
+        b.user_id,
+        b.price,
+        b.created_date
+    FROM bookings b
+    JOIN houses h on b.house_id = h.id
+    WHERE (_house_name IS NULL OR TRIM(_house_name) = '' OR LOWER(h.house_name) LIKE LOWER(CONCAT('%', _house_name, '%')))
+        AND (_start_date IS NULL OR b.start_date >= _start_date)
+        AND (_end_date IS NULL OR b.end_date <= _end_date)
+        and (_status is null or b.status = _status)
+        and (h.host_id = _id)
+    ORDER BY b.id DESC;
+end;
+
+drop procedure if exists get_host_houses_list;
+create procedure get_host_houses_list(
+    in _id bigint,
+    IN _limit INT,
+    IN _offset INT
+)
+begin
+    select
+        h.id as id,
+        h.house_name as houseName,
+        h.price as price,
+        h.address as address,
+        COALESCE(SUM((DATEDIFF(b.end_date, b.start_date) + 1) * b.price), 0) AS totalRevenue,
+        h.status as status
+    from houses h
+        left join bookings b on h.id = b.house_id and b.status = 'CHECKED_OUT'
+    where h.host_id = _id
+    GROUP BY h.id
+    LIMIT _limit OFFSET _offset;
+end;
+
+drop procedure if exists search_host_houses;
+create procedure search_host_houses(
+    in _id bigint,
+    in _house_name varchar(255),
+    in _status varchar(255),
+    IN _limit INT,
+    IN _offset INT
+)
+begin
+    SET _house_name = NULLIF(_house_name, '');
+    SET _status = NULLIF(_status, '');
+    select
+        h.id as id,
+        h.house_name as houseName,
+        h.price as price,
+        h.address as address,
+        COALESCE(SUM((DATEDIFF(b.end_date, b.start_date) + 1) * b.price), 0) AS totalRevenue,
+        h.status as status
+    from houses h
+             left join bookings b on h.id = b.house_id and b.status = 'CHECKED_OUT'
+    where
+        (_house_name IS NULL OR TRIM(_house_name) = '' OR LOWER(h.house_name) LIKE LOWER(CONCAT('%', _house_name, '%')))
+        and (_status is null or h.status = _status)
+        and h.host_id = _id
+    GROUP BY h.id
+    LIMIT _limit OFFSET _offset;
+end;
 
 # Data
 INSERT INTO roles (name)
@@ -77,25 +287,25 @@ INSERT INTO users
 (address, full_name, password, phone, email, username, status)
 VALUES
     (
-        '123 Oak Street, Austin, TX 78701',
+        '12 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh',
         'John Doe',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0123456789',
-        'thang.nd0226@gmail.com',
+        'john.d@gmail.com',
         'john_doe',
         'ACTIVE'
     ),
     (
-        '456 Pine Ave, Seattle, WA 98101',
+        '25 Trần Duy Hưng, Cầu Giấy, Hà Nội',
         'Sarah Smith',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0987654322',
-        'sarah.smith@gmail.com',
+        'sarah.s@gmail.com',
         'sarah_smith',
         'ACTIVE'
     ),
     (
-        '789 Maple Dr, Chicago, IL 60601',
+        '90 Lê Lợi, Quận Hải Châu, Đà Nẵng',
         'Michael Johnson',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0456789123',
@@ -104,7 +314,7 @@ VALUES
         'ACTIVE'
     ),
     (
-        '321 Elm Road, Miami, FL 33101',
+        '66 Nguyễn Hữu Thọ, Quận 7, TP. Hồ Chí Minh',
         'Emily Brown',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0789123456',
@@ -113,7 +323,7 @@ VALUES
         'ACTIVE'
     ),
     (
-        '654 Cedar Lane, Denver, CO 80201',
+        '57 Bạch Đằng, Quận Hải Châu, Đà Nẵng',
         'David Wilson',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0321654987',
@@ -122,7 +332,7 @@ VALUES
         'ACTIVE'
     ),
     (
-        '987 Birch Blvd, Portland, OR 97201',
+        '38 Nguyễn Văn Linh, Quận Hải Châu, Đà Nẵng',
         'Lisa Taylor',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0147258369',
@@ -131,7 +341,7 @@ VALUES
         'ACTIVE'
     ),
     (
-        '147 Walnut St, Boston, MA 02101',
+        '45 Phan Chu Trinh, Quận Hoàn Kiếm, Hà Nội',
         'Robert Miller',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0258147369',
@@ -140,7 +350,7 @@ VALUES
         'ACTIVE'
     ),
     (
-        '258 Spruce Court, Houston, TX 77001',
+        '102 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh',
         'Jennifer Davis',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0369147258',
@@ -149,7 +359,7 @@ VALUES
         'ACTIVE'
     ),
     (
-        '369 Ash Way, Phoenix, AZ 85001',
+        '78 Võ Văn Kiệt, Quận Sơn Trà, Đà Nẵng',
         'William Jones',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0741852963',
@@ -158,7 +368,7 @@ VALUES
         'ACTIVE'
     ),
     (
-        '741 Beech Path, San Diego, CA 92101',
+        '15 Hoàng Hoa Thám, Quận Ninh Kiều, Cần Thơ',
         'Mary Anderson',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0963852741',
@@ -166,6 +376,21 @@ VALUES
         'mary_a',
         'LOCKED'
     );
+
+INSERT INTO users
+(address, full_name, password, phone, email, username, status, is_gg_account)
+values
+    (
+        'Số 1 Ngô Xuân Quảng, Trâu Quỳ, Gia Lâm, Hà Nội',
+        'Nguyễn Đức Thắng',
+        '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
+        '0888899999',
+        'thang.nd0226@gmail.com',
+        'Thắng Nguyễn Đức',
+        'PENDING',
+        true
+    );
+
 
 INSERT INTO users_roles
 (user_id, roles_id)
@@ -179,21 +404,22 @@ VALUES
     (7, 1),
     (8, 1),
     (9, 1),
-    (10, 1);
+    (10, 1),
+    (11, 1);
 
 INSERT INTO houses
-(address, bathrooms, bedrooms, description, house_name, price, host_id)
+(address, bathrooms, bedrooms, description, house_name, price, host_id, status)
 VALUES
-    ( '36 Hang Be, Hoan Kiem', 2, 3, 'Fully-equipped apartment, centrally located, suitable for couples or small families.', 'Luxury apartment near Hoan Kiem Lake', 800000, 2),
-    ('12 Tran Phu, Ba Dinh', 3, 4, 'Spacious villa with garden, perfect for large families or groups.', 'Elegant Ba Dinh Villa', 1500000, 2),
-    ('25 Xuan Dieu, Tay Ho', 2, 2, 'Lake-view apartment with modern design, ideal for expats and digital nomads.', 'Tay Ho Lakeview Apartment', 900000, 2),
-    ('78 Kim Ma, Ba Dinh', 1, 1, 'Cozy studio in central Hanoi, close to embassies and business areas.', 'Kim Ma Cozy Studio', 600000, 2),
-    ('9 Hang Bong, Hoan Kiem', 2, 3, 'Traditional-style home in Hanoi Old Quarter, offering an authentic experience.', 'Old Quarter Charm House', 850000, 2),
-    ('105 Lang Ha, Dong Da', 2, 2, 'Modern apartment with full amenities, near shopping malls and offices.', 'Lang Ha Modern Condo', 950000, 3),
-    ('45 Le Van Luong, Thanh Xuan', 2, 3, 'Newly built apartment with gym and pool access.', 'Thanh Xuan Luxury Condo', 1000000, 3),
-    ('33 Hoang Hoa Tham, Ba Dinh', 1, 2, 'Quiet and comfortable apartment near West Lake.', 'West Lake Retreat', 700000, 3),
-    ('56 Doi Can, Ba Dinh', 3, 4, 'Spacious home with rooftop terrace, perfect for family gatherings.', 'Doi Can Family House', 1200000, 3),
-    ('15 Phan Dinh Phung, Hoan Kiem', 2, 3, 'Historic French colonial house with elegant decor.', 'French Colonial Residence', 1400000, 3);
+    ( '12 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh', 2, 3, 'Fully-equipped apartment, centrally located, suitable for couples or small families.', 'Hoàn Kiếm Villa', 800000, 2, 'RENTED'),
+    ('25 Trần Duy Hưng, Cầu Giấy, Hà Nội', 3, 4, 'Spacious villa with garden, perfect for large families or groups.', 'Ba Đình Villa', 1500000, 2, 'RENTED'),
+    ('90 Lê Lợi, Quận Hải Châu, Đà Nẵng', 2, 2, 'Lake-view apartment with modern design, ideal for expats and digital nomads.', 'Tây Hồ Lakeview Apartment', 900000, 2, 'RENTED'),
+    ('15 Hoàng Hoa Thám, Quận Ninh Kiều, Cần Thơ', 1, 1, 'Cozy studio in central Hanoi, close to embassies and business areas.', 'Kim Mã Studio', 600000, 2, 'RENTED'),
+    ('78 Võ Văn Kiệt, Quận Sơn Trà, Đà Nẵng', 2, 3, 'Traditional-style home in Hanoi Old Quarter, offering an authentic experience.', 'Old Quarter Charm House', 850000, 2, 'RENTED'),
+    ('102 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh', 2, 2, 'Modern apartment with full amenities, near shopping malls and offices.', 'Láng Hạ Modern Condo', 950000, 3, 'RENTED'),
+    ('45 Phan Chu Trinh, Quận Hoàn Kiếm, Hà Nội', 2, 3, 'Newly built apartment with gym and pool access.', 'Thanh Xuân Luxury Condo', 1000000, 3, 'RENTED'),
+    ('38 Nguyễn Văn Linh, Quận Hải Châu, Đà Nẵng', 1, 2, 'Quiet and comfortable apartment near West Lake.', 'West Lake Retreat', 700000, 3, 'RENTED'),
+    ('57 Bạch Đằng, Quận Hải Châu, Đà Nẵng', 3, 4, 'Spacious home with rooftop terrace, perfect for family gatherings.', ' Đội Cấn Family House', 1200000, 3, 'RENTED'),
+    ('66 Nguyễn Hữu Thọ, Quận 7, TP. Hồ Chí Minh', 2, 3, 'Historic French colonial house with elegant decor.', 'French Colonial Residence', 1400000, 3, 'RENTED');
 
 insert into house_images (house_id, file_name)
 values  (1, 'hinh anh so (1).jpg'),
@@ -224,96 +450,102 @@ values  (1, 'hinh anh so (1).jpg'),
         (10, 'hinh anh so (26).jpg'),
         (10, 'hinh anh so (27).jpg');
 
-insert into availabilities (start_date, end_date, house_id)
+insert into host_requests (request_date, user_id)
 values
--- House 1
-    ('2025-03-01', '2025-04-15', 1),
-    ('2025-05-01', '2025-06-30', 1),
-    ('2025-09-30', '2027-10-10', 1),
+    ('2025-02-21 13:07:43.708469', 11),
+    ('2025-02-20 13:07:43.708469', 5),
+    ('2025-02-09 13:07:43.708469', 6);
 
--- House 2
-    ('2025-02-15', '2025-03-31', 2),
-    ('2025-04-10', '2025-05-31', 2),
-    ('2025-08-31', '2027-10-10', 2),
+INSERT INTO availabilities (start_date, end_date, house_id)
+VALUES
+    ('2023-01-01', '2024-06-30', 1),
+    ('2024-07-30', '2025-04-15', 1),
+    ('2025-05-01', '2025-05-15', 1),
+    ('2025-05-31', '2025-05-31', 1),
+    ('2025-06-10', '2027-12-31', 1),
 
--- House 3
-    ('2025-03-15', '2025-04-30', 3),
-    ('2025-06-01', '2025-07-15', 3),
-    ('2025-10-31', '2027-10-10',3),
+    ('2023-01-01', '2024-03-31', 2),
+    ('2024-04-10', '2024-04-30', 2),
+    ('2024-05-10', '2024-05-31', 2),
+    ('2024-07-01', '2027-12-31', 2),
 
--- House 4
-    ('2025-02-01', '2025-03-15', 4),
-    ('2025-05-15', '2025-06-30', 4),
-    ('2025-09-15', '2027-10-10', 4),
+    ('2023-01-01', '2024-04-30', 3),
+    ('2024-06-01', '2024-07-15', 3),
+    ('2024-07-31', '2027-12-31', 3),
 
--- House 5
-    ('2025-04-01', '2025-05-31', 5),
-    ('2025-07-15', '2025-08-31', 5),
-    ('2025-11-30', '2027-10-10', 5),
+    ('2023-01-01', '2024-03-15', 4),
+    ('2024-05-15', '2024-06-30', 4),
+    ('2024-07-15', '2025-02-25', 4),
+    ('2025-03-01', '2027-12-31', 4),
 
--- House 6
-    ('2025-03-01', '2025-04-30', 6),
-    ('2025-06-15', '2025-07-31', 6),
-    ('2025-10-31', '2027-10-10', 6),
+    ('2023-01-01', '2024-05-31', 5),
+    ('2024-06-15', '2024-08-31', 5),
+    ('2024-09-30', '2027-12-31', 5),
 
--- House 7
-    ('2025-02-15', '2025-04-15', 7),
-    ('2025-05-01', '2025-06-15', 7),
-    ('2025-09-30', '2027-10-10', 7),
+    ('2023-01-01', '2024-09-30', 6),
+    ('2024-10-31', '2025-04-30', 6),
+    ('2025-06-15', '2027-12-31', 6),
 
--- House 8
-    ('2025-03-15', '2025-05-15', 8),
-    ('2025-06-01', '2025-07-31', 8),
-    ('2025-10-15', '2027-10-10', 8),
+    ('2023-01-01', '2024-09-15', 7),
+    ('2024-09-30', '2025-04-15', 7),
+    ('2025-05-01', '2027-12-31', 7),
 
--- House 9
-    ('2025-04-01', '2025-05-31', 9),
-    ('2025-07-15', '2025-08-31', 9),
-    ('2025-11-15', '2027-10-10', 9),
+    ('2023-01-01', '2024-09-30', 8),
+    ('2024-10-15', '2025-05-15', 8),
+    ('2025-06-01', '2027-12-31', 8),
 
--- House 10
-    ('2025-03-01', '2025-04-30', 10),
-    ('2025-06-01', '2025-07-31', 10),
-    ('2025-11-30', '2027-10-10', 10);
+    ('2023-01-01', '2024-08-31', 9),
+    ('2024-09-15', '2025-05-31', 9),
+    ('2025-06-15', '2027-12-31', 9),
 
-insert into bookings (start_date, end_date, status, updated_at, house_id, user_id)
-values
-    -- House 1 (gaps: Apr 16-Apr 30, Jul 1-Sep 29)
-    ('2025-04-16', '2025-04-30', 'CONFIRMED', '2025-03-16 14:30:00', 1, 4),
-    ('2025-07-01', '2025-09-29', 'CONFIRMED', '2025-06-01 09:45:00', 1,5),
+    ('2023-01-01', '2024-07-31', 10),
+    ('2024-08-30', '2025-04-30', 10),
+    ('2025-06-01', '2027-12-31', 10);
 
--- House 2 (gaps: Apr 1-Apr 9, Jun 1-Aug 30)
-    ('2025-04-01', '2025-04-09', 'CONFIRMED', '2025-03-01 11:00:00', 2, 6),
-    ('2025-06-01', '2025-08-30', 'CONFIRMED', '2025-05-01 13:15:00', 2, 7),
+INSERT INTO bookings (start_date, end_date, status, updated_at, price, house_id, user_id)
+VALUES
+    ('2024-07-01', '2024-07-29', 'CHECKED_OUT', '2024-07-29 14:30:00', 23200000, 1, 5),
+    ('2025-04-16', '2025-04-30', 'WAITING', '2025-02-16 14:30:00', 11200000, 1, 4),
+    ('2025-05-16', '2025-05-30', 'WAITING', '2025-02-17 14:30:00', 11200000, 1, 4),
+    ('2025-06-01', '2025-06-09', 'WAITING', '2025-02-18 14:30:00', 6400000, 1, 5),
 
--- House 3 (gaps: May 1-May 31, Jul 16-Oct 30)
-    ('2025-05-01', '2025-05-31', 'CONFIRMED', '2025-04-01 15:45:00', 3, 8),
-    ('2025-07-16', '2025-10-30', 'CONFIRMED', '2025-06-16 12:00:00', 3, 9),
+    ('2024-04-01', '2024-04-09', 'CHECKED_OUT', '2024-04-09 14:30:00', 12000000, 2, 6),
+    ('2024-05-01', '2024-05-09', 'CHECKED_OUT', '2024-05-09 14:30:00', 12000000, 2, 6),
+    ('2024-06-01', '2024-06-30', 'CHECKED_OUT', '2024-06-30 14:30:00', 43500000, 2, 7),
 
--- House 4 (gaps: Mar 16-May 14, Jul 1-Sep 14)
-    ('2025-03-16', '2025-05-14', 'CONFIRMED', '2025-02-16 14:20:00', 4, 10),
-    ('2025-07-01', '2025-09-14', 'CONFIRMED', '2025-06-01 16:45:00', 4, 10),
+    ('2024-05-01', '2024-05-31', 'CHECKED_OUT', '2024-05-31 14:30:00', 27000000, 3, 8),
+    ('2024-07-16', '2024-07-30', 'CHECKED_OUT', '2024-07-30 14:30:00', 12600000, 3, 9),
 
--- House 5 (gaps: Jun 1-Jul 14, Sep 1-Nov 29)
-    ('2025-06-01', '2025-07-14', 'CONFIRMED', '2025-05-01 10:15:00', 5, 4),
-    ('2025-09-01', '2025-11-29', 'CONFIRMED', '2025-08-01 13:30:00', 5, 5),
+    ('2024-03-16', '2024-05-14', 'CHECKED_OUT', '2024-05-14 14:30:00', 36000000, 4, 10),
+    ('2024-07-01', '2024-07-14', 'CHECKED_OUT', '2024-07-14 14:30:00', 8400000, 4, 10),
+    ('2025-02-26', '2025-02-28', 'CHECKED_IN', '2024-02-26 14:30:00', 1200000, 4, 10),
 
--- House 6 (gaps: May 1-Jun 14, Aug 1-Oct 30)
-    ('2025-05-01', '2025-06-14', 'CONFIRMED', '2025-04-01 11:20:00', 6, 6),
-    ('2025-08-01', '2025-10-30', 'PENDING', '2025-07-01 15:00:00', 6, 7),
+    ('2024-06-01', '2024-06-14', 'CHECKED_OUT', '2024-06-14 14:30:00', 35700000, 5, 4),
+    ('2024-09-01', '2024-09-29', 'CHECKED_OUT', '2024-09-29 14:30:00', 23800000, 5, 5),
 
--- House 7 (gaps: Apr 16-Apr 30, Jun 16-Sep 29)
-    ('2025-04-16', '2025-04-30', 'CONFIRMED', '2025-03-16 09:00:00', 7, 8),
-    ('2025-06-16', '2025-09-29', 'PENDING', '2025-05-16 14:45:00', 7, 9),
+    ('2024-10-01', '2024-10-30', 'CHECKED_OUT', '2024-10-30 14:30:00', 85500000, 6, 7),
+    ('2025-05-01', '2025-06-14', 'WAITING', '2025-02-16 14:30:00', 42750000, 6, 6),
 
--- House 8 (gaps: May 16-May 31, Aug 1-Oct 14)
-    ('2025-05-16', '2025-05-31', 'CONFIRMED', '2025-04-16 16:15:00', 8, 10),
-    ('2025-08-01', '2025-10-14', 'PENDING', '2025-07-01 10:45:00', 8, 4),
+    ('2024-09-16', '2024-09-29', 'CHECKED_OUT', '2024-09-29 14:30:00', 106000000, 7, 9),
+    ('2025-04-16', '2025-04-30', 'WAITING', '2025-02-17 14:30:00', 15000000, 7, 8),
 
--- House 9 (gaps: Jun 1-Jul 14, Sep 1-Nov 14)
-    ('2025-06-01', '2025-07-14', 'CONFIRMED', '2025-05-01 11:30:00', 9, 5),
-    ('2025-09-01', '2025-11-14', 'PENDING', '2025-08-01 15:45:00', 9, 6),
+    ('2024-10-01', '2024-10-14', 'CHECKED_OUT', '2024-10-14 14:30:00', 51800000, 8, 4),
+    ('2025-05-16', '2025-05-31', 'WAITING', '2025-02-18 14:30:00', 10500000, 8, 10),
 
--- House 10 (gaps: May 1-May 31, Aug 1-Nov 29)
-    ('2025-05-01', '2025-05-31', 'CONFIRMED', '2025-04-01 14:00:00', 10, 7),
-    ('2025-08-01', '2025-11-29', 'PENDING', '2025-07-01 10:30:00', 10, 8);
+    ('2024-09-01', '2024-09-14', 'CHECKED_OUT', '2024-09-14 14:30:00', 16800000, 9, 6),
+    ('2025-06-01', '2025-06-14', 'WAITING', '2025-02-14 14:30:00', 51600000, 9, 5),
+
+    ('2024-08-01', '2024-08-29', 'CHECKED_OUT', '2024-08-29 14:30:00', 40600000, 10, 11),
+    ('2025-05-01', '2025-05-31', 'WAITING', '2025-02-20 14:30:00', 42000000, 10, 11);
+
+INSERT INTO notifications (created_at, message, host_id)
+VALUES
+    ('2025-02-16 14:30:00', '"Lisa Taylor" BOOKED the house "Hoàn Kiếm Villa" on 16/02/2025', 2),
+    ('2025-02-17 14:30:00', '"Lisa Taylor" BOOKED the house "Hoàn Kiếm Villa" on 17/02/2025', 2),
+    ('2025-02-18 14:30:00', '"David Wilson" BOOKED the house "Hoàn Kiếm Villa" on 18/02/2025', 2),
+    ('2025-02-16 14:30:00', '"William Jones" BOOKED the house "Láng Hạ Modern Condo" on 16/02/2025', 3),
+    ('2025-02-17 14:30:00', '"Jennifer Davis" BOOKED the house "Thanh Xuân Luxury Condo" on 17/02/2025', 3),
+    ('2025-02-18 14:30:00', '"Mary Anderson" BOOKED the house "West Lake Retreat" on 18/02/2025', 3),
+    ('2025-02-14 14:30:00', '"Lisa Taylor" BOOKED the house "Đội Cấn Family House" on 14/02/2025', 3),
+    ('2025-02-20 14:30:00', '"Jennifer Davis" BOOKED the house "French Colonial Residence" on 20/02/2025', 3);
+

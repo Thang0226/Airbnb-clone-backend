@@ -9,6 +9,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +18,10 @@ import java.util.*;
 
 @Service
 public class JwtService {
-    private static final String SECRET_KEY = "123456789987654321123456789987654321123456789";
-    private static final long EXPIRE_TIME = 36000000L;
+    @Value("${SECRET_KEY}")
+    private String SECRET_KEY;
+    @Value("${EXPIRE_TIME}")
+    private int EXPIRE_TIME;
 
     @Autowired
     private IUserService userService;

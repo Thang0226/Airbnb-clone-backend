@@ -2,8 +2,6 @@ package com.codegym.model;
 import com.codegym.model.auth.Role;
 import com.codegym.model.constants.UserStatus;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -26,6 +24,9 @@ public class User {
     private String avatar;
 
     private String fullName;
+
+    @Column(name = "is_gg_account", nullable = false, columnDefinition = "boolean default false")
+    private boolean isGGAccount = false;
 
     @Column(columnDefinition = "TEXT")
     private String address;

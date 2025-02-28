@@ -1,4 +1,4 @@
-package com.codegym.model.dto;
+package com.codegym.model.dto.user;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

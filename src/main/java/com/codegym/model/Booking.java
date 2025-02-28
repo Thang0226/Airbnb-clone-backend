@@ -26,13 +26,17 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     private BookingStatus status;
 
+    private LocalDateTime createdDate;
+
     private LocalDateTime updatedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    private Integer price;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "house_id", nullable = false)
     private House house;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }

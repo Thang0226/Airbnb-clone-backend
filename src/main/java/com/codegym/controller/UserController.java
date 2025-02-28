@@ -4,13 +4,14 @@ import com.codegym.exception.PhoneAlreadyExistsException;
 import com.codegym.exception.UsernameAlreadyExistsException;
 import com.codegym.model.auth.Account;
 import com.codegym.model.HostRequest;
+import com.codegym.model.auth.GGAccount;
 import com.codegym.model.auth.Role;
 import com.codegym.model.dto.UpdatePasswordDTO;
-import com.codegym.model.dto.UserDTO;
+import com.codegym.model.dto.user.UserDTO;
 import com.codegym.model.User;
 import com.codegym.model.UserForm;
 import com.codegym.config.jwt.JwtService;
-import com.codegym.model.dto.UserProfileDTO;
+import com.codegym.model.dto.user.UserProfileDTO;
 import com.codegym.service.host.IHostRequestService;
 import com.codegym.service.role.IRoleService;
 import com.codegym.service.user.UserService;
@@ -48,6 +49,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/users")
 public class UserController {
 
+
     @Autowired
     private UserService userService;
     @Autowired
@@ -62,8 +64,10 @@ public class UserController {
     @Autowired
     private IHostRequestService hostRequestService;
 
-    @Value("${file_upload}")
+    @Value("${FILE_UPLOAD}")
     private String fileUpload;
+    @Value("${DEFAULT_PASSWORD}")
+    private String defaultPassword;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Account account) {
@@ -82,11 +86,58 @@ public class UserController {
                     jwt,
                     userDetails.getUsername(),
                     currentUser.getFullName(),
+                    currentUser.getStatus(),
                     userDetails.getAuthorities()));
 
         } catch (BadCredentialsException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Username or Password.");
         }
+    }
+
+    @PostMapping("/login-gg")
+    public ResponseEntity<?> loginWithGG(@RequestBody GGAccount ggAccount) {
+        try {
+            Optional<User> userOptional = userService.findByEmail(ggAccount.getEmail());
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
+                Authentication authentication = authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(user.getUsername(), defaultPassword));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                String jwt = jwtService.generateTokenLogin(authentication);
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                return ResponseEntity.ok(new JwtResponse(
+                        user.getId(),
+                        jwt,
+                        userDetails.getUsername(),
+                        user.getFullName(),
+                        user.getStatus(),
+                        userDetails.getAuthorities()));
+            }
+            // If GGAccount is not registered by email, create new user account from GGAccount
+            return addUserWithGG(ggAccount);
+
+        } catch (BadCredentialsException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Username or Password.");
+        }
+    }
+
+    private ResponseEntity<?> addUserWithGG(GGAccount ggAccount) {
+        User user = new User();
+        user.setUsername(ggAccount.getUsername());
+        user.setEmail(ggAccount.getEmail());
+        user.setFullName(ggAccount.getFullName());
+        String encodedPassword = passwordEncoder.encode(defaultPassword);
+        user.setPassword(encodedPassword);
+        user.setGGAccount(true);
+
+        Set<Role> roles = new HashSet<>();
+        Role userRole = roleService.findByName("ROLE_USER");
+        roles.add(userRole);
+        user.setRoles(roles);
+
+        userService.save(user);
+        return loginWithGG(ggAccount);
     }
 
     @PostMapping("/register")
@@ -149,20 +200,36 @@ public class UserController {
             if (request.isEmpty()) {
                 return new ResponseEntity<>("Request not found", HttpStatus.NOT_FOUND);
             }
-
             // Get the user from the request
             User user = request.get().getUser();
-
-            // Add host role
+            // Replace user role by host role
             Role hostRole = roleService.findByName("ROLE_HOST");
-            // Set<Role> roles = user.getRoles(); // add new role_id for same user_id (old)
-            Set<Role> roles = new HashSet<>(); // replace new role_id (new)
+            Set<Role> roles = new HashSet<>();
             roles.add(hostRole);
             user.setRoles(roles);
-
             userService.save(user);
-            hostRequestService.deleteById(requestId); // Delete the request
-            return new ResponseEntity<>(HttpStatus.OK);
+
+            // Delete the request
+            hostRequestService.deleteById(requestId);
+            return ResponseEntity.ok("Host request approved");
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    // Admin: decline request to be Host
+    @PostMapping("/host-requests/{requestId}/decline")
+    public ResponseEntity<?> declineHostRequest(@PathVariable Long requestId) {
+        try {
+            Optional<HostRequest> request = hostRequestService.findById(requestId);
+            if (request.isEmpty()) {
+                return new ResponseEntity<>("Request not found", HttpStatus.NOT_FOUND);
+            }
+
+            hostRequestService.deleteById(requestId);
+            return ResponseEntity.ok("Host request declined");
+
         } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
