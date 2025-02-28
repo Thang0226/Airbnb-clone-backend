@@ -10,25 +10,25 @@ import java.util.Optional;
 @Service
 public class HostRequestService implements IHostRequestService {
     @Autowired
-    private IHostRequestRepository hostRepository;
+    private IHostRequestRepository hostRequestRepository;
 
     @Override
     public Iterable<HostRequest> findAll() {
-        return hostRepository.findAll();
+        return hostRequestRepository.findAll();
     }
 
     @Override
     public Optional<HostRequest> findById(Long id) {
-        return hostRepository.findById(id);
+        return hostRequestRepository.findById(id);
     }
 
     @Override
     public void save(HostRequest object) {
-        hostRepository.save(object);
+        hostRequestRepository.save(object);
     }
 
     @Override
     public void deleteById(Long id) {
-        hostRepository.deleteById(id);
+        hostRequestRepository.deleteById(id);
     }
 }

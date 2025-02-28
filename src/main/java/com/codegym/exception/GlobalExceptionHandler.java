@@ -2,6 +2,8 @@ package com.codegym.exception;
 
 
 
+import com.codegym.exception.house_maintenance.DuplicateMaintenanceException;
+import com.codegym.exception.house_maintenance.InvalidMaintenanceDateException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,5 +37,25 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(
                 "User " + ex.getMessage() + " does not exist",
                 HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(AvailabilityNotFoundException.class)
+    public ResponseEntity<String> handleAvailabilityNotFound(AvailabilityNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(HouseNotFoundException.class)
+    public ResponseEntity<String> handleHouseNotFound(HouseNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(DuplicateMaintenanceException.class)
+    public ResponseEntity<String> handleDuplicateMaintenance(DuplicateMaintenanceException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidMaintenanceDateException.class)
+    public ResponseEntity<?> handleInvalidMaintenanceDateException(InvalidMaintenanceDateException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( ex.getMessage());
     }
 }

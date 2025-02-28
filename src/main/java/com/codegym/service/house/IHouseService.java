@@ -30,4 +30,6 @@ public interface IHouseService extends IGenerateService<House> {
 
     List<HouseImage> findImagesByHouseId(Long houseId);
     void updateHouse(Long houseId, HouseDTO houseDTO) throws IOException;
+
+    void updateHouseStatus(Long houseId, String status);
 }

@@ -1,14 +1,18 @@
 package com.codegym.service.house;
 
 
+import com.codegym.exception.HouseNotFoundException;
+import com.codegym.model.Availability;
 import com.codegym.model.House;
 import com.codegym.model.HouseImage;
 import com.codegym.model.User;
 import com.codegym.model.dto.house.HouseDTO;
+import com.codegym.model.constants.HouseStatus;
 import com.codegym.model.dto.house.HouseListDTO;
 import com.codegym.repository.IHouseImageRepository;
 import com.codegym.repository.IHouseRepository;
 import com.codegym.service.user.IUserService;
+import com.codegym.service.availability.IAvailabilityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -38,6 +42,9 @@ public class HouseService implements IHouseService {
     private IHouseRepository houseRepository;
 
     @Autowired
+    private IAvailabilityService availabilityService;
+
+    @Autowired
     private IHouseImageRepository houseImageRepository;
 
     @Autowired
@@ -54,8 +61,13 @@ public class HouseService implements IHouseService {
     }
 
     @Override
-    public void save(House object) {
-        houseRepository.save(object);
+    public void save(House house) {
+        houseRepository.save(house);
+        Availability availability = new Availability();
+        availability.setStartDate(LocalDate.now());
+        availability.setEndDate(LocalDate.now().plusYears(10));
+        availability.setHouse(house);
+        availabilityService.save(availability);
     }
 
     @Override
@@ -206,5 +218,26 @@ public class HouseService implements IHouseService {
         // 6. Update the house with the final list of images
         house.getHouseImages().clear();
         house.getHouseImages().addAll(updatedImages);
+    }
+
+    @Override
+    public void updateHouseStatus(Long houseId, String status) {
+        House house = houseRepository.findById(houseId)
+                .orElseThrow(() -> new HouseNotFoundException("House with id " + houseId + " not found"));
+        if (house.getStatus() == HouseStatus.RENTED) {
+            throw new IllegalStateException("Cannot change status because the house is currently RENTED");
+        }
+        switch (status) {
+            case "AVAILABLE":
+                house.setStatus(HouseStatus.AVAILABLE);
+                houseRepository.save(house);
+                break;
+            case "MAINTAINING":
+                house.setStatus(HouseStatus.MAINTAINING);
+                houseRepository.save(house);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid status: " + status);
+        }
     }
 }
