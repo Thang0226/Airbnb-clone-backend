@@ -62,12 +62,15 @@ public class HouseService implements IHouseService {
 
     @Override
     public void save(House house) {
+        // if new house, initialize an availability time for house
+        if (house.getId() == null) {
+            Availability availability = new Availability();
+            availability.setStartDate(LocalDate.now());
+            availability.setEndDate(LocalDate.now().plusYears(3));
+            availability.setHouse(house);
+            availabilityService.save(availability);
+        }
         houseRepository.save(house);
-        Availability availability = new Availability();
-        availability.setStartDate(LocalDate.now());
-        availability.setEndDate(LocalDate.now().plusYears(10));
-        availability.setHouse(house);
-        availabilityService.save(availability);
     }
 
     @Override

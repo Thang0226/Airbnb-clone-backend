@@ -127,8 +127,6 @@ public class HouseController {
             Optional<House> houseOptional = houseService.findById(newBookingDTO.getHouseId());
             if (houseOptional.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("House not found");
             House house = houseOptional.get();
-            house.setStatus(HouseStatus.RENTED);
-            houseService.save(house);
 
             // Notify host
             User host = house.getHost();

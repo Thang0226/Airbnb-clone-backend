@@ -14,7 +14,7 @@ public class HostRequestService implements IHostRequestService {
 
     @Override
     public Iterable<HostRequest> findAll() {
-        return hostRequestRepository.findAll();
+        return hostRequestRepository.findAllOrderByRequestDateDesc();
     }
 
     @Override
