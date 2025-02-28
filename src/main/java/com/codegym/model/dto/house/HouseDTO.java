@@ -1,6 +1,7 @@
 package com.codegym.model.dto.house;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,6 +15,8 @@ public class HouseDTO {
      private Integer bathrooms;
      private String description;
      private Integer price;
-     private List<MultipartFile> houseImages;
      private String username;
+     @JsonIgnore
+     private List<MultipartFile> houseImages;
+     private List<Long> existingImageIds;
 }

@@ -1,6 +1,7 @@
 package com.codegym.repository;
 
 import com.codegym.model.House;
+import com.codegym.model.HouseImage;
 import com.codegym.model.dto.house.HouseListDTO;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -49,4 +50,5 @@ public interface IHouseRepository extends JpaRepository<House, Long> {
                                       @Param("limit") int limit,
                                       @Param("offset") int offset
   );
+
 }
