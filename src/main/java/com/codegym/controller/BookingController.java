@@ -3,11 +3,14 @@ package com.codegym.controller;
 import com.codegym.mapper.BookingDTOMapper;
 import com.codegym.model.Booking;
 import com.codegym.model.House;
+import com.codegym.model.Review;
 import com.codegym.model.User;
+import com.codegym.model.dto.ReviewDTO;
 import com.codegym.model.dto.booking.BookingDTO;
 import com.codegym.model.dto.booking.BookingSearchDTO;
 import com.codegym.model.dto.user.UserBookingDTO;
 import com.codegym.service.booking.IBookingService;
+import com.codegym.service.review.IReviewService;
 import com.codegym.service.user.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,6 +36,9 @@ public class BookingController {
     private IBookingService bookingService;
     @Autowired
     private BookingDTOMapper bookingDTOMapper;
+
+    @Autowired
+    private IReviewService reviewService;
 
     @Autowired
     private IUserService userService;
@@ -110,5 +116,32 @@ public class BookingController {
         notificationController.sendNotification(host, message);
 
         return getBookingsByUsernameOfUser(username);
+    }
+
+    @PostMapping("/{id}/review")
+    public ResponseEntity<?> reviewBooking(@RequestBody ReviewDTO reviewDTO, @PathVariable Long id) {
+        Optional<Booking> bookingOptional = bookingService.findById(id);
+        if (bookingOptional.isEmpty()) {
+            return new ResponseEntity<>("Booking ID not found", HttpStatus.NOT_FOUND);
+        }
+        Booking booking = bookingOptional.get();
+        Review review = reviewService.findReviewByBooking(booking);
+        boolean isUpdating = false;
+        if (review == null) {
+            review = new Review();
+            review.setBooking(booking);
+        } else {
+            isUpdating = true;
+        }
+        Integer rating = reviewDTO.getRating();
+        if (rating < 1 || rating > 5) { return new ResponseEntity<>("Rating must be between 1 and 5 stars", HttpStatus.BAD_REQUEST); }
+        review.setRating(reviewDTO.getRating());
+        review.setComment(reviewDTO.getComment());
+        reviewService.save(review);
+        if (isUpdating) {
+            return new ResponseEntity<>("Review updated", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Add new review successfully", HttpStatus.OK);
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.codegym.service.review;
 
+import com.codegym.model.Booking;
 import com.codegym.model.Review;
 import com.codegym.repository.IReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,5 +35,10 @@ public class ReviewService implements IReviewService {
     @Override
     public void deleteById(Long id) {
         reviewRepository.deleteById(id);
+    }
+
+    @Override
+    public Review findReviewByBooking(Booking booking) {
+        return reviewRepository.findReviewByBooking(booking);
     }
 }
