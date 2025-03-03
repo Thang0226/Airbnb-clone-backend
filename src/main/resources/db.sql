@@ -242,6 +242,7 @@ begin
         h.house_name as houseName,
         h.price as price,
         h.address as address,
+        h.rentals as rentals,
         COALESCE(SUM((DATEDIFF(b.end_date, b.start_date) + 1) * b.price), 0) AS totalRevenue,
         h.status as status
     from houses h

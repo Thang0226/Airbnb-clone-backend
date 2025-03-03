@@ -33,6 +33,8 @@ public class House {
     @Enumerated(EnumType.STRING)
     private HouseStatus status;
 
+    private int rentals;
+
     @OneToMany(mappedBy = "house", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<HouseImage> houseImages = new ArrayList<>();
