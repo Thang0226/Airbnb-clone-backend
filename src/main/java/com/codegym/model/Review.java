@@ -1,5 +1,6 @@
 package com.codegym.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -20,6 +21,7 @@ public class Review {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="booking_id", nullable = false)
+    @JsonIgnore
     private Booking booking;
 
     public Review() {

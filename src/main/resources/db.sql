@@ -277,6 +277,20 @@ begin
     LIMIT _limit OFFSET _offset;
 end;
 
+drop procedure if exists find_reviews_by_house_id;
+create procedure find_reviews_by_house_id(
+    in _house_id bigint,
+    in _limit int,
+    in _offset int
+)
+begin
+    select r.* from reviews r
+    join bookings b on r.booking_id = b.id
+    where b.house_id = _house_id
+    limit _limit offset _offset;
+end;
+
+
 # Data
 INSERT INTO roles (name)
 VALUES

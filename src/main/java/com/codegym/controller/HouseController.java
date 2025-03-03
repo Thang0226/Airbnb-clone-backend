@@ -1,10 +1,8 @@
 package com.codegym.controller;
 
-import com.codegym.exception.HouseNotFoundException;
 import com.codegym.mapper.BookingDTOMapper;
 import com.codegym.mapper.HouseMaintenanceMapper;
 import com.codegym.model.*;
-import com.codegym.model.constants.HouseStatus;
 import com.codegym.model.dto.booking.NewBookingDTO;
 import com.codegym.model.dto.house.HouseDateDTO;
 import com.codegym.model.dto.SearchDTO;
@@ -14,6 +12,7 @@ import com.codegym.model.dto.house.HouseMaintenanceRecordDTO;
 import com.codegym.service.availability.IAvailabilityService;
 import com.codegym.service.booking.IBookingService;
 import com.codegym.service.house.IHouseMaintenanceService;
+import com.codegym.service.review.IReviewService;
 import com.codegym.service.user.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -65,6 +64,8 @@ public class HouseController {
 
     @Autowired
     private NotificationController notificationController;
+    @Autowired
+    private IReviewService reviewService;
 
     @GetMapping
     public ResponseEntity<List<House>> getHousesForAvailable() {
@@ -366,5 +367,15 @@ public class HouseController {
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+    }
+
+    @GetMapping("/{houseId}/reviews")
+    public ResponseEntity<?> getHouseReviews(@PathVariable Long houseId, Pageable pageable) {
+        Optional<House> houseOptional = houseService.findById(houseId);
+        if (houseOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("House not found");
+        }
+        List<Review> reviews = reviewService.findAllByHouseId(houseId, pageable);
+        return ResponseEntity.ok(reviews);
     }
 }
