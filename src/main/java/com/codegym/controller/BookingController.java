@@ -7,6 +7,7 @@ import com.codegym.model.Review;
 import com.codegym.model.User;
 import com.codegym.model.dto.ReviewDTO;
 import com.codegym.model.dto.booking.BookingDTO;
+import com.codegym.model.dto.booking.BookingDTOForReview;
 import com.codegym.model.dto.booking.BookingSearchDTO;
 import com.codegym.model.dto.user.UserBookingDTO;
 import com.codegym.service.booking.IBookingService;
@@ -50,6 +51,17 @@ public class BookingController {
     public ResponseEntity<PagedModel<?>> getBookings(Pageable pageable, PagedResourcesAssembler<BookingDTO> assembler) {
         Page<BookingDTO> bookings = bookingService.getAllBookings(pageable);
         return new ResponseEntity<>(assembler.toModel(bookings), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/get")
+    public ResponseEntity<?> getBooking(@PathVariable Long id) {
+        Optional<Booking> bookingOptional = bookingService.findById(id);
+        if (bookingOptional.isEmpty()) {
+            return new ResponseEntity<>("Booking not found", HttpStatus.NOT_FOUND);
+        }
+        Booking booking = bookingOptional.get();
+        BookingDTOForReview bookingDTOForReview = bookingDTOMapper.toBookingDTOForReview(booking);
+        return new ResponseEntity<>(bookingDTOForReview, HttpStatus.OK);
     }
 
     @GetMapping("/{username}")

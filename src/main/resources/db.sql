@@ -1,6 +1,7 @@
 # Drop tables & run again to create new tables
 drop table if exists users_roles;
 drop table if exists house_images;
+drop table if exists reviews;
 drop table if exists bookings;
 drop table if exists availabilities;
 drop table if exists house_maintenance;
@@ -548,4 +549,3 @@ VALUES
     ('2025-02-18 14:30:00', '"Mary Anderson" BOOKED the house "West Lake Retreat" on 18/02/2025', 3),
     ('2025-02-14 14:30:00', '"Lisa Taylor" BOOKED the house "Đội Cấn Family House" on 14/02/2025', 3),
     ('2025-02-20 14:30:00', '"Jennifer Davis" BOOKED the house "French Colonial Residence" on 20/02/2025', 3);
-

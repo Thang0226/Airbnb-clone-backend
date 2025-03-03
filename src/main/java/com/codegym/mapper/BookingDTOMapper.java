@@ -4,6 +4,7 @@ import com.codegym.model.Booking;
 import com.codegym.model.House;
 import com.codegym.model.User;
 import com.codegym.model.constants.BookingStatus;
+import com.codegym.model.dto.booking.BookingDTOForReview;
 import com.codegym.model.dto.booking.NewBookingDTO;
 import com.codegym.model.dto.user.UserBookingDTO;
 import com.codegym.service.house.IHouseService;
@@ -63,5 +64,15 @@ public abstract class BookingDTOMapper {
         userBookingDTO.setHouseName(house.getHouseName());
         userBookingDTO.setHouseStatus(house.getStatus());
         return userBookingDTO;
+    }
+
+    public BookingDTOForReview toBookingDTOForReview(Booking booking) {
+        BookingDTOForReview bookingDTOForReview = new BookingDTOForReview();
+        bookingDTOForReview.setId(booking.getId());
+        bookingDTOForReview.setHouseName(booking.getHouse().getHouseName());
+        bookingDTOForReview.setHouseImage(booking.getHouse().getHouseImages().get(0).getFileName());
+        bookingDTOForReview.setCustomerName(booking.getUser().getFullName());
+        bookingDTOForReview.setCustomerImage(booking.getUser().getAvatar());
+        return bookingDTOForReview;
     }
 }
