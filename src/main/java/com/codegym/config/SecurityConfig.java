@@ -88,7 +88,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/houses").permitAll()
                         .requestMatchers("/api/users/change_password", "/api/users/logout").authenticated()
                         .requestMatchers("/api/admin/**", "api/users/host-requests/**").hasRole("ADMIN")
-                                .requestMatchers("/api/bookings/user/*").hasAnyRole("USER")
+                                .requestMatchers("/api/bookings/user/*", "/api/bookings/*/review").hasAnyRole("USER")
                                 .requestMatchers("/api/hosts/**").hasRole("HOST")
                         .requestMatchers("/api/bookings/**").hasAnyRole("ADMIN", "HOST", "USER")
 //                        .requestMatchers("/api/users/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN","ROLE_SELLER")
