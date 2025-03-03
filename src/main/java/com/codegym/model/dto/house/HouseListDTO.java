@@ -9,4 +9,5 @@ public interface HouseListDTO {
     String getAddress();
     BigDecimal getTotalRevenue();
     String getStatus();
+    int getRentals();
 }

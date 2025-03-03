@@ -181,6 +181,7 @@ public  class BookingService implements IBookingService {
                 }
                 booking.setStatus(BookingStatus.CHECKED_OUT);
                 house.setStatus(HouseStatus.AVAILABLE);
+                house.setRentals(house.getRentals() + 1);
                 break;
             default:
                 throw new IllegalArgumentException("Invalid action: " + action);
