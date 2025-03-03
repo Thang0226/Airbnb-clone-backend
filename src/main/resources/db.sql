@@ -563,3 +563,21 @@ VALUES
     ('2025-02-18 14:30:00', '"Mary Anderson" BOOKED the house "West Lake Retreat" on 18/02/2025', 3),
     ('2025-02-14 14:30:00', '"Lisa Taylor" BOOKED the house "Đội Cấn Family House" on 14/02/2025', 3),
     ('2025-02-20 14:30:00', '"Jennifer Davis" BOOKED the house "French Colonial Residence" on 20/02/2025', 3);
+
+INSERT INTO reviews (comment, rating, updated_at, booking_id)
+VALUES
+    ('Absolutely loved our stay! The house was even more beautiful than in the pictures.', 5, '2024-07-30', 1),
+    ('Great location and comfortable amenities. Would recommend!', 4, '2024-04-10', 5),
+    ('Nice property but some maintenance issues in the bathroom.', 3, '2024-05-10', 6),
+    ('Perfect for our family vacation. Spacious and well-equipped kitchen.', 5, '2024-07-02', 7),
+    ('Enjoyed the peaceful surroundings. Host was very responsive.', 4, '2024-06-01', 8),
+    ('Amazing views and convenient location to local attractions.', 5, '2024-07-31', 9),
+    ('Property was clean but smaller than it appeared in photos.', 3, '2024-05-15', 10),
+    ('We had a wonderful time! The backyard was perfect for our kids.', 4, '2024-07-15', 11),
+    ('Stylish interior and very comfortable beds. Would stay again!', 5, '2024-06-15', 13),
+    ('Great value for money. Everything was as described.', 4, '2024-09-30', 14),
+    ('Luxury at its finest! Worth every penny for a special occasion.', 5, '2024-10-31', 15),
+    ('The property exceeded our expectations. Beautiful neighborhood.', 5, '2024-09-30', 17),
+    ('Modern, clean, and the host was exceptionally accommodating.', 4, '2024-10-15', 19),
+    ('Cozy place with charming details. Minor issue with WiFi but otherwise great.', 4, '2024-09-15', 21),
+    ('Perfect getaway! Loved the pool and outdoor entertainment area.', 5, '2024-08-30', 23);
