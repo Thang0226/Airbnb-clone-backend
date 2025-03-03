@@ -1,18 +1,22 @@
 package com.codegym.service.booking;
+import com.codegym.exception.BookingNotFoundException;
 import com.codegym.mapper.BookingMapper;
 import com.codegym.model.Availability;
 import com.codegym.model.Booking;
 import com.codegym.model.House;
 import com.codegym.model.constants.BookingStatus;
+import com.codegym.model.constants.HouseStatus;
 import com.codegym.model.dto.booking.BookingDTO;
 import com.codegym.model.dto.user.UserRentalHistoryDTO;
 import com.codegym.repository.IBookingRepository;
 import com.codegym.service.availability.IAvailabilityService;
+import com.codegym.service.house.IHouseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -23,8 +27,12 @@ import java.util.Optional;
 public  class BookingService implements IBookingService {
     @Autowired
     private IBookingRepository bookingRepository;
+
     @Autowired
     private IAvailabilityService availabilityService;
+
+    @Autowired
+    private IHouseService houseService;
 
     @Autowired
     private BookingMapper bookingMapper;
@@ -148,5 +156,39 @@ public  class BookingService implements IBookingService {
     @Override
     public List<Booking> findAllByUserId(Long userId) {
         return bookingRepository.findAllByUserId(userId, BookingStatus.CANCELED);
+    }
+
+    @Override
+    @Transactional
+    public BookingDTO processBooking(Long bookingId, String action) {
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(
+                () -> new BookingNotFoundException("Cannot find booking with id: " + bookingId)
+        );
+
+        House house = booking.getHouse();
+
+        switch (action.toLowerCase()) {
+            case "checkin":
+                if (booking.getStatus() != BookingStatus.WAITING) {
+                    throw new IllegalArgumentException("Booking id " + bookingId + " is not in waiting status.");
+                }
+                booking.setStatus(BookingStatus.CHECKED_IN);
+                house.setStatus(HouseStatus.RENTED);
+                break;
+            case "checkout":
+                if (booking.getStatus() != BookingStatus.CHECKED_IN) {
+                    throw new IllegalArgumentException("Booking id " + bookingId + " is not in checked in status.");
+                }
+                booking.setStatus(BookingStatus.CHECKED_OUT);
+                house.setStatus(HouseStatus.AVAILABLE);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid action: " + action);
+
+        }
+        bookingRepository.save(booking);
+        houseService.save(house);
+
+        return bookingMapper.toBookingDTO(booking);
     }
 }

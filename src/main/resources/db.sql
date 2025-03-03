@@ -77,6 +77,7 @@ begin
            u.full_name as fullName,
            u.address as address,
            u.phone as phone,
+           u.email as email,
            COALESCE(COUNT(DISTINCT h.id), 0) AS housesForRent,
            COALESCE(SUM((DATEDIFF(b.end_date, b.start_date) + 1) * b.price), 0) AS totalIncome
     from users u
@@ -97,6 +98,7 @@ begin
            u.full_name as fullName,
            u.address as address,
            u.phone as phone,
+           u.email as email,
            COALESCE(COUNT(DISTINCT h.id), 0) AS housesForRent,
            COALESCE(SUM((DATEDIFF(b.end_date, b.start_date) + 1) * b.price), 0) AS totalIncome
     from users u

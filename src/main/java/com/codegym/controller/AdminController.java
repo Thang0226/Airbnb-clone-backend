@@ -1,5 +1,6 @@
 package com.codegym.controller;
 
+import com.codegym.exception.NoSuchUserExistsException;
 import com.codegym.model.User;
 import com.codegym.model.constants.UserStatus;
 import com.codegym.model.dto.host.HostInfoDTO;
@@ -15,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 @RestController
 @CrossOrigin("*")
@@ -46,22 +46,15 @@ public class AdminController {
 
     @PostMapping("/update-status/{id}")
     public ResponseEntity<?> updateStatus(@PathVariable Long id) {
-        Optional<User> userOptional = userService.findById(id);
-        if (userOptional.isEmpty()) {
-            return new ResponseEntity<>("No user with id " + id + "founded",HttpStatus.NOT_FOUND);
-        }
-        User user = userOptional.get();
-        String userStatus = user.getStatus().toString();
-        if (userStatus.equals("ACTIVE")) {
-            user.setStatus(UserStatus.LOCKED);
-            userService.save(user);
-            return new ResponseEntity<>("User locked", HttpStatus.OK);
-        } else {
-            user.setStatus(UserStatus.ACTIVE);
-            userService.save(user);
-            return new ResponseEntity<>("User unlocked", HttpStatus.OK);
+        try {
+            User user = userService.updateUserStatus(id);
+            String message = "User " + (user.getStatus() == UserStatus.ACTIVE ? "unlocked" : "locked");
+            return ResponseEntity.ok(message);
+        } catch (NoSuchUserExistsException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+
 
     @GetMapping("/users/{id}")
     public ResponseEntity<?> getUserInfo(@PathVariable Long id) {
