@@ -60,12 +60,11 @@ public class HouseController {
 
     @Autowired
     private IHouseMaintenanceService houseMaintenanceService;
+    @Autowired
+    private HouseMaintenanceMapper houseMaintenanceMapper;
 
     @Autowired
     private NotificationController notificationController;
-
-    @Autowired
-    private HouseMaintenanceMapper houseMaintenanceMapper;
 
     @GetMapping
     public ResponseEntity<List<House>> getHousesForAvailable() {
@@ -86,9 +85,6 @@ public class HouseController {
     @GetMapping("/host/{hostId}")
     public ResponseEntity<?> getAllHouseByHostId(@PathVariable Long hostId) {
         List<House> houses = houseService.findHousesByHostId(hostId);
-        if (houses.isEmpty()) {
-            return new ResponseEntity<>("No houses found for this host", HttpStatus.NOT_FOUND);
-        }
         return new ResponseEntity<>(houses, HttpStatus.OK);
     }
 
