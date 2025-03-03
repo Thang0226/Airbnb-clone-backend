@@ -1,6 +1,5 @@
 package com.codegym.service.booking;
 import com.codegym.exception.BookingNotFoundException;
-import com.codegym.exception.HouseNotFoundException;
 import com.codegym.mapper.BookingMapper;
 import com.codegym.model.Availability;
 import com.codegym.model.Booking;
