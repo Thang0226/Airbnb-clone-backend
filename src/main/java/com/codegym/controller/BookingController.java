@@ -111,4 +111,13 @@ public class BookingController {
 
         return getBookingsByUsernameOfUser(username);
     }
+
+    @PutMapping("/{bookingId}/process-booking")
+    public ResponseEntity<?> processBooking(@PathVariable Long bookingId, @RequestParam String action) {
+        try {
+            return new ResponseEntity<>(bookingService.processBooking(bookingId, action), HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
 }

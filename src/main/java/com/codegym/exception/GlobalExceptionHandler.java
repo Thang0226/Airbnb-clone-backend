@@ -58,4 +58,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleInvalidMaintenanceDateException(InvalidMaintenanceDateException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( ex.getMessage());
     }
+
+    @ExceptionHandler(BookingNotFoundException.class)
+    public ResponseEntity<String> handleBookingNotFoundException(BookingNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
 }

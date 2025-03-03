@@ -5,6 +5,7 @@ import com.codegym.exception.PhoneAlreadyExistsException;
 import com.codegym.exception.UsernameAlreadyExistsException;
 import com.codegym.mapper.UserMapper;
 import com.codegym.model.auth.UserPrincipal;
+import com.codegym.model.constants.UserStatus;
 import com.codegym.model.dto.host.HostInfoDTO;
 import com.codegym.model.dto.user.UserInfoDTO;
 import com.codegym.model.User;
@@ -150,5 +151,13 @@ public class UserService implements IUserService, UserDetailsService {
             System.out.println(e.getMessage());
         }
         return incomeList;
+    }
+
+    @Override
+    public User updateUserStatus(Long id) {
+        return userRepository.findById(id).map(user -> {
+            user.setStatus(user.getStatus() == UserStatus.ACTIVE ? UserStatus.LOCKED : UserStatus.ACTIVE);
+            return userRepository.save(user);
+        }).orElseThrow(() -> new NoSuchUserExistsException("No user with id " + id + " found"));
     }
 }

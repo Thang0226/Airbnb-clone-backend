@@ -35,4 +35,6 @@ public interface IUserService extends IGenerateService<User> {
     List<Long> getIncomeByMonth(String hostUsername, Integer numberOfMonth);
 
     List<Long> getIncomeByYear(String hostUsername, Integer numberOfYear);
+
+    User updateUserStatus(Long id);
 }

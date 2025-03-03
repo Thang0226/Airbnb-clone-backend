@@ -33,4 +33,6 @@ public interface IBookingService extends IGenerateService<Booking> {
             Pageable pageable);
 
     List<Booking> findAllByUserId(Long userId);
+
+    BookingDTO processBooking(Long bookingId, String action);
 }
