@@ -33,7 +33,8 @@ public class House {
     @Enumerated(EnumType.STRING)
     private HouseStatus status;
 
-    private int rentals;
+    @Column(nullable = false, columnDefinition = "int default 0")
+    private Integer rentals;
 
     @OneToMany(mappedBy = "house", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference

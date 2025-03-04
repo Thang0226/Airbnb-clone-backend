@@ -5,7 +5,7 @@ import com.codegym.model.Booking;
 import com.codegym.model.House;
 import com.codegym.model.Review;
 import com.codegym.model.User;
-import com.codegym.model.dto.ReviewDTO;
+import com.codegym.model.dto.review.NewReviewDTO;
 import com.codegym.model.dto.booking.BookingDTO;
 import com.codegym.model.dto.booking.BookingDTOForReview;
 import com.codegym.model.dto.booking.BookingSearchDTO;
@@ -141,7 +141,7 @@ public class BookingController {
     }
 
     @PostMapping("/{id}/review")
-    public ResponseEntity<?> reviewBooking(@RequestBody ReviewDTO reviewDTO, @PathVariable Long id) {
+    public ResponseEntity<?> reviewBooking(@RequestBody NewReviewDTO newReviewDTO, @PathVariable Long id) {
         Optional<Booking> bookingOptional = bookingService.findById(id);
         if (bookingOptional.isEmpty()) {
             return new ResponseEntity<>("Booking ID not found", HttpStatus.NOT_FOUND);
@@ -155,14 +155,24 @@ public class BookingController {
         } else {
             isUpdating = true;
         }
-        Integer rating = reviewDTO.getRating();
+        Integer rating = newReviewDTO.getRating();
         if (rating < 1 || rating > 5) { return new ResponseEntity<>("Rating must be between 1 and 5 stars", HttpStatus.BAD_REQUEST); }
-        review.setRating(reviewDTO.getRating());
-        review.setComment(reviewDTO.getComment());
+        review.setRating(newReviewDTO.getRating());
+        review.setComment(newReviewDTO.getComment());
         reviewService.save(review);
+
+        House house = booking.getHouse();
+        User host = house.getHost();
+        String message;
         if (isUpdating) {
+            message = '"'+booking.getUser().getUsername()+'"'+" updated review about the house "+'"'+booking.getHouse().getHouseName()+'"'
+                    + " on " + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            notificationController.sendNotification(host, message);
             return new ResponseEntity<>("Review updated", HttpStatus.OK);
         } else {
+            message = '"'+booking.getUser().getUsername()+'"'+" reviewed the house "+'"'+booking.getHouse().getHouseName()+'"'
+                    + " on " + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            notificationController.sendNotification(host, message);
             return new ResponseEntity<>("Add new review successfully", HttpStatus.OK);
         }
     }
