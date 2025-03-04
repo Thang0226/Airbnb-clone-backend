@@ -269,7 +269,6 @@ public class UserController {
     public ResponseEntity<?> logout(HttpServletRequest request) {
         String token = jwtService.extractTokenFromRequest(request);
         if (token != null && jwtService.validateJwtToken(token)) {
-            // [IF REQUIRED] Add token to a blacklist or perform other logout logic
             return ResponseEntity.ok("Logged out successfully!");
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid token");

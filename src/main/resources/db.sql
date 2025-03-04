@@ -405,7 +405,7 @@ values
         '0888899999',
         'thang.nd0226@gmail.com',
         'Thắng Nguyễn Đức',
-        'PENDING',
+        'ACTIVE',
         true
     );
 
@@ -426,18 +426,18 @@ VALUES
     (11, 1);
 
 INSERT INTO houses
-(address, bathrooms, bedrooms, description, house_name, price, host_id, status)
+(address, bathrooms, bedrooms, description, house_name, price, host_id, status, rentals)
 VALUES
-    ( '12 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh', 2, 3, 'Fully-equipped apartment, centrally located, suitable for couples or small families.', 'Hoàn Kiếm Villa', 800000, 2, 'RENTED'),
-    ('25 Trần Duy Hưng, Cầu Giấy, Hà Nội', 3, 4, 'Spacious villa with garden, perfect for large families or groups.', 'Ba Đình Villa', 1500000, 2, 'RENTED'),
-    ('90 Lê Lợi, Quận Hải Châu, Đà Nẵng', 2, 2, 'Lake-view apartment with modern design, ideal for expats and digital nomads.', 'Tây Hồ Lakeview Apartment', 900000, 2, 'RENTED'),
-    ('15 Hoàng Hoa Thám, Quận Ninh Kiều, Cần Thơ', 1, 1, 'Cozy studio in central Hanoi, close to embassies and business areas.', 'Kim Mã Studio', 600000, 2, 'RENTED'),
-    ('78 Võ Văn Kiệt, Quận Sơn Trà, Đà Nẵng', 2, 3, 'Traditional-style home in Hanoi Old Quarter, offering an authentic experience.', 'Old Quarter Charm House', 850000, 2, 'RENTED'),
-    ('102 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh', 2, 2, 'Modern apartment with full amenities, near shopping malls and offices.', 'Láng Hạ Modern Condo', 950000, 3, 'RENTED'),
-    ('45 Phan Chu Trinh, Quận Hoàn Kiếm, Hà Nội', 2, 3, 'Newly built apartment with gym and pool access.', 'Thanh Xuân Luxury Condo', 1000000, 3, 'RENTED'),
-    ('38 Nguyễn Văn Linh, Quận Hải Châu, Đà Nẵng', 1, 2, 'Quiet and comfortable apartment near West Lake.', 'West Lake Retreat', 700000, 3, 'RENTED'),
-    ('57 Bạch Đằng, Quận Hải Châu, Đà Nẵng', 3, 4, 'Spacious home with rooftop terrace, perfect for family gatherings.', ' Đội Cấn Family House', 1200000, 3, 'RENTED'),
-    ('66 Nguyễn Hữu Thọ, Quận 7, TP. Hồ Chí Minh', 2, 3, 'Historic French colonial house with elegant decor.', 'French Colonial Residence', 1400000, 3, 'RENTED');
+    ( '12 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh', 2, 3, 'Fully-equipped apartment, centrally located, suitable for couples or small families.', 'Hoàn Kiếm Villa', 800000, 2, 'RENTED', 1),
+    ('25 Trần Duy Hưng, Cầu Giấy, Hà Nội', 3, 4, 'Spacious villa with garden, perfect for large families or groups.', 'Ba Đình Villa', 1500000, 2, 'RENTED', 3),
+    ('90 Lê Lợi, Quận Hải Châu, Đà Nẵng', 2, 2, 'Lake-view apartment with modern design, ideal for expats and digital nomads.', 'Tây Hồ Lakeview Apartment', 900000, 2, 'RENTED', 2),
+    ('15 Hoàng Hoa Thám, Quận Ninh Kiều, Cần Thơ', 1, 1, 'Cozy studio in central Hanoi, close to embassies and business areas.', 'Kim Mã Studio', 600000, 2, 'RENTED', 2),
+    ('78 Võ Văn Kiệt, Quận Sơn Trà, Đà Nẵng', 2, 3, 'Traditional-style home in Hanoi Old Quarter, offering an authentic experience.', 'Old Quarter Charm House', 850000, 2, 'RENTED', 2),
+    ('102 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh', 2, 2, 'Modern apartment with full amenities, near shopping malls and offices.', 'Láng Hạ Modern Condo', 950000, 3, 'RENTED', 1),
+    ('45 Phan Chu Trinh, Quận Hoàn Kiếm, Hà Nội', 2, 3, 'Newly built apartment with gym and pool access.', 'Thanh Xuân Luxury Condo', 1000000, 3, 'RENTED', 1),
+    ('38 Nguyễn Văn Linh, Quận Hải Châu, Đà Nẵng', 1, 2, 'Quiet and comfortable apartment near West Lake.', 'West Lake Retreat', 700000, 3, 'RENTED', 1),
+    ('57 Bạch Đằng, Quận Hải Châu, Đà Nẵng', 3, 4, 'Spacious home with rooftop terrace, perfect for family gatherings.', ' Đội Cấn Family House', 1200000, 3, 'RENTED', 1),
+    ('66 Nguyễn Hữu Thọ, Quận 7, TP. Hồ Chí Minh', 2, 3, 'Historic French colonial house with elegant decor.', 'French Colonial Residence', 1400000, 3, 'RENTED', 1);
 
 insert into house_images (house_id, file_name)
 values  (1, 'hinh anh so (1).jpg'),
@@ -565,7 +565,22 @@ VALUES
     ('2025-02-17 14:30:00', '"Jennifer Davis" BOOKED the house "Thanh Xuân Luxury Condo" on 17/02/2025', 3),
     ('2025-02-18 14:30:00', '"Mary Anderson" BOOKED the house "West Lake Retreat" on 18/02/2025', 3),
     ('2025-02-14 14:30:00', '"Lisa Taylor" BOOKED the house "Đội Cấn Family House" on 14/02/2025', 3),
-    ('2025-02-20 14:30:00', '"Jennifer Davis" BOOKED the house "French Colonial Residence" on 20/02/2025', 3);
+    ('2025-02-20 14:30:00', '"Jennifer Davis" BOOKED the house "French Colonial Residence" on 20/02/2025', 3),
+    ('2024-07-30 14:30:00', '"David Wilson" reviewed the house "Hoàn Kiếm Villa" on 30/07/2024', 2),
+    ('2024-04-10 14:30:00', '"Emily Brown" reviewed the house "Ba Đình Villa" on 10/04/2024', 2),
+    ('2024-05-10 14:30:00', '"Michael Johnson" reviewed the house "Tây Hồ Lakeview Apartment" on 10/05/2024', 2),
+    ('2024-07-02 14:30:00', '"Jennifer Davis" reviewed the house "Kim Mã Studio" on 02/07/2024', 2),
+    ('2024-06-01 14:30:00', '"William Jones" reviewed the house "Old Quarter Charm House" on 01/06/2024', 2),
+    ('2024-07-31 14:30:00', '"Sarah Smith" reviewed the house "Láng Hạ Modern Condo" on 31/07/2024', 3),
+    ('2024-05-15 14:30:00', '"Robert Miller" reviewed the house "Thanh Xuân Luxury Condo" on 15/05/2024', 3),
+    ('2024-07-15 14:30:00', '"Lisa Taylor" reviewed the house "West Lake Retreat" on 15/07/2024', 3),
+    ('2024-06-15 14:30:00', '"John Doe" reviewed the house "Đội Cấn Family House" on 15/06/2024', 3),
+    ('2024-09-30 14:30:00', '"Mary Anderson" reviewed the house "French Colonial Residence" on 30/09/2024', 3),
+    ('2024-10-31 14:30:00', '"Sarah Smith" reviewed the house "Hoàn Kiếm Villa" on 31/10/2024', 2),
+    ('2024-09-30 14:30:00', '"David Wilson" reviewed the house "Ba Đình Villa" on 30/09/2024', 2),
+    ('2024-10-15 14:30:00', '"Michael Johnson" reviewed the house "Tây Hồ Lakeview Apartment" on 15/10/2024', 2),
+    ('2024-09-15 14:30:00', '"Lisa Taylor" reviewed the house " Đội Cấn Family House" on 15/09/2024', 3),
+    ('2024-08-30 14:30:00', '"Thắng Nguyễn Đức" reviewed the house "French Colonial Residence" on 30/08/2024', 3);
 
 INSERT INTO reviews (comment, rating, updated_at, booking_id)
 VALUES

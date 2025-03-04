@@ -160,9 +160,19 @@ public class BookingController {
         review.setRating(newReviewDTO.getRating());
         review.setComment(newReviewDTO.getComment());
         reviewService.save(review);
+
+        House house = booking.getHouse();
+        User host = house.getHost();
+        String message;
         if (isUpdating) {
+            message = '"'+booking.getUser().getUsername()+'"'+" updated review about the house "+'"'+booking.getHouse().getHouseName()+'"'
+                    + " on " + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            notificationController.sendNotification(host, message);
             return new ResponseEntity<>("Review updated", HttpStatus.OK);
         } else {
+            message = '"'+booking.getUser().getUsername()+'"'+" reviewed the house "+'"'+booking.getHouse().getHouseName()+'"'
+                    + " on " + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            notificationController.sendNotification(host, message);
             return new ResponseEntity<>("Add new review successfully", HttpStatus.OK);
         }
     }
