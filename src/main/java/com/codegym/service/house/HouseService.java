@@ -2,6 +2,7 @@ package com.codegym.service.house;
 
 
 import com.codegym.exception.HouseNotFoundException;
+import com.codegym.mapper.HouseMapper;
 import com.codegym.model.Availability;
 import com.codegym.model.House;
 import com.codegym.model.HouseImage;
@@ -9,6 +10,7 @@ import com.codegym.model.User;
 import com.codegym.model.dto.house.HouseDTO;
 import com.codegym.model.constants.HouseStatus;
 import com.codegym.model.dto.house.HouseListDTO;
+import com.codegym.model.dto.house.TopFiveHousesDTO;
 import com.codegym.repository.IHouseImageRepository;
 import com.codegym.repository.IHouseRepository;
 import com.codegym.service.user.IUserService;
@@ -49,6 +51,10 @@ public class HouseService implements IHouseService {
 
     @Autowired
     private IUserService userService;
+
+    @Autowired
+
+    private HouseMapper houseMapper;
 
     @Override
     public List<House> findAll() {
@@ -242,5 +248,11 @@ public class HouseService implements IHouseService {
             default:
                 throw new IllegalArgumentException("Invalid status: " + status);
         }
+    }
+
+    @Override
+    public Page<TopFiveHousesDTO> getTopFiveRentalCountHouses(Pageable pageable) {
+        Page<House> houses = houseRepository.findTop5ByOrderByRentalsDesc(pageable);
+        return houses.map(houseMapper::toTopFiveHousesDTO);
     }
 }

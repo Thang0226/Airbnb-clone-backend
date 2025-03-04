@@ -3,6 +3,7 @@ package com.codegym.repository;
 import com.codegym.model.House;
 import com.codegym.model.HouseImage;
 import com.codegym.model.dto.house.HouseListDTO;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -51,4 +52,5 @@ public interface IHouseRepository extends JpaRepository<House, Long> {
                                       @Param("offset") int offset
   );
 
+  Page<House> findTop5ByOrderByRentalsDesc(Pageable pageable);
 }

@@ -367,4 +367,9 @@ public class HouseController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
+    @GetMapping("/top-five-houses")
+    public ResponseEntity<?> getTopFiveHouses(Pageable pageable) {
+        return ResponseEntity.ok(houseService.getTopFiveRentalCountHouses(pageable));
+    }
 }
