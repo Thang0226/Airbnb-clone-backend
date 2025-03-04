@@ -4,6 +4,7 @@ import com.codegym.model.House;
 import com.codegym.model.HouseImage;
 import com.codegym.model.dto.house.HouseDTO;
 import com.codegym.model.dto.house.HouseListDTO;
+import com.codegym.model.dto.house.TopFiveHousesDTO;
 import com.codegym.service.IGenerateService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,4 +33,6 @@ public interface IHouseService extends IGenerateService<House> {
     void updateHouse(Long houseId, HouseDTO houseDTO) throws IOException;
 
     void updateHouseStatus(Long houseId, String status);
+
+    Page<TopFiveHousesDTO> getTopFiveRentalCountHouses(Pageable pageable);
 }

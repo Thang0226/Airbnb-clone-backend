@@ -374,6 +374,12 @@ public class HouseController {
         }
     }
 
+
+    @GetMapping("/top-five-houses")
+    public ResponseEntity<?> getTopFiveHouses(Pageable pageable) {
+        return ResponseEntity.ok(houseService.getTopFiveRentalCountHouses(pageable));
+    }
+
     @GetMapping("/{houseId}/reviews")
     public ResponseEntity<?> getHouseReviews(@PathVariable Long houseId, Pageable pageable) {
         Optional<House> houseOptional = houseService.findById(houseId);
