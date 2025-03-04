@@ -15,15 +15,13 @@ import com.codegym.repository.IHouseImageRepository;
 import com.codegym.repository.IHouseRepository;
 import com.codegym.service.user.IUserService;
 import com.codegym.service.availability.IAvailabilityService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -67,7 +65,13 @@ public class HouseService implements IHouseService {
     }
 
     @Override
+    @Transactional
     public void save(House house) {
+        if (house.getId() == null) {
+            house.setStatus(HouseStatus.AVAILABLE);
+            house.setRentals(0);
+        }
+        houseRepository.save(house);
         // if new house, initialize an availability time for house
         if (house.getId() == null) {
             Availability availability = new Availability();
@@ -76,7 +80,6 @@ public class HouseService implements IHouseService {
             availability.setHouse(house);
             availabilityService.save(availability);
         }
-        houseRepository.save(house);
     }
 
     @Override
