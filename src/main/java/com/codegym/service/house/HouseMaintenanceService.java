@@ -1,7 +1,7 @@
 package com.codegym.service.house;
 
 import com.codegym.exception.AvailabilityNotFoundException;
-import com.codegym.exception.house_maintenance.DuplicateMaintenanceException;
+import com.codegym.exception.house_maintenance.OverlappingMaintenanceException;
 import com.codegym.exception.house_maintenance.InvalidMaintenanceDateException;
 import com.codegym.mapper.HouseMaintenanceMapper;
 import com.codegym.model.Availability;
@@ -11,6 +11,7 @@ import com.codegym.repository.IHouseMaintenanceRepository;
 import com.codegym.service.availability.IAvailabilityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -39,21 +40,30 @@ public class HouseMaintenanceService implements IHouseMaintenanceService {
     }
 
     @Override
+    @Transactional
     public void save(HouseMaintenance houseMaintenance) {
         LocalDate today = LocalDate.now();
         LocalDate startDate = houseMaintenance.getStartDate();
         LocalDate endDate = houseMaintenance.getEndDate();
 
+        if (endDate.isBefore(startDate)) {
+            throw new InvalidMaintenanceDateException("End date must be after start date.");
+        }
+
         if (endDate.isBefore(today) || (today.isAfter(startDate) && today.isBefore(endDate))) {
             throw new InvalidMaintenanceDateException("Invalid maintenance period. Please check the dates.");
         }
 
-        boolean isExists = houseMaintenanceRepository.existsByHouseIdAndStartDateAndEndDate(
+        boolean isOverlap = houseMaintenanceRepository.overlappingMaintenance(
                 houseMaintenance.getHouse().getId(), startDate, endDate
         );
-        if (isExists) {
-            throw new DuplicateMaintenanceException("House maintenance record already exists for this date range.");
+        if (isOverlap) {
+            throw new OverlappingMaintenanceException(
+                    "The house is already scheduled for maintenance during the selected period." +
+                            "Please choose a different date range."
+            );
         }
+
 
         houseMaintenanceRepository.save(houseMaintenance);
 

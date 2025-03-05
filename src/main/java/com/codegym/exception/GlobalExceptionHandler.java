@@ -2,7 +2,7 @@ package com.codegym.exception;
 
 
 
-import com.codegym.exception.house_maintenance.DuplicateMaintenanceException;
+import com.codegym.exception.house_maintenance.OverlappingMaintenanceException;
 import com.codegym.exception.house_maintenance.InvalidMaintenanceDateException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -49,8 +49,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
-    @ExceptionHandler(DuplicateMaintenanceException.class)
-    public ResponseEntity<String> handleDuplicateMaintenance(DuplicateMaintenanceException ex) {
+    @ExceptionHandler(OverlappingMaintenanceException.class)
+    public ResponseEntity<String> handleDuplicateMaintenance(OverlappingMaintenanceException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 

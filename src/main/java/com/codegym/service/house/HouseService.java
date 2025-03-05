@@ -7,14 +7,14 @@ import com.codegym.model.Availability;
 import com.codegym.model.House;
 import com.codegym.model.HouseImage;
 import com.codegym.model.User;
-import com.codegym.model.dto.house.HouseDTO;
 import com.codegym.model.constants.HouseStatus;
+import com.codegym.model.dto.house.HouseDTO;
 import com.codegym.model.dto.house.HouseListDTO;
 import com.codegym.model.dto.house.TopFiveHousesDTO;
 import com.codegym.repository.IHouseImageRepository;
 import com.codegym.repository.IHouseRepository;
-import com.codegym.service.user.IUserService;
 import com.codegym.service.availability.IAvailabilityService;
+import com.codegym.service.user.IUserService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +33,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class HouseService implements IHouseService {
