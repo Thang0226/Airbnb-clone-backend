@@ -38,4 +38,6 @@ public interface IBookingRepository extends JpaRepository<Booking, Long> {
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
             @Param("status") String status);
+
+    boolean existsByHouseIdAndStartDateAndEndDate(Long houseId, LocalDate startDate, LocalDate endDate);
 }

@@ -5,10 +5,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
+import lombok.*;
 import lombok.Data;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -26,5 +24,6 @@ public class HouseImage {
     @ManyToOne
     @JoinColumn(name = "house_id")
     @JsonBackReference
+    @ToString.Exclude
     private House house;
 }

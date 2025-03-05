@@ -67,13 +67,15 @@ public class HouseService implements IHouseService {
     @Override
     @Transactional
     public void save(House house) {
-        if (house.getId() == null) {
+        boolean isNewHouse = (house.getId() == null);
+
+        if (isNewHouse) {
             house.setStatus(HouseStatus.AVAILABLE);
             house.setRentals(0);
         }
         houseRepository.save(house);
         // if new house, initialize an availability time for house
-        if (house.getId() == null) {
+        if (isNewHouse) {
             Availability availability = new Availability();
             availability.setStartDate(LocalDate.now());
             availability.setEndDate(LocalDate.now().plusYears(3));
