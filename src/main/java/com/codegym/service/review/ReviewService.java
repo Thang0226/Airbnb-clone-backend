@@ -30,9 +30,6 @@ public class ReviewService implements IReviewService {
 
     @Override
     public void save(Review review) {
-        if (review.getId() != null) { // if update old one, set new update time
-            review.setUpdatedAt(LocalDate.now());
-        }
         reviewRepository.save(review);
     }
 
@@ -47,9 +44,7 @@ public class ReviewService implements IReviewService {
     }
 
     @Override
-    public List<Review> findAllByHouseId(Long houseId, Pageable pageable) {
-        int limit = pageable.getPageSize();
-        int offset = (int) pageable.getOffset();
-        return reviewRepository.findAllByHouseId(houseId, limit, offset);
+    public List<Review> findAllByHouseId(Long houseId) {
+        return reviewRepository.findAllByHouseId(houseId);
     }
 }

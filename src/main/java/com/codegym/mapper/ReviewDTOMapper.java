@@ -14,6 +14,7 @@ public abstract class ReviewDTOMapper {
         reviewDTO.setUpdatedAt(review.getUpdatedAt());
         reviewDTO.setRating(review.getRating());
         reviewDTO.setComment(review.getComment());
+        reviewDTO.setHidden(review.isHidden());
         return reviewDTO;
     }
 }

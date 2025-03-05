@@ -410,12 +410,22 @@ public class HouseController {
     }
 
     @GetMapping("/{houseId}/reviews")
-    public ResponseEntity<?> getHouseReviews(@PathVariable Long houseId, Pageable pageable) {
+    public ResponseEntity<?> getHouseReviews(@PathVariable Long houseId, @RequestParam Integer hidden) {
         Optional<House> houseOptional = houseService.findById(houseId);
         if (houseOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("House not found");
         }
-        List<Review> reviews = reviewService.findAllByHouseId(houseId, pageable);
+        List<Review> reviews = reviewService.findAllByHouseId(houseId);
+        if (hidden == 1) {
+            List<Review> filteredReviews = new ArrayList<>();
+            for (Review review : reviews) {
+                if (review.isHidden()) {
+                    continue;
+                }
+                filteredReviews.add(review);
+            }
+            reviews = filteredReviews;
+        }
         List<ReviewDTO> reviewDTOS = reviews.stream().map(reviewDTOMapper::toReviewDTO).toList();
         return ResponseEntity.ok(reviewDTOS);
     }

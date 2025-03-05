@@ -16,4 +16,5 @@ public class ReviewDTO {
     private LocalDate updatedAt;
     private Integer rating;
     private String comment;
+    private boolean isHidden;
 }
