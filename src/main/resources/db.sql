@@ -569,20 +569,20 @@ VALUES
     ('2024-09-15 14:30:00', '"Lisa Taylor" reviewed the house " Đội Cấn Family House" on 15/09/2024', 3),
     ('2024-08-30 14:30:00', '"Thắng Nguyễn Đức" reviewed the house "French Colonial Residence" on 30/08/2024', 3);
 
-INSERT INTO reviews (comment, rating, updated_at, booking_id)
+INSERT INTO reviews (comment, rating, updated_at, booking_id, is_hidden)
 VALUES
-    ('Absolutely loved our stay! The house was even more beautiful than in the pictures.', 5, '2024-07-30', 1),
-    ('Great location and comfortable amenities. Would recommend!', 4, '2024-04-10', 5),
-    ('Nice property but some maintenance issues in the bathroom.', 3, '2024-05-10', 6),
-    ('Perfect for our family vacation. Spacious and well-equipped kitchen.', 5, '2024-07-02', 7),
-    ('Enjoyed the peaceful surroundings. Host was very responsive.', 4, '2024-06-01', 8),
-    ('Amazing views and convenient location to local attractions.', 5, '2024-07-31', 9),
-    ('Property was clean but smaller than it appeared in photos.', 3, '2024-05-15', 10),
-    ('We had a wonderful time! The backyard was perfect for our kids.', 4, '2024-07-15', 11),
-    ('Stylish interior and very comfortable beds. Would stay again!', 5, '2024-06-15', 13),
-    ('Great value for money. Everything was as described.', 4, '2024-09-30', 14),
-    ('Luxury at its finest! Worth every penny for a special occasion.', 5, '2024-10-31', 15),
-    ('The property exceeded our expectations. Beautiful neighborhood.', 5, '2024-09-30', 17),
-    ('Modern, clean, and the host was exceptionally accommodating.', 4, '2024-10-15', 19),
-    ('Cozy place with charming details. Minor issue with WiFi but otherwise great.', 4, '2024-09-15', 21),
-    ('Perfect getaway! Loved the pool and outdoor entertainment area.', 5, '2024-08-30', 23);
+    ('Absolutely loved our stay! The house was even more beautiful than in the pictures.', 5, '2024-07-30', 1, 0),
+    ('Great location and comfortable amenities. Would recommend!', 4, '2024-04-10', 5, 0),
+    ('Nice property but some maintenance issues in the bathroom.', 3, '2024-05-10', 6, 0),
+    ('Perfect for our family vacation. Spacious and well-equipped kitchen.', 5, '2024-07-02', 7, 0),
+    ('Enjoyed the peaceful surroundings. Host was very responsive.', 4, '2024-06-01', 8, 0),
+    ('Amazing views and convenient location to local attractions.', 5, '2024-07-31', 9, 0),
+    ('Property was clean but smaller than it appeared in photos.', 3, '2024-05-15', 10, 0),
+    ('We had a wonderful time! The backyard was perfect for our kids.', 4, '2024-07-15', 11, 0),
+    ('Stylish interior and very comfortable beds. Would stay again!', 5, '2024-06-15', 13, 0),
+    ('Great value for money. Everything was as described.', 4, '2024-09-30', 14, 0),
+    ('Luxury at its finest! Worth every penny for a special occasion.', 5, '2024-10-31', 15, 0),
+    ('The property exceeded our expectations. Beautiful neighborhood.', 5, '2024-09-30', 17, 0),
+    ('Modern, clean, and the host was exceptionally accommodating.', 4, '2024-10-15', 19, 0),
+    ('Cozy place with charming details. Minor issue with WiFi but otherwise great.', 4, '2024-09-15', 21, 0),
+    ('Perfect getaway! Loved the pool and outdoor entertainment area.', 5, '2024-08-30', 23, 0);

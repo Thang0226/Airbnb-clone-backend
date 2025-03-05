@@ -24,7 +24,10 @@ public class Review {
     @JsonIgnore
     private Booking booking;
 
+    private boolean isHidden;
+
     public Review() {
         this.updatedAt = LocalDate.now();
+        this.isHidden = false;
     }
 }

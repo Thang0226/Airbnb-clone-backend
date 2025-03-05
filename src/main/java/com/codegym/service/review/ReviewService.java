@@ -30,9 +30,6 @@ public class ReviewService implements IReviewService {
 
     @Override
     public void save(Review review) {
-        if (review.getId() != null) { // if update old one, set new update time
-            review.setUpdatedAt(LocalDate.now());
-        }
         reviewRepository.save(review);
     }
 

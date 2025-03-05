@@ -381,7 +381,7 @@ public class HouseController {
     }
 
     @GetMapping("/{houseId}/reviews")
-    public ResponseEntity<?> getHouseReviews(@PathVariable Long houseId) {
+    public ResponseEntity<?> getHouseReviews(@PathVariable Long houseId, @RequestParam Integer hidden) {
         Optional<House> houseOptional = houseService.findById(houseId);
         if (houseOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("House not found");
