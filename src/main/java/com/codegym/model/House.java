@@ -14,6 +14,7 @@ import java.util.List;
 
 @Entity
 @Data
+@ToString(exclude = {"host", "houseImages"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "houses")

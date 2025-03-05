@@ -92,7 +92,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/hosts/**").hasRole("HOST")
                         .requestMatchers("/api/bookings/**").hasAnyRole("ADMIN", "HOST", "USER")
 //                        .requestMatchers("/api/users/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN","ROLE_SELLER")
-                                .requestMatchers("/api/houses/**").permitAll()
+                                .requestMatchers("/api/houses/**", "/api/houses/*/host").permitAll()
                                 .requestMatchers("/api/placeholder/**").permitAll() // Cho phép tất cả truy cập API này
                         .anyRequest().authenticated()
                 )

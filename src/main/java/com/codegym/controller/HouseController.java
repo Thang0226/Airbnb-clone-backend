@@ -4,7 +4,9 @@ import com.codegym.mapper.BookingDTOMapper;
 import com.codegym.mapper.HouseMaintenanceMapper;
 import com.codegym.mapper.ReviewDTOMapper;
 import com.codegym.model.*;
+import com.codegym.model.auth.Role;
 import com.codegym.model.dto.booking.NewBookingDTO;
+import com.codegym.model.dto.host.HostChatDTO;
 import com.codegym.model.dto.house.HouseDateDTO;
 import com.codegym.model.dto.SearchDTO;
 import com.codegym.model.dto.house.HouseListDTO;
@@ -87,6 +89,33 @@ public class HouseController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @GetMapping("/{houseId}/host")
+    public ResponseEntity<HostChatDTO> getHouseHost(@PathVariable Long houseId) {
+        Optional<House> houseOptional = houseService.findById(houseId);
+        if (houseOptional.isEmpty()) {
+            System.out.println("House not found" );
+            return ResponseEntity.notFound().build();
+        }
+        House house = houseOptional.get();
+        User host = house.getHost();
+
+        String role = null;
+        for (Role userRole : host.getRoles()) {
+            if (userRole.getName().equals("ROLE_HOST")) {
+                role = userRole.getName();
+                break;
+            }
+        }
+        if (role == null && !host.getRoles().isEmpty()) {
+            role = host.getRoles().iterator().next().getName();
+        }
+        HostChatDTO hostChatDTO = new HostChatDTO(
+                host.getId(),
+                host.getUsername(),
+                role
+        );
+        return ResponseEntity.ok(hostChatDTO);
+    }
 
     @GetMapping("/host/{hostId}")
     public ResponseEntity<?> getAllHouseByHostId(@PathVariable Long hostId) {
