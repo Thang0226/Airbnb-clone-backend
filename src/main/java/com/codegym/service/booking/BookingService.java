@@ -1,5 +1,5 @@
 package com.codegym.service.booking;
-import com.codegym.exception.BookingNotFoundException;
+import com.codegym.exception.booking.BookingNotFoundException;
 import com.codegym.mapper.BookingMapper;
 import com.codegym.model.Availability;
 import com.codegym.model.Booking;
@@ -191,5 +191,10 @@ public  class BookingService implements IBookingService {
         houseService.save(house);
 
         return bookingMapper.toBookingDTO(booking);
+    }
+
+    @Override
+    public boolean overlappingBooking(Long houseId, LocalDate startDate, LocalDate endDate) {
+        return bookingRepository.overlappingBooking(houseId, startDate, endDate);
     }
 }

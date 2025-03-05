@@ -6,6 +6,7 @@ import com.codegym.model.dto.user.UserRentalHistoryDTO;
 import com.codegym.service.IGenerateService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -35,4 +36,6 @@ public interface IBookingService extends IGenerateService<Booking> {
     List<Booking> findAllByUserId(Long userId);
 
     BookingDTO processBooking(Long bookingId, String action);
+
+    boolean overlappingBooking(Long houseId, LocalDate startDate, LocalDate endDate);
 }

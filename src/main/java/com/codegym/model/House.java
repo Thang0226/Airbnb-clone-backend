@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,7 @@ public class House {
 
     @OneToMany(mappedBy = "house", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
+    @ToString.Exclude
     private List<HouseImage> houseImages = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)

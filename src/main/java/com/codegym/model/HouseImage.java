@@ -1,16 +1,11 @@
 package com.codegym.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
+import lombok.ToString;
 
 @Data
 @NoArgsConstructor
@@ -26,5 +21,6 @@ public class HouseImage {
     @ManyToOne
     @JoinColumn(name = "house_id")
     @JsonBackReference
+    @ToString.Exclude
     private House house;
 }

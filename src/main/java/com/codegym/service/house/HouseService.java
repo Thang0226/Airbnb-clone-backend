@@ -7,14 +7,14 @@ import com.codegym.model.Availability;
 import com.codegym.model.House;
 import com.codegym.model.HouseImage;
 import com.codegym.model.User;
-import com.codegym.model.dto.house.HouseDTO;
 import com.codegym.model.constants.HouseStatus;
+import com.codegym.model.dto.house.HouseDTO;
 import com.codegym.model.dto.house.HouseListDTO;
 import com.codegym.model.dto.house.TopFiveHousesDTO;
 import com.codegym.repository.IHouseImageRepository;
 import com.codegym.repository.IHouseRepository;
-import com.codegym.service.user.IUserService;
 import com.codegym.service.availability.IAvailabilityService;
+import com.codegym.service.user.IUserService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +33,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class HouseService implements IHouseService {
@@ -67,13 +66,15 @@ public class HouseService implements IHouseService {
     @Override
     @Transactional
     public void save(House house) {
-        if (house.getId() == null) {
+        boolean isNewHouse = (house.getId() == null);
+
+        if (isNewHouse) {
             house.setStatus(HouseStatus.AVAILABLE);
             house.setRentals(0);
         }
         houseRepository.save(house);
         // if new house, initialize an availability time for house
-        if (house.getId() == null) {
+        if (isNewHouse) {
             Availability availability = new Availability();
             availability.setStartDate(LocalDate.now());
             availability.setEndDate(LocalDate.now().plusYears(3));
@@ -193,7 +194,7 @@ public class HouseService implements IHouseService {
         // 1. Get all existing images
         List<HouseImage> allExistingImages = houseImageRepository.findByHouseId(house.getId());
 
-        // 2. Create a list for updated images (existing images we wanna keep + new ones)
+        // 2. Create a list for updated images (existing images we want keep + new ones)
         List<HouseImage> updatedImages = new ArrayList<>();
 
         // 3. Add existing images that should be kept (filter by ID)
