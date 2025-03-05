@@ -194,7 +194,7 @@ public class HouseService implements IHouseService {
         // 1. Get all existing images
         List<HouseImage> allExistingImages = houseImageRepository.findByHouseId(house.getId());
 
-        // 2. Create a list for updated images (existing images we wanna keep + new ones)
+        // 2. Create a list for updated images (existing images we want keep + new ones)
         List<HouseImage> updatedImages = new ArrayList<>();
 
         // 3. Add existing images that should be kept (filter by ID)

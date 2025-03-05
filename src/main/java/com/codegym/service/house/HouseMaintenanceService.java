@@ -1,14 +1,16 @@
 package com.codegym.service.house;
 
 import com.codegym.exception.AvailabilityNotFoundException;
-import com.codegym.exception.house_maintenance.OverlappingMaintenanceException;
+import com.codegym.exception.booking.OverlappingBookingException;
 import com.codegym.exception.house_maintenance.InvalidMaintenanceDateException;
+import com.codegym.exception.house_maintenance.OverlappingMaintenanceException;
 import com.codegym.mapper.HouseMaintenanceMapper;
 import com.codegym.model.Availability;
 import com.codegym.model.HouseMaintenance;
 import com.codegym.model.dto.house.HouseMaintenanceRecordDTO;
 import com.codegym.repository.IHouseMaintenanceRepository;
 import com.codegym.service.availability.IAvailabilityService;
+import com.codegym.service.booking.IBookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,9 @@ public class HouseMaintenanceService implements IHouseMaintenanceService {
 
     @Autowired
     private IAvailabilityService availabilityService;
+
+    @Autowired
+    private IBookingService bookingService;
 
     @Autowired
     private HouseMaintenanceMapper houseMaintenanceMapper;
@@ -54,16 +59,25 @@ public class HouseMaintenanceService implements IHouseMaintenanceService {
             throw new InvalidMaintenanceDateException("Invalid maintenance period. Please check the dates.");
         }
 
-        boolean isOverlap = houseMaintenanceRepository.overlappingMaintenance(
-                houseMaintenance.getHouse().getId(), startDate, endDate
-        );
-        if (isOverlap) {
+        Long houseId = houseMaintenance.getHouse().getId();
+
+        // Kiểm tra trùng lịch bảo trì
+        boolean isOverlapMaintenance = houseMaintenanceRepository.overlappingMaintenance(houseId, startDate, endDate);
+        if (isOverlapMaintenance) {
             throw new OverlappingMaintenanceException(
-                    "The house is already scheduled for maintenance during the selected period." +
+                    "The house is already scheduled for maintenance during the selected period. " +
                             "Please choose a different date range."
             );
         }
 
+        // Kiểm tra trùng lịch đặt phòng
+        boolean isOverlapBooking = bookingService.overlappingBooking(houseId, startDate, endDate);
+        if (isOverlapBooking) {
+            throw new OverlappingBookingException(
+                    "This house has a booking during the selected maintenance period. " +
+                            "Please choose a different date."
+            );
+        }
 
         houseMaintenanceRepository.save(houseMaintenance);
 

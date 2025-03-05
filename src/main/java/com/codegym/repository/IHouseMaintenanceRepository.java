@@ -13,8 +13,6 @@ import java.util.List;
 public interface IHouseMaintenanceRepository extends JpaRepository<HouseMaintenance, Long> {
     List<HouseMaintenance> findByHouseId(Long houseId);
 
-    boolean existsByHouseIdAndStartDateBeforeAndEndDateAfter(Long houseId, LocalDate startDate, LocalDate endDate);
-
     @Query("""
             SELECT CASE WHEN COUNT(hm) > 0 THEN true ELSE false END
             FROM HouseMaintenance hm

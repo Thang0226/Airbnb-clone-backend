@@ -39,5 +39,13 @@ public interface IBookingRepository extends JpaRepository<Booking, Long> {
             @Param("endDate") LocalDate endDate,
             @Param("status") String status);
 
-    boolean existsByHouseIdAndStartDateAndEndDate(Long houseId, LocalDate startDate, LocalDate endDate);
+    @Query("""
+            SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END
+            FROM Booking b
+            WHERE b.house.id = :houseId
+            AND (b.startDate <= :endDate AND b.endDate >= :startDate)
+            """)
+    boolean overlappingBooking(@Param("houseId") Long houseId,
+                                   @Param("startDate") LocalDate startDate,
+                                   @Param("endDate") LocalDate endDate);
 }
