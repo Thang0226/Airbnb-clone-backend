@@ -47,9 +47,7 @@ public class ReviewService implements IReviewService {
     }
 
     @Override
-    public List<Review> findAllByHouseId(Long houseId, Pageable pageable) {
-        int limit = pageable.getPageSize();
-        int offset = (int) pageable.getOffset();
-        return reviewRepository.findAllByHouseId(houseId, limit, offset);
+    public List<Review> findAllByHouseId(Long houseId) {
+        return reviewRepository.findAllByHouseId(houseId);
     }
 }

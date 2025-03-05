@@ -13,5 +13,5 @@ public interface IReviewService extends IGenerateService<Review> {
 
     Review findReviewByBooking(Booking booking);
 
-    List<Review> findAllByHouseId(Long houseId, Pageable pageable);
+    List<Review> findAllByHouseId(Long houseId);
 }

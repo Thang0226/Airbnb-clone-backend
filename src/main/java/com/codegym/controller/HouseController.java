@@ -381,12 +381,12 @@ public class HouseController {
     }
 
     @GetMapping("/{houseId}/reviews")
-    public ResponseEntity<?> getHouseReviews(@PathVariable Long houseId, Pageable pageable) {
+    public ResponseEntity<?> getHouseReviews(@PathVariable Long houseId) {
         Optional<House> houseOptional = houseService.findById(houseId);
         if (houseOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("House not found");
         }
-        List<Review> reviews = reviewService.findAllByHouseId(houseId, pageable);
+        List<Review> reviews = reviewService.findAllByHouseId(houseId);
         List<ReviewDTO> reviewDTOS = reviews.stream().map(reviewDTOMapper::toReviewDTO).toList();
         return ResponseEntity.ok(reviewDTOS);
     }

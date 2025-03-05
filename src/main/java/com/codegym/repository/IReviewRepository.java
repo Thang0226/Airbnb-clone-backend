@@ -17,6 +17,8 @@ public interface IReviewRepository extends JpaRepository<Review, Long> {
 
     Review findReviewByBooking(Booking booking);
 
-    @Query(nativeQuery = true, value = "call find_reviews_by_house_id(:houseId, :limit, :offset)")
-    List<Review> findAllByHouseId(@Param("houseId") Long houseId, @Param("limit") int limit, @Param("offset") int offset);
+    @Query("SELECT r FROM Review r " +
+            "JOIN r.booking b " +
+            "WHERE b.house.id = :houseId")
+    List<Review> findAllByHouseId(@Param("houseId") Long houseId);
 }
