@@ -1,4 +1,4 @@
-package com.codegym.exception;
+package com.codegym.exception.booking;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

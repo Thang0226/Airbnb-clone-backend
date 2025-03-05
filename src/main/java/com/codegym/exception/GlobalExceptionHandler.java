@@ -2,7 +2,9 @@ package com.codegym.exception;
 
 
 
-import com.codegym.exception.house_maintenance.DuplicateMaintenanceException;
+import com.codegym.exception.booking.BookingNotFoundException;
+import com.codegym.exception.booking.OverlappingBookingException;
+import com.codegym.exception.house_maintenance.OverlappingMaintenanceException;
 import com.codegym.exception.house_maintenance.InvalidMaintenanceDateException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -49,8 +51,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
-    @ExceptionHandler(DuplicateMaintenanceException.class)
-    public ResponseEntity<String> handleDuplicateMaintenance(DuplicateMaintenanceException ex) {
+    @ExceptionHandler(OverlappingMaintenanceException.class)
+    public ResponseEntity<String> handleOverlappingMaintenanceException(OverlappingMaintenanceException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
@@ -62,5 +64,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BookingNotFoundException.class)
     public ResponseEntity<String> handleBookingNotFoundException(BookingNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(OverlappingBookingException.class)
+    public ResponseEntity<String> handleOverlappingBookingException(OverlappingBookingException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 }
