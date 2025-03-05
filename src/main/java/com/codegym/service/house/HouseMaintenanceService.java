@@ -1,11 +1,13 @@
 package com.codegym.service.house;
 
 import com.codegym.exception.AvailabilityNotFoundException;
+import com.codegym.exception.HouseNotFoundException;
 import com.codegym.exception.booking.OverlappingBookingException;
 import com.codegym.exception.house_maintenance.InvalidMaintenanceDateException;
 import com.codegym.exception.house_maintenance.OverlappingMaintenanceException;
 import com.codegym.mapper.HouseMaintenanceMapper;
 import com.codegym.model.Availability;
+import com.codegym.model.House;
 import com.codegym.model.HouseMaintenance;
 import com.codegym.model.dto.house.HouseMaintenanceRecordDTO;
 import com.codegym.repository.IHouseMaintenanceRepository;
@@ -30,6 +32,9 @@ public class HouseMaintenanceService implements IHouseMaintenanceService {
 
     @Autowired
     private IBookingService bookingService;
+
+    @Autowired
+    private IHouseService houseService;
 
     @Autowired
     private HouseMaintenanceMapper houseMaintenanceMapper;
@@ -99,6 +104,9 @@ public class HouseMaintenanceService implements IHouseMaintenanceService {
 
     @Override
     public List<HouseMaintenanceRecordDTO> findByHouseId(Long houseId) {
+        houseService.findById(houseId).orElseThrow(
+                () -> new HouseNotFoundException("Cannot find house with id: " + houseId)
+        );
         List<HouseMaintenance> houseMaintenance = houseMaintenanceRepository.findByHouseId(houseId);
         return houseMaintenance.stream()
                 .map(houseMaintenanceMapper::toHouseMaintenanceRecordDTO)
