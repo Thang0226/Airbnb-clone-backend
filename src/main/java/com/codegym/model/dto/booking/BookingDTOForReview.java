@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 public class BookingDTOForReview {
     private Long id;
     private String houseName;
-    private String houseImage;
     private String customerName;
     private String customerImage;
 }

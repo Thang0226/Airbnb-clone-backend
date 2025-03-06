@@ -1,11 +1,8 @@
 package com.codegym.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Data
 @NoArgsConstructor
@@ -14,13 +11,9 @@ import lombok.ToString;
 public class HouseImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonProperty("id")
     private Long id;
     private String fileName;
 
-    @ManyToOne
-    @JoinColumn(name = "house_id")
-    @JsonBackReference
-    @ToString.Exclude
+    @ManyToOne(fetch = FetchType.LAZY)
     private House house;
 }

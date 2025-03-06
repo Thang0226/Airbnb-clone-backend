@@ -6,15 +6,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.ToString;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Data
-@ToString(exclude = {"host", "houseImages"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "houses")
@@ -37,11 +31,6 @@ public class House {
 
     @Column(nullable = false, columnDefinition = "int default 0")
     private Integer rentals;
-
-    @OneToMany(mappedBy = "house", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    @ToString.Exclude
-    private List<HouseImage> houseImages = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "host_id", nullable = false)

@@ -70,7 +70,6 @@ public abstract class BookingDTOMapper {
         BookingDTOForReview bookingDTOForReview = new BookingDTOForReview();
         bookingDTOForReview.setId(booking.getId());
         bookingDTOForReview.setHouseName(booking.getHouse().getHouseName());
-        bookingDTOForReview.setHouseImage(booking.getHouse().getHouseImages().get(0).getFileName());
         bookingDTOForReview.setCustomerName(booking.getUser().getFullName());
         bookingDTOForReview.setCustomerImage(booking.getUser().getAvatar());
         return bookingDTOForReview;

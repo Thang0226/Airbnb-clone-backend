@@ -1,5 +1,6 @@
 # Drop tables & run again to create new tables
 drop table if exists users_roles;
+drop table if exists houses_house_images;
 drop table if exists house_images;
 drop table if exists reviews;
 drop table if exists bookings;
@@ -426,34 +427,34 @@ VALUES
     ('57 Bạch Đằng, Quận Hải Châu, Đà Nẵng', 3, 4, 'Spacious home with rooftop terrace, perfect for family gatherings.', ' Đội Cấn Family House', 1200000, 3, 'RENTED', 1),
     ('66 Nguyễn Hữu Thọ, Quận 7, TP. Hồ Chí Minh', 2, 3, 'Historic French colonial house with elegant decor.', 'French Colonial Residence', 1400000, 3, 'RENTED', 1);
 
-insert into house_images (house_id, file_name)
-values  (1, 'hinh anh so (1).jpg'),
-        (1, 'hinh anh so (2).jpg'),
-        (1, 'hinh anh so (6).jpg'),
-        (2, 'hinh anh so (1).jpg'),
-        (2, 'hinh anh so (2).jpg'),
-        (2, 'hinh anh so (3).jpg'),
-        (2, 'hinh anh so (7).jpg'),
-        (3, 'hinh anh so (8).jpg'),
-        (3, 'hinh anh so (9).jpg'),
-        (4, 'hinh anh so (10).jpg'),
-        (4, 'hinh anh so (11).jpg'),
-        (5, 'hinh anh so (12).jpg'),
-        (5, 'hinh anh so (13).jpg'),
-        (6, 'hinh anh so (14).jpg'),
-        (6, 'hinh anh so (15).jpg'),
-        (7, 'hinh anh so (16).jpg'),
-        (7, 'hinh anh so (17).jpg'),
-        (7, 'hinh anh so (18).jpg'),
-        (8, 'hinh anh so (19).jpg'),
-        (8, 'hinh anh so (20).jpg'),
-        (8, 'hinh anh so (21).jpg'),
-        (8, 'hinh anh so (22).jpg'),
-        (9, 'hinh anh so (23).jpg'),
-        (9, 'hinh anh so (24).jpg'),
-        (9, 'hinh anh so (25).jpg'),
-        (10, 'hinh anh so (26).jpg'),
-        (10, 'hinh anh so (27).jpg');
+insert into house_images (file_name, house_id)
+values  ('hinh anh so (1).jpg', 1),
+        ('hinh anh so (2).jpg', 1),
+        ('hinh anh so (3).jpg', 1),
+        ('hinh anh so (4).jpg', 2),
+        ('hinh anh so (5).jpg', 2),
+        ('hinh anh so (6).jpg', 2),
+        ('hinh anh so (7).jpg', 2),
+        ('hinh anh so (8).jpg', 3),
+        ('hinh anh so (9).jpg', 3),
+        ('hinh anh so (10).jpg', 4),
+        ('hinh anh so (11).jpg', 4),
+        ('hinh anh so (12).jpg', 5),
+        ('hinh anh so (13).jpg', 5),
+        ('hinh anh so (14).jpg', 6),
+        ('hinh anh so (15).jpg', 6),
+        ('hinh anh so (16).jpg',7),
+        ('hinh anh so (17).jpg', 7),
+        ('hinh anh so (18).jpg', 7),
+        ('hinh anh so (19).jpg', 8),
+        ('hinh anh so (20).jpg', 8),
+        ('hinh anh so (21).jpg', 8),
+        ('hinh anh so (22).jpg', 8),
+        ('hinh anh so (23).jpg', 9),
+        ('hinh anh so (24).jpg', 9),
+        ('hinh anh so (25).jpg', 9),
+        ('hinh anh so (26).jpg', 10),
+        ('hinh anh so (27).jpg', 10);
 
 insert into host_requests (request_date, user_id)
 values
