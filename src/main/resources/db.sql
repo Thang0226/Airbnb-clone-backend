@@ -290,10 +290,11 @@ VALUES
     ('ROLE_ADMIN');
 
 INSERT INTO users
-(address, full_name, password, phone, email, username, status)
+(address, avatar, full_name, password, phone, email, username, status)
 VALUES
     (
         '12 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh',
+        'ava1.png',
         'John Doe',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0123456789',
@@ -303,6 +304,7 @@ VALUES
     ),
     (
         '25 Trần Duy Hưng, Cầu Giấy, Hà Nội',
+        'ava5.png',
         'Sarah Smith',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0987654322',
@@ -312,6 +314,7 @@ VALUES
     ),
     (
         '90 Lê Lợi, Quận Hải Châu, Đà Nẵng',
+        'ava2.png',
         'Michael Johnson',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0456789123',
@@ -321,6 +324,7 @@ VALUES
     ),
     (
         '66 Nguyễn Hữu Thọ, Quận 7, TP. Hồ Chí Minh',
+        'ava6.png',
         'Emily Brown',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0789123456',
@@ -330,6 +334,7 @@ VALUES
     ),
     (
         '57 Bạch Đằng, Quận Hải Châu, Đà Nẵng',
+        'ava3.png',
         'David Wilson',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0321654987',
@@ -339,6 +344,7 @@ VALUES
     ),
     (
         '38 Nguyễn Văn Linh, Quận Hải Châu, Đà Nẵng',
+        'ava8.png',
         'Lisa Taylor',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0147258369',
@@ -348,6 +354,7 @@ VALUES
     ),
     (
         '45 Phan Chu Trinh, Quận Hoàn Kiếm, Hà Nội',
+        'ava4.png',
         'Robert Miller',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0258147369',
@@ -357,6 +364,7 @@ VALUES
     ),
     (
         '102 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh',
+        null,
         'Jennifer Davis',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0369147258',
@@ -366,6 +374,7 @@ VALUES
     ),
     (
         '78 Võ Văn Kiệt, Quận Sơn Trà, Đà Nẵng',
+        'ava7.png',
         'William Jones',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0741852963',
@@ -375,6 +384,7 @@ VALUES
     ),
     (
         '15 Hoàng Hoa Thám, Quận Ninh Kiều, Cần Thơ',
+        null,
         'Mary Anderson',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0963852741',
@@ -422,7 +432,7 @@ VALUES
     ('15 Hoàng Hoa Thám, Quận Ninh Kiều, Cần Thơ', 1, 1, 'Cozy studio in central Hanoi, close to embassies and business areas.', 'Kim Mã Studio', 600000, 2, 'RENTED', 2),
     ('78 Võ Văn Kiệt, Quận Sơn Trà, Đà Nẵng', 2, 3, 'Traditional-style home in Hanoi Old Quarter, offering an authentic experience.', 'Old Quarter Charm House', 850000, 2, 'RENTED', 2),
     ('102 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh', 2, 2, 'Modern apartment with full amenities, near shopping malls and offices.', 'Láng Hạ Modern Condo', 950000, 3, 'RENTED', 1),
-    ('45 Phan Chu Trinh, Quận Hoàn Kiếm, Hà Nội', 2, 3, 'Newly built apartment with gym and pool access.', 'Thanh Xuân Luxury Condo', 1000000, 3, 'RENTED', 1),
+    ('45 Phan Chu Trinh, Quận Hoàn Kiếm, Hà Nội', 2, 3, 'Newly built apartment with gym and pool access.', 'Thanh Xuân Luxury Condo', 1000000, 3, 'AVAILABLE', 1),
     ('38 Nguyễn Văn Linh, Quận Hải Châu, Đà Nẵng', 1, 2, 'Quiet and comfortable apartment near West Lake.', 'West Lake Retreat', 700000, 3, 'RENTED', 1),
     ('57 Bạch Đằng, Quận Hải Châu, Đà Nẵng', 3, 4, 'Spacious home with rooftop terrace, perfect for family gatherings.', ' Đội Cấn Family House', 1200000, 3, 'RENTED', 1),
     ('66 Nguyễn Hữu Thọ, Quận 7, TP. Hồ Chí Minh', 2, 3, 'Historic French colonial house with elegant decor.', 'French Colonial Residence', 1400000, 3, 'RENTED', 1);
@@ -454,11 +464,12 @@ values  ('hinh anh so (1).jpg', 1),
         ('hinh anh so (24).jpg', 9),
         ('hinh anh so (25).jpg', 9),
         ('hinh anh so (26).jpg', 10),
-        ('hinh anh so (27).jpg', 10);
+        ('hinh anh so (30).jpg', 10),
+        ('hinh anh so (31).jpg', 10);
 
 insert into host_requests (request_date, user_id)
 values
-    ('2025-02-21 13:07:43.708469', 11),
+    ('2025-02-21 13:07:43.708469', 10),
     ('2025-02-20 13:07:43.708469', 5),
     ('2025-02-09 13:07:43.708469', 6);
 
