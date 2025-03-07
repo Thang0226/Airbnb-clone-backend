@@ -3,11 +3,15 @@ package com.codegym.controller;
 import com.codegym.mapper.BookingDTOMapper;
 import com.codegym.model.Booking;
 import com.codegym.model.House;
+import com.codegym.model.Review;
 import com.codegym.model.User;
+import com.codegym.model.dto.review.NewReviewDTO;
 import com.codegym.model.dto.booking.BookingDTO;
+import com.codegym.model.dto.booking.BookingDTOForReview;
 import com.codegym.model.dto.booking.BookingSearchDTO;
 import com.codegym.model.dto.user.UserBookingDTO;
 import com.codegym.service.booking.IBookingService;
+import com.codegym.service.review.IReviewService;
 import com.codegym.service.user.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -35,6 +39,9 @@ public class BookingController {
     private BookingDTOMapper bookingDTOMapper;
 
     @Autowired
+    private IReviewService reviewService;
+
+    @Autowired
     private IUserService userService;
 
     @Autowired
@@ -44,6 +51,17 @@ public class BookingController {
     public ResponseEntity<PagedModel<?>> getBookings(Pageable pageable, PagedResourcesAssembler<BookingDTO> assembler) {
         Page<BookingDTO> bookings = bookingService.getAllBookings(pageable);
         return new ResponseEntity<>(assembler.toModel(bookings), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/get")
+    public ResponseEntity<?> getBooking(@PathVariable Long id) {
+        Optional<Booking> bookingOptional = bookingService.findById(id);
+        if (bookingOptional.isEmpty()) {
+            return new ResponseEntity<>("Booking not found", HttpStatus.NOT_FOUND);
+        }
+        Booking booking = bookingOptional.get();
+        BookingDTOForReview bookingDTOForReview = bookingDTOMapper.toBookingDTOForReview(booking);
+        return new ResponseEntity<>(bookingDTOForReview, HttpStatus.OK);
     }
 
     @GetMapping("/{username}")
@@ -110,5 +128,52 @@ public class BookingController {
         notificationController.sendNotification(host, message);
 
         return getBookingsByUsernameOfUser(username);
+    }
+
+
+    @PutMapping("/{bookingId}/process-booking")
+    public ResponseEntity<?> processBooking(@PathVariable Long bookingId, @RequestParam String action) {
+        try {
+            return new ResponseEntity<>(bookingService.processBooking(bookingId, action), HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/{id}/review")
+    public ResponseEntity<?> reviewBooking(@RequestBody NewReviewDTO newReviewDTO, @PathVariable Long id) {
+        Optional<Booking> bookingOptional = bookingService.findById(id);
+        if (bookingOptional.isEmpty()) {
+            return new ResponseEntity<>("Booking ID not found", HttpStatus.NOT_FOUND);
+        }
+        Booking booking = bookingOptional.get();
+        Review review = reviewService.findReviewByBooking(booking);
+        boolean isUpdating = false;
+        if (review == null) {
+            review = new Review();
+            review.setBooking(booking);
+        } else {
+            isUpdating = true;
+        }
+        Integer rating = newReviewDTO.getRating();
+        if (rating < 1 || rating > 5) { return new ResponseEntity<>("Rating must be between 1 and 5 stars", HttpStatus.BAD_REQUEST); }
+        review.setRating(newReviewDTO.getRating());
+        review.setComment(newReviewDTO.getComment());
+        reviewService.save(review);
+
+        House house = booking.getHouse();
+        User host = house.getHost();
+        String message;
+        if (isUpdating) {
+            message = '"'+booking.getUser().getUsername()+'"'+" updated review about the house "+'"'+booking.getHouse().getHouseName()+'"'
+                    + " on " + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            notificationController.sendNotification(host, message);
+            return new ResponseEntity<>("Review updated", HttpStatus.OK);
+        } else {
+            message = '"'+booking.getUser().getUsername()+'"'+" reviewed the house "+'"'+booking.getHouse().getHouseName()+'"'
+                    + " on " + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            notificationController.sendNotification(host, message);
+            return new ResponseEntity<>("Add new review successfully", HttpStatus.OK);
+        }
     }
 }

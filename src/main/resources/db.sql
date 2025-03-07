@@ -1,6 +1,8 @@
 # Drop tables & run again to create new tables
 drop table if exists users_roles;
+drop table if exists houses_house_images;
 drop table if exists house_images;
+drop table if exists reviews;
 drop table if exists bookings;
 drop table if exists availabilities;
 drop table if exists house_maintenance;
@@ -31,7 +33,7 @@ create procedure search_houses_asc(
     IN maxPrice INT
 )
 begin
-    SELECT h.*
+    SELECT DISTINCT h.*
     FROM houses h
              LEFT JOIN availabilities a ON a.house_id = h.id
     WHERE ( minBedrooms IS NULL OR h.bedrooms >= minBedrooms )
@@ -54,7 +56,7 @@ create procedure search_houses_desc(
     IN maxPrice INT
 )
 begin
-    SELECT h.*
+    SELECT DISTINCT h.*
     FROM houses h
              LEFT JOIN availabilities a ON a.house_id = h.id
     WHERE ( minBedrooms IS NULL OR h.bedrooms >= minBedrooms )
@@ -76,6 +78,7 @@ begin
            u.full_name as fullName,
            u.address as address,
            u.phone as phone,
+           u.email as email,
            COALESCE(COUNT(DISTINCT h.id), 0) AS housesForRent,
            COALESCE(SUM((DATEDIFF(b.end_date, b.start_date) + 1) * b.price), 0) AS totalIncome
     from users u
@@ -96,6 +99,7 @@ begin
            u.full_name as fullName,
            u.address as address,
            u.phone as phone,
+           u.email as email,
            COALESCE(COUNT(DISTINCT h.id), 0) AS housesForRent,
            COALESCE(SUM((DATEDIFF(b.end_date, b.start_date) + 1) * b.price), 0) AS totalIncome
     from users u
@@ -145,7 +149,7 @@ BEGIN
     GROUP BY
         DATE_FORMAT(mr.month_date, '%Y-%m')
     ORDER BY
-        DATE_FORMAT(mr.month_date, '%Y-%m') DESC;
+        DATE_FORMAT(mr.month_date, '%Y-%m');
 
     DROP TEMPORARY TABLE IF EXISTS month_range;
 END;
@@ -190,7 +194,7 @@ BEGIN
     GROUP BY
         YEAR(yr.year_date)
     ORDER BY
-        YEAR(yr.year_date) DESC;
+        YEAR(yr.year_date);
 
     DROP TEMPORARY TABLE IF EXISTS year_range;
 END;
@@ -239,6 +243,7 @@ begin
         h.house_name as houseName,
         h.price as price,
         h.address as address,
+        h.rentals as rentals,
         COALESCE(SUM((DATEDIFF(b.end_date, b.start_date) + 1) * b.price), 0) AS totalRevenue,
         h.status as status
     from houses h
@@ -276,6 +281,7 @@ begin
     LIMIT _limit OFFSET _offset;
 end;
 
+
 # Data
 INSERT INTO roles (name)
 VALUES
@@ -284,10 +290,11 @@ VALUES
     ('ROLE_ADMIN');
 
 INSERT INTO users
-(address, full_name, password, phone, email, username, status)
+(address, avatar, full_name, password, phone, email, username, status)
 VALUES
     (
         '12 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh',
+        'ava1.png',
         'John Doe',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0123456789',
@@ -297,6 +304,7 @@ VALUES
     ),
     (
         '25 Trần Duy Hưng, Cầu Giấy, Hà Nội',
+        'ava5.png',
         'Sarah Smith',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0987654322',
@@ -306,6 +314,7 @@ VALUES
     ),
     (
         '90 Lê Lợi, Quận Hải Châu, Đà Nẵng',
+        'ava2.png',
         'Michael Johnson',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0456789123',
@@ -315,6 +324,7 @@ VALUES
     ),
     (
         '66 Nguyễn Hữu Thọ, Quận 7, TP. Hồ Chí Minh',
+        'ava6.png',
         'Emily Brown',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0789123456',
@@ -324,6 +334,7 @@ VALUES
     ),
     (
         '57 Bạch Đằng, Quận Hải Châu, Đà Nẵng',
+        'ava3.png',
         'David Wilson',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0321654987',
@@ -333,6 +344,7 @@ VALUES
     ),
     (
         '38 Nguyễn Văn Linh, Quận Hải Châu, Đà Nẵng',
+        'ava8.png',
         'Lisa Taylor',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0147258369',
@@ -342,6 +354,7 @@ VALUES
     ),
     (
         '45 Phan Chu Trinh, Quận Hoàn Kiếm, Hà Nội',
+        'ava4.png',
         'Robert Miller',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0258147369',
@@ -351,6 +364,7 @@ VALUES
     ),
     (
         '102 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh',
+        null,
         'Jennifer Davis',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0369147258',
@@ -360,6 +374,7 @@ VALUES
     ),
     (
         '78 Võ Văn Kiệt, Quận Sơn Trà, Đà Nẵng',
+        'ava7.png',
         'William Jones',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0741852963',
@@ -369,12 +384,13 @@ VALUES
     ),
     (
         '15 Hoàng Hoa Thám, Quận Ninh Kiều, Cần Thơ',
+        null,
         'Mary Anderson',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0963852741',
         'mary.a@gmail.com',
         'mary_a',
-        'LOCKED'
+        'ACTIVE'
     );
 
 INSERT INTO users
@@ -385,9 +401,9 @@ values
         'Nguyễn Đức Thắng',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0888899999',
-        'thang.nd0226@gmail.com',
-        'Thắng Nguyễn Đức',
-        'PENDING',
+        'thang.n@gmail.com',
+        'Thắng Nguyễn',
+        'ACTIVE',
         true
     );
 
@@ -408,135 +424,228 @@ VALUES
     (11, 1);
 
 INSERT INTO houses
-(address, bathrooms, bedrooms, description, house_name, price, host_id, status)
+(address, bathrooms, bedrooms, description, house_name, price, host_id, status, rentals)
 VALUES
-    ( '12 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh', 2, 3, 'Fully-equipped apartment, centrally located, suitable for couples or small families.', 'Hoàn Kiếm Villa', 800000, 2, 'RENTED'),
-    ('25 Trần Duy Hưng, Cầu Giấy, Hà Nội', 3, 4, 'Spacious villa with garden, perfect for large families or groups.', 'Ba Đình Villa', 1500000, 2, 'RENTED'),
-    ('90 Lê Lợi, Quận Hải Châu, Đà Nẵng', 2, 2, 'Lake-view apartment with modern design, ideal for expats and digital nomads.', 'Tây Hồ Lakeview Apartment', 900000, 2, 'RENTED'),
-    ('15 Hoàng Hoa Thám, Quận Ninh Kiều, Cần Thơ', 1, 1, 'Cozy studio in central Hanoi, close to embassies and business areas.', 'Kim Mã Studio', 600000, 2, 'RENTED'),
-    ('78 Võ Văn Kiệt, Quận Sơn Trà, Đà Nẵng', 2, 3, 'Traditional-style home in Hanoi Old Quarter, offering an authentic experience.', 'Old Quarter Charm House', 850000, 2, 'RENTED'),
-    ('102 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh', 2, 2, 'Modern apartment with full amenities, near shopping malls and offices.', 'Láng Hạ Modern Condo', 950000, 3, 'RENTED'),
-    ('45 Phan Chu Trinh, Quận Hoàn Kiếm, Hà Nội', 2, 3, 'Newly built apartment with gym and pool access.', 'Thanh Xuân Luxury Condo', 1000000, 3, 'RENTED'),
-    ('38 Nguyễn Văn Linh, Quận Hải Châu, Đà Nẵng', 1, 2, 'Quiet and comfortable apartment near West Lake.', 'West Lake Retreat', 700000, 3, 'RENTED'),
-    ('57 Bạch Đằng, Quận Hải Châu, Đà Nẵng', 3, 4, 'Spacious home with rooftop terrace, perfect for family gatherings.', ' Đội Cấn Family House', 1200000, 3, 'RENTED'),
-    ('66 Nguyễn Hữu Thọ, Quận 7, TP. Hồ Chí Minh', 2, 3, 'Historic French colonial house with elegant decor.', 'French Colonial Residence', 1400000, 3, 'RENTED');
+    ( '12 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh', 2, 3,
+     'Fully-equipped apartment, centrally located, suitable for couples or small families.',
+     'Hoàn Kiếm Villa', 800000, 2, 'RENTED', 1),
+    ('25 Trần Duy Hưng, Cầu Giấy, Hà Nội', 3, 4,
+     'Spacious villa with garden, perfect for large families or groups.',
+     'Ba Đình Villa', 1500000, 2, 'RENTED', 3),
+    ('90 Lê Lợi, Quận Hải Châu, Đà Nẵng', 2, 2,
+     'Lake-view apartment with modern design, ideal for expats and digital nomads.',
+     'Tây Hồ Lakeview Apartment', 900000, 2, 'RENTED', 2),
+    ('15 Hoàng Hoa Thám, Quận Ninh Kiều, Cần Thơ', 1, 1,
+     'Cozy studio in central Hanoi, close to embassies and business areas.',
+     'Kim Mã Studio', 600000, 2, 'RENTED', 2),
+    ('78 Võ Văn Kiệt, Quận Sơn Trà, Đà Nẵng', 2, 3,
+     'Traditional-style home in Hanoi Old Quarter, offering an authentic experience.',
+     'Old Quarter Charm House', 850000, 2, 'RENTED', 2),
 
-insert into house_images (house_id, file_name)
-values  (1, 'hinh anh so (1).jpg'),
-        (1, 'hinh anh so (2).jpg'),
-        (1, 'hinh anh so (6).jpg'),
-        (2, 'hinh anh so (1).jpg'),
-        (2, 'hinh anh so (2).jpg'),
-        (2, 'hinh anh so (3).jpg'),
-        (2, 'hinh anh so (7).jpg'),
-        (3, 'hinh anh so (8).jpg'),
-        (3, 'hinh anh so (9).jpg'),
-        (4, 'hinh anh so (10).jpg'),
-        (4, 'hinh anh so (11).jpg'),
-        (5, 'hinh anh so (12).jpg'),
-        (5, 'hinh anh so (13).jpg'),
-        (6, 'hinh anh so (14).jpg'),
-        (6, 'hinh anh so (15).jpg'),
-        (7, 'hinh anh so (16).jpg'),
-        (7, 'hinh anh so (17).jpg'),
-        (7, 'hinh anh so (18).jpg'),
-        (8, 'hinh anh so (19).jpg'),
-        (8, 'hinh anh so (20).jpg'),
-        (8, 'hinh anh so (21).jpg'),
-        (8, 'hinh anh so (22).jpg'),
-        (9, 'hinh anh so (23).jpg'),
-        (9, 'hinh anh so (24).jpg'),
-        (9, 'hinh anh so (25).jpg'),
-        (10, 'hinh anh so (26).jpg'),
-        (10, 'hinh anh so (27).jpg');
+    ('102 Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh', 2, 2,
+     'Modern apartment with full amenities, near shopping malls and offices.',
+     'Láng Hạ Modern Condo', 950000, 3, 'AVAILABLE', 1),
+    ('45 Phan Chu Trinh, Quận Hoàn Kiếm, Hà Nội', 2, 3,
+     'Newly built apartment with gym and pool access.',
+     'Thanh Xuân Luxury Condo', 1000000, 3, 'AVAILABLE', 1),
+    ('38 Nguyễn Văn Linh, Quận Hải Châu, Đà Nẵng', 1, 2,
+     'Quiet and comfortable apartment near West Lake.',
+     'West Lake Retreat', 700000, 3, 'RENTED', 1),
+    ('57 Bạch Đằng, Quận Hải Châu, Đà Nẵng', 3, 4,
+     'Spacious home with rooftop terrace, perfect for family gatherings.',
+     ' Đội Cấn Family House', 1200000, 3, 'RENTED', 1),
+    ('66 Nguyễn Hữu Thọ, Quận 7, TP. Hồ Chí Minh', 2, 3,
+     'Historic French colonial house with elegant decor.',
+     'French Colonial Residence', 1400000, 3, 'RENTED', 1);
+
+insert into house_images (file_name, house_id)
+values  ('hinh anh so (1).jpg', 1),
+        ('hinh anh so (2).jpg', 1),
+        ('hinh anh so (3).jpg', 1),
+        ('hinh anh so (4).jpg', 2),
+        ('hinh anh so (5).jpg', 2),
+        ('hinh anh so (6).jpg', 2),
+        ('hinh anh so (7).jpg', 2),
+        ('hinh anh so (8).jpg', 3),
+        ('hinh anh so (9).jpg', 3),
+        ('hinh anh so (10).jpg', 4),
+        ('hinh anh so (11).jpg', 4),
+        ('hinh anh so (12).jpg', 5),
+        ('hinh anh so (13).jpg', 5),
+        ('hinh anh so (14).jpg', 6),
+        ('hinh anh so (15).jpg', 6),
+        ('hinh anh so (16).jpg',7),
+        ('hinh anh so (17).jpg', 7),
+        ('hinh anh so (18).jpg', 7),
+        ('hinh anh so (19).jpg', 8),
+        ('hinh anh so (20).jpg', 8),
+        ('hinh anh so (21).jpg', 8),
+        ('hinh anh so (22).jpg', 8),
+        ('hinh anh so (23).jpg', 9),
+        ('hinh anh so (24).jpg', 9),
+        ('hinh anh so (25).jpg', 9),
+        ('hinh anh so (26).jpg', 10),
+        ('hinh anh so (30).jpg', 10),
+        ('hinh anh so (31).jpg', 10);
 
 insert into host_requests (request_date, user_id)
 values
-    ('2025-02-21 13:07:43.708469', 11),
+    ('2025-02-21 13:07:43.708469', 10),
     ('2025-02-20 13:07:43.708469', 5),
     ('2025-02-09 13:07:43.708469', 6);
 
-INSERT INTO availabilities (start_date, end_date, house_id)
-VALUES
-    ('2023-01-01', '2024-06-30', 1),
-    ('2024-07-30', '2025-04-15', 1),
-    ('2025-05-01', '2025-05-15', 1),
-    ('2025-05-31', '2025-05-31', 1),
-    ('2025-06-10', '2027-12-31', 1),
+INSERT INTO availabilities (start_date, end_date, house_id) VALUES
+    ('2024-01-01', '2024-06-30', 1),
+    ('2024-07-30', '2024-10-31', 1),
+    ('2024-11-09', '2025-02-25', 1),
+    ('2025-03-10', '2025-03-15', 1),
+    ('2025-03-31', '2025-04-15', 1),
+    ('2025-05-10', '2027-12-31', 1),
 
-    ('2023-01-01', '2024-03-31', 2),
+    ('2024-01-01', '2024-03-31', 2),
     ('2024-04-10', '2024-04-30', 2),
     ('2024-05-10', '2024-05-31', 2),
-    ('2024-07-01', '2027-12-31', 2),
+    ('2024-07-01', '2024-10-31', 2),
+    ('2024-11-09', '2024-11-30', 2),
+    ('2024-12-09', '2024-12-31', 2),
+    ('2025-01-09', '2027-12-31', 2),
 
-    ('2023-01-01', '2024-04-30', 3),
+    ('2024-01-01', '2024-04-30', 3),
     ('2024-06-01', '2024-07-15', 3),
-    ('2024-07-31', '2027-12-31', 3),
+    ('2024-07-31', '2024-10-31', 3),
+    ('2024-11-09', '2024-11-20', 3),
+    ('2024-11-29', '2024-11-30', 3),
+    ('2024-12-09', '2024-12-31', 3),
+    ('2025-01-09', '2025-01-10', 3),
+    ('2025-01-19', '2027-12-31', 3),
 
-    ('2023-01-01', '2024-03-15', 4),
-    ('2024-05-15', '2024-06-30', 4),
-    ('2024-07-15', '2025-02-25', 4),
-    ('2025-03-01', '2027-12-31', 4),
+    ('2024-01-01', '2024-03-15', 4),
+    ('2024-04-15', '2024-06-30', 4),
+    ('2024-07-15', '2024-11-30', 4),
+    ('2024-12-09', '2027-12-31', 4),
 
-    ('2023-01-01', '2024-05-31', 5),
+    ('2024-01-01', '2024-05-31', 5),
     ('2024-06-15', '2024-08-31', 5),
     ('2024-09-30', '2027-12-31', 5),
 
-    ('2023-01-01', '2024-09-30', 6),
-    ('2024-10-31', '2025-04-30', 6),
-    ('2025-06-15', '2027-12-31', 6),
+    ('2024-01-01', '2024-09-30', 6),
+    ('2024-10-31', '2024-11-30', 6),
+    ('2024-12-09', '2025-02-25', 6),
+    ('2025-03-10', '2025-03-31', 6),
+    ('2025-04-15', '2027-12-31', 6),
 
-    ('2023-01-01', '2024-09-15', 7),
-    ('2024-09-30', '2025-04-15', 7),
-    ('2025-05-01', '2027-12-31', 7),
+    ('2024-01-01', '2024-09-15', 7),
+    ('2024-09-30', '2024-11-30', 7),
+    ('2024-12-09', '2025-03-15', 7),
+    ('2025-03-31', '2027-12-31', 7),
 
-    ('2023-01-01', '2024-09-30', 8),
+    ('2024-01-01', '2024-09-30', 8),
     ('2024-10-15', '2025-05-15', 8),
     ('2025-06-01', '2027-12-31', 8),
 
-    ('2023-01-01', '2024-08-31', 9),
+    ('2024-01-01', '2024-08-31', 9),
     ('2024-09-15', '2025-05-31', 9),
     ('2025-06-15', '2027-12-31', 9),
 
-    ('2023-01-01', '2024-07-31', 10),
-    ('2024-08-30', '2025-04-30', 10),
-    ('2025-06-01', '2027-12-31', 10);
+    ('2024-01-01', '2024-07-31', 10),
+    ('2024-08-30', '2024-08-31', 10),
+    ('2024-09-09', '2024-09-30', 10),
+    ('2024-10-09', '2024-11-30', 10),
+    ('2024-12-09', '2025-03-31', 10),
+    ('2025-05-01', '2027-12-31', 10);
+
 
 INSERT INTO bookings (start_date, end_date, status, updated_at, price, house_id, user_id)
 VALUES
-    ('2024-07-01', '2024-07-29', 'CHECKED_OUT', '2024-07-29 14:30:00', 23200000, 1, 5),
-    ('2025-04-16', '2025-04-30', 'WAITING', '2025-02-16 14:30:00', 11200000, 1, 4),
-    ('2025-05-16', '2025-05-30', 'WAITING', '2025-02-17 14:30:00', 11200000, 1, 4),
-    ('2025-06-01', '2025-06-09', 'WAITING', '2025-02-18 14:30:00', 6400000, 1, 5),
+    ('2024-07-01', '2024-07-29', 'CHECKED_OUT',
+     '2024-07-29 14:30:00', 23200000, 1, 5),
+    ('2024-11-01', '2024-11-08', 'CHECKED_OUT',
+     '2024-11-08 14:30:00', 6400000, 1, 4),
+    ('2025-02-26', '2025-03-09', 'CHECKED_IN',
+     '2024-02-26 14:30:00', 1200000, 1, 10),
+    ('2025-03-16', '2025-03-30', 'WAITING',
+     '2025-02-16 14:30:00', 11200000, 1, 4),
+    ('2025-04-16', '2025-04-30', 'WAITING',
+     '2025-02-17 14:30:00', 11200000, 1, 4),
+    ('2025-05-01', '2025-05-09', 'WAITING',
+     '2025-02-18 14:30:00', 6400000, 1, 5),
 
-    ('2024-04-01', '2024-04-09', 'CHECKED_OUT', '2024-04-09 14:30:00', 12000000, 2, 6),
-    ('2024-05-01', '2024-05-09', 'CHECKED_OUT', '2024-05-09 14:30:00', 12000000, 2, 6),
-    ('2024-06-01', '2024-06-30', 'CHECKED_OUT', '2024-06-30 14:30:00', 43500000, 2, 7),
+    ('2024-04-01', '2024-04-09', 'CHECKED_OUT',
+     '2024-04-09 14:30:00', 12000000, 2, 6),
+    ('2024-05-01', '2024-05-09', 'CHECKED_OUT',
+     '2024-05-09 14:30:00', 12000000, 2, 6),
+    ('2024-06-01', '2024-06-30', 'CHECKED_OUT',
+     '2024-06-30 14:30:00', 43500000, 2, 7),
+    ('2024-11-01', '2024-11-08', 'CHECKED_OUT',
+     '2024-11-08 14:30:00', 12000000, 2, 7),
+    ('2024-12-01', '2024-12-08', 'CHECKED_OUT',
+     '2024-12-08 14:30:00', 12000000, 2, 6),
+    ('2025-01-01', '2025-01-08', 'CHECKED_OUT',
+     '2025-01-08 14:30:00', 12000000, 2, 7),
 
-    ('2024-05-01', '2024-05-31', 'CHECKED_OUT', '2024-05-31 14:30:00', 27000000, 3, 8),
-    ('2024-07-16', '2024-07-30', 'CHECKED_OUT', '2024-07-30 14:30:00', 12600000, 3, 9),
+    ('2024-05-01', '2024-05-31', 'CHECKED_OUT',
+     '2024-05-31 14:30:00', 27000000, 3, 8),
+    ('2024-07-16', '2024-07-30', 'CHECKED_OUT',
+     '2024-07-30 14:30:00', 12600000, 3, 9),
+    ('2024-11-01', '2024-11-08', 'CHECKED_OUT',
+     '2024-11-08 14:30:00', 7200000, 3, 8),
+    ('2024-11-21', '2024-11-28', 'CHECKED_OUT',
+     '2024-11-08 14:30:00', 7200000, 3, 9),
+    ('2024-12-01', '2024-12-08', 'CHECKED_OUT',
+     '2024-12-08 14:30:00', 7200000, 3, 8),
+    ('2025-01-01', '2025-01-08', 'CHECKED_OUT',
+     '2025-01-08 14:30:00', 7200000, 3, 8),
+    ('2025-01-11', '2025-01-18', 'CHECKED_OUT',
+     '2025-01-08 14:30:00', 7200000, 3, 9),
 
-    ('2024-03-16', '2024-05-14', 'CHECKED_OUT', '2024-05-14 14:30:00', 36000000, 4, 10),
-    ('2024-07-01', '2024-07-14', 'CHECKED_OUT', '2024-07-14 14:30:00', 8400000, 4, 10),
-    ('2025-02-26', '2025-02-28', 'CHECKED_IN', '2024-02-26 14:30:00', 1200000, 4, 10),
+    ('2024-03-16', '2024-04-14', 'CHECKED_OUT',
+     '2024-04-14 14:30:00', 36000000, 4, 10),
+    ('2024-07-01', '2024-07-14', 'CHECKED_OUT',
+     '2024-07-14 14:30:00', 8400000, 4, 10),
+    ('2024-12-01', '2024-12-08', 'CHECKED_OUT',
+     '2024-12-08 14:30:00', 4800000, 4, 10),
 
-    ('2024-06-01', '2024-06-14', 'CHECKED_OUT', '2024-06-14 14:30:00', 35700000, 5, 4),
-    ('2024-09-01', '2024-09-29', 'CHECKED_OUT', '2024-09-29 14:30:00', 23800000, 5, 5),
+    ('2024-06-01', '2024-06-14', 'CHECKED_OUT',
+     '2024-06-14 14:30:00', 35700000, 5, 4),
+    ('2024-09-01', '2024-09-29', 'CHECKED_OUT',
+     '2024-09-29 14:30:00', 23800000, 5, 5),
 
-    ('2024-10-01', '2024-10-30', 'CHECKED_OUT', '2024-10-30 14:30:00', 85500000, 6, 7),
-    ('2025-05-01', '2025-06-14', 'WAITING', '2025-02-16 14:30:00', 42750000, 6, 6),
+    ('2024-10-01', '2024-10-30', 'CHECKED_OUT',
+     '2024-10-30 14:30:00', 85500000, 6, 7),
+    ('2024-12-01', '2024-12-08', 'CHECKED_OUT',
+     '2024-12-08 14:30:00', 7600000, 6, 7),
+    ('2025-02-26', '2025-03-09', 'CHECKED_IN',
+     '2024-02-26 14:30:00', 1200000, 6, 10),
+    ('2025-04-01', '2025-04-14', 'WAITING',
+     '2025-02-16 14:30:00', 13300000, 6, 6),
 
-    ('2024-09-16', '2024-09-29', 'CHECKED_OUT', '2024-09-29 14:30:00', 106000000, 7, 9),
-    ('2025-04-16', '2025-04-30', 'WAITING', '2025-02-17 14:30:00', 15000000, 7, 8),
+    ('2024-09-16', '2024-09-29', 'CHECKED_OUT',
+     '2024-09-29 14:30:00', 106000000, 7, 9),
+    ('2024-12-01', '2024-12-08', 'CHECKED_OUT',
+     '2024-12-08 14:30:00', 8000000, 7, 9),
+    ('2025-03-16', '2025-03-30', 'WAITING',
+     '2025-02-17 14:30:00', 15000000, 7, 8),
 
-    ('2024-10-01', '2024-10-14', 'CHECKED_OUT', '2024-10-14 14:30:00', 51800000, 8, 4),
-    ('2025-05-16', '2025-05-31', 'WAITING', '2025-02-18 14:30:00', 10500000, 8, 10),
+    ('2024-10-01', '2024-10-14', 'CHECKED_OUT',
+     '2024-10-14 14:30:00', 51800000, 8, 4),
+    ('2025-05-16', '2025-05-31', 'WAITING',
+     '2025-02-18 14:30:00', 10500000, 8, 10),
 
-    ('2024-09-01', '2024-09-14', 'CHECKED_OUT', '2024-09-14 14:30:00', 16800000, 9, 6),
-    ('2025-06-01', '2025-06-14', 'WAITING', '2025-02-14 14:30:00', 51600000, 9, 5),
+    ('2024-09-01', '2024-09-14', 'CHECKED_OUT',
+     '2024-09-14 14:30:00', 16800000, 9, 6),
+    ('2025-06-01', '2025-06-14', 'WAITING',
+     '2025-02-14 14:30:00', 16800000, 9, 5),
 
-    ('2024-08-01', '2024-08-29', 'CHECKED_OUT', '2024-08-29 14:30:00', 40600000, 10, 11),
-    ('2025-05-01', '2025-05-31', 'WAITING', '2025-02-20 14:30:00', 42000000, 10, 11);
+    ('2024-08-01', '2024-08-29', 'CHECKED_OUT',
+     '2024-08-29 14:30:00', 40600000, 10, 11),
+    ('2024-09-01', '2024-09-08', 'CHECKED_OUT',
+     '2024-09-08 14:30:00', 11200000, 10, 11),
+    ('2024-10-01', '2024-10-08', 'CHECKED_OUT',
+     '2024-10-08 14:30:00', 11200000, 10, 11),
+    ('2024-12-01', '2024-12-08', 'CHECKED_OUT',
+     '2024-12-08 14:30:00', 11200000, 10, 11),
+    ('2025-04-01', '2025-04-30', 'WAITING',
+     '2025-02-20 14:30:00', 42000000, 10, 11);
 
 INSERT INTO notifications (created_at, message, host_id)
 VALUES
@@ -547,5 +656,51 @@ VALUES
     ('2025-02-17 14:30:00', '"Jennifer Davis" BOOKED the house "Thanh Xuân Luxury Condo" on 17/02/2025', 3),
     ('2025-02-18 14:30:00', '"Mary Anderson" BOOKED the house "West Lake Retreat" on 18/02/2025', 3),
     ('2025-02-14 14:30:00', '"Lisa Taylor" BOOKED the house "Đội Cấn Family House" on 14/02/2025', 3),
-    ('2025-02-20 14:30:00', '"Jennifer Davis" BOOKED the house "French Colonial Residence" on 20/02/2025', 3);
+    ('2025-02-20 14:30:00', '"Jennifer Davis" BOOKED the house "French Colonial Residence" on 20/02/2025', 3),
+    ('2024-07-30 14:30:00', '"David Wilson" reviewed the house "Hoàn Kiếm Villa" on 30/07/2024', 2),
+    ('2024-04-10 14:30:00', '"Emily Brown" reviewed the house "Ba Đình Villa" on 10/04/2024', 2),
+    ('2024-05-10 14:30:00', '"Michael Johnson" reviewed the house "Tây Hồ Lakeview Apartment" on 10/05/2024', 2),
+    ('2024-07-02 14:30:00', '"Jennifer Davis" reviewed the house "Kim Mã Studio" on 02/07/2024', 2),
+    ('2024-06-01 14:30:00', '"William Jones" reviewed the house "Old Quarter Charm House" on 01/06/2024', 2),
+    ('2024-07-31 14:30:00', '"Sarah Smith" reviewed the house "Láng Hạ Modern Condo" on 31/07/2024', 3),
+    ('2024-05-15 14:30:00', '"Robert Miller" reviewed the house "Thanh Xuân Luxury Condo" on 15/05/2024', 3),
+    ('2024-07-15 14:30:00', '"Lisa Taylor" reviewed the house "West Lake Retreat" on 15/07/2024', 3),
+    ('2024-06-15 14:30:00', '"John Doe" reviewed the house "Đội Cấn Family House" on 15/06/2024', 3),
+    ('2024-09-30 14:30:00', '"Mary Anderson" reviewed the house "French Colonial Residence" on 30/09/2024', 3),
+    ('2024-10-31 14:30:00', '"Sarah Smith" reviewed the house "Hoàn Kiếm Villa" on 31/10/2024', 2),
+    ('2024-09-30 14:30:00', '"David Wilson" reviewed the house "Ba Đình Villa" on 30/09/2024', 2),
+    ('2024-10-15 14:30:00', '"Michael Johnson" reviewed the house "Tây Hồ Lakeview Apartment" on 15/10/2024', 2),
+    ('2024-09-15 14:30:00', '"Lisa Taylor" reviewed the house " Đội Cấn Family House" on 15/09/2024', 3),
+    ('2024-08-30 14:30:00', '"Thắng Nguyễn Đức" reviewed the house "French Colonial Residence" on 30/08/2024', 3);
 
+INSERT INTO reviews (comment, rating, updated_at, booking_id, is_hidden) VALUES
+     ('Amazing experience! The house was well-maintained and very clean.', 5, '2024-07-30', 1, 0),
+     ('Had a wonderful stay. Everything was as described.', 4, '2024-11-09', 2, 0),
+     ('Decent place but had some noise issues.', 3, '2024-04-10', 7, 0),
+     ('The AC was not working properly, quite uncomfortable.', 2, '2024-05-10', 8, 1),
+     ('Loved the view! Would definitely come back.', 5, '2024-06-30', 9, 0),
+     ('Great location, but the bed was a bit uncomfortable.', 3, '2024-11-09', 10, 0),
+     ('The property was fine, but customer service was lacking.', 2, '2024-12-09', 11, 1),
+     ('A hidden gem! Exceeded my expectations.', 5, '2025-01-09', 12, 0),
+     ('Great place to stay with family.', 4, '2024-05-31', 13, 0),
+     ('Very peaceful and clean environment.', 4, '2024-07-30', 14, 0),
+     ('The kitchen appliances were outdated.', 3, '2024-11-09', 15, 0),
+     ('Poor hygiene and cleanliness. Would not recommend.', 1, '2024-11-08', 16, 1),
+     ('Fantastic host, very accommodating.', 5, '2024-12-08', 17, 0),
+     ('The internet was very slow.', 2, '2025-01-08', 18, 1),
+     ('The house was sparkling clean and well-furnished.', 5, '2025-01-19', 19, 0),
+     ('The house was sparkling clean and well-furnished.', 5, '2024-04-15', 20, 0),
+     ('Nice and quiet place to relax.', 4, '2024-07-14', 21, 0),
+     ('The neighborhood felt a little unsafe.', 2, '2024-12-08', 22, 1),
+     ('The furniture was old and worn out.', 2, '2024-06-14', 23, 1),
+     ('Would definitely book again!', 5, '2024-09-29', 24, 0),
+     ('The host was great, but the mattress was too hard.', 3, '2024-12-09', 25, 0),
+     ('Loved everything about this stay!', 5, '2024-10-15', 27, 0),
+     ('Very spacious and clean!', 5, '2024-09-29', 29, 0),
+     ('Could have been better maintained.', 3, '2024-12-08', 30, 0),
+     ('The place was decent but had plumbing issues.', 2, '2024-10-14', 32, 1),
+     ('Would stay again, very relaxing!', 5, '2024-09-14', 34, 0),
+     ('Best stay I have had in years!', 5, '2024-08-29', 36, 0),
+     ('The host was very friendly and helpful.', 4, '2024-09-08', 37, 0),
+     ('Nice place, but overpriced.', 3, '2024-10-08', 38, 0),
+     ('The view was incredible!', 5, '2024-12-08', 39, 0);

@@ -11,4 +11,5 @@ public class UserProfileDTO {
     private String fullName;
     private String address;
     private String phone;
+    private String email;
 }

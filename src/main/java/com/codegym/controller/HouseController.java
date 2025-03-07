@@ -1,19 +1,22 @@
 package com.codegym.controller;
 
-import com.codegym.exception.HouseNotFoundException;
 import com.codegym.mapper.BookingDTOMapper;
 import com.codegym.mapper.HouseMaintenanceMapper;
+import com.codegym.mapper.HouseMapper;
+import com.codegym.mapper.ReviewDTOMapper;
 import com.codegym.model.*;
-import com.codegym.model.constants.HouseStatus;
+import com.codegym.model.auth.Role;
 import com.codegym.model.dto.booking.NewBookingDTO;
-import com.codegym.model.dto.house.HouseDateDTO;
+import com.codegym.model.dto.host.HostChatDTO;
+import com.codegym.model.dto.house.*;
 import com.codegym.model.dto.SearchDTO;
-import com.codegym.model.dto.house.HouseListDTO;
+import com.codegym.model.dto.review.ReviewDTO;
 import com.codegym.repository.IHouseImageRepository;
-import com.codegym.model.dto.house.HouseMaintenanceRecordDTO;
 import com.codegym.service.availability.IAvailabilityService;
 import com.codegym.service.booking.IBookingService;
 import com.codegym.service.house.IHouseMaintenanceService;
+import com.codegym.service.houseImage.HouseImageService;
+import com.codegym.service.review.IReviewService;
 import com.codegym.service.user.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,7 +24,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.codegym.model.dto.house.HouseDTO;
 import com.codegym.service.house.IHouseService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -38,18 +40,28 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/api/houses")
 public class HouseController {
+    @Autowired
+    private IUserService userService;
 
     @Autowired
     private IHouseImageRepository houseImageRepository;
     @Autowired
     private IHouseService houseService;
     @Autowired
-    private IUserService userService;
+    private HouseMapper houseMapper;
+    @Autowired
+    private HouseImageService houseImageService;
+
+    @Autowired
+    private IHouseMaintenanceService houseMaintenanceService;
+    @Autowired
+    private HouseMaintenanceMapper houseMaintenanceMapper;
 
     @Autowired
     private IBookingService bookingService;
@@ -59,37 +71,63 @@ public class HouseController {
     private IAvailabilityService availabilityService;
 
     @Autowired
-    private IHouseMaintenanceService houseMaintenanceService;
-
-    @Autowired
     private NotificationController notificationController;
-
     @Autowired
-    private HouseMaintenanceMapper houseMaintenanceMapper;
+    private IReviewService reviewService;
+    @Autowired
+    private ReviewDTOMapper reviewDTOMapper;
 
     @GetMapping
-    public ResponseEntity<List<House>> getHousesForAvailable() {
+    public ResponseEntity<?> getHousesForAvailable() {
         List<House> houses;
-        houses = houseService.searchHousesDesc(null, LocalDate.now(), LocalDate.now().plusDays(1), null, null, null, null);
-        return ResponseEntity.ok(houses);
+        houses = houseService.searchHousesDesc(null, null, null, null, null, null, null);
+        List<HouseDTO> houseDTOs = houses.stream().map(house -> houseMapper.toHouseDTO(house)).toList();
+        return ResponseEntity.ok(houseDTOs);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<House> getHouseById(@PathVariable Long id){
-        Optional<House> house = houseService.findById(id);
-        return house.map(value ->
-                        new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<?> getHouseById(@PathVariable Long id){
+        Optional<House> houseOptional = houseService.findById(id);
+        if (houseOptional.isPresent()) {
+            House house = houseOptional.get();
+            return ResponseEntity.ok(houseMapper.toHouseDTO(house));
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @GetMapping("/{houseId}/host")
+    public ResponseEntity<HostChatDTO> getHouseHost(@PathVariable Long houseId) {
+        Optional<House> houseOptional = houseService.findById(houseId);
+        if (houseOptional.isEmpty()) {
+            System.out.println("House not found" );
+            return ResponseEntity.notFound().build();
+        }
+        House house = houseOptional.get();
+        User host = house.getHost();
+
+        String role = null;
+        for (Role userRole : host.getRoles()) {
+            if (userRole.getName().equals("ROLE_HOST")) {
+                role = userRole.getName();
+                break;
+            }
+        }
+        if (role == null && !host.getRoles().isEmpty()) {
+            role = host.getRoles().iterator().next().getName();
+        }
+        HostChatDTO hostChatDTO = new HostChatDTO(
+                host.getId(),
+                host.getUsername(),
+                role
+        );
+        return ResponseEntity.ok(hostChatDTO);
+    }
 
     @GetMapping("/host/{hostId}")
     public ResponseEntity<?> getAllHouseByHostId(@PathVariable Long hostId) {
         List<House> houses = houseService.findHousesByHostId(hostId);
-        if (houses.isEmpty()) {
-            return new ResponseEntity<>("No houses found for this host", HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(houses, HttpStatus.OK);
+        List<HouseDTO> houseDTOs = houses.stream().map(h -> houseMapper.toHouseDTO(h)).toList();
+        return new ResponseEntity<>(houseDTOs, HttpStatus.OK);
     }
 
     @GetMapping("/{id}/booked-dates")
@@ -142,9 +180,8 @@ public class HouseController {
     }
 
     @PostMapping
-    public ResponseEntity<List<House>> searchHouses(@RequestBody SearchDTO searchDTO) {
+    public ResponseEntity<?> searchHouses(@RequestBody SearchDTO searchDTO) {
         List<House> houses;
-
         if (searchDTO.getPriceOrder().equals("ASC")) {
             houses = houseService.searchHousesAsc(
                     searchDTO.getAddress(),
@@ -166,7 +203,8 @@ public class HouseController {
                     searchDTO.getMaxPrice()
             );
         }
-        return ResponseEntity.ok(houses);
+        List<HouseDTO> houseDTOS = houses.stream().map(h -> houseMapper.toHouseDTO(h)).toList();
+        return ResponseEntity.ok(houseDTOS);
     }
 
     // Create House
@@ -174,45 +212,37 @@ public class HouseController {
     private String UPLOAD_DIR;
 
     @PostMapping(path ="/create", consumes = { "multipart/form-data" })
-    public ResponseEntity<?> createHouse(@ModelAttribute HouseDTO houseDTO) {
+    public ResponseEntity<?> createHouse(@ModelAttribute NewHouseDTO newHouseDTO) {
         try {
             // Validate house data
-            if (houseDTO.getBedrooms() == null || houseDTO.getBedrooms() < 1 || houseDTO.getBedrooms() > 10) {
+            if (newHouseDTO.getBedrooms() == null || newHouseDTO.getBedrooms() < 1 || newHouseDTO.getBedrooms() > 10) {
                 return ResponseEntity.badRequest().body("Bedrooms must be between 1 and 10");
             }
-            if (houseDTO.getBathrooms() == null || houseDTO.getBathrooms() < 1 || houseDTO.getBathrooms() > 3) {
+            if (newHouseDTO.getBathrooms() == null || newHouseDTO.getBathrooms() < 1 || newHouseDTO.getBathrooms() > 3) {
                 return ResponseEntity.badRequest().body("Bathrooms must be between 1 and 3");
             }
-            if (houseDTO.getPrice() == null || houseDTO.getPrice() < 100000) {
+            if (newHouseDTO.getPrice() == null || newHouseDTO.getPrice() < 100000) {
                 return ResponseEntity.badRequest().body("Price must be at least 100,000 VND");
             }
-
             // Create house entity
             House house = new House();
-            house.setHouseName(houseDTO.getHouseName());
-            house.setAddress(houseDTO.getAddress());
-            house.setBedrooms(houseDTO.getBedrooms());
-            house.setBathrooms(houseDTO.getBathrooms());
-            house.setDescription(houseDTO.getDescription());
-            house.setPrice(houseDTO.getPrice());
-
-            Optional<User> userOptional = userService.findByUsername(houseDTO.getUsername());
+            house.setHouseName(newHouseDTO.getHouseName());
+            house.setAddress(newHouseDTO.getAddress());
+            house.setBedrooms(newHouseDTO.getBedrooms());
+            house.setBathrooms(newHouseDTO.getBathrooms());
+            house.setDescription(newHouseDTO.getDescription());
+            house.setPrice(newHouseDTO.getPrice());
+            Optional<User> userOptional = userService.findByUsername(newHouseDTO.getUsername());
             if (userOptional.isPresent()) {
                 house.setHost(userOptional.get());
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username not found");
             }
+            houseService.save(house);
 
-            // Initialize house images list
-            if (house.getHouseImages() == null) {
-                house.setHouseImages(new ArrayList<>());
-            }
-
-            // Log the contents of houseImages
-            List<MultipartFile> houseImages = houseDTO.getHouseImages();
+            // Save house images
+            List<MultipartFile> houseImages = newHouseDTO.getHouseImages();
             System.out.println("Received houseImages: " + (houseImages != null ? houseImages.size() : "null"));
-
-            // Handle images
             if (houseImages != null && !houseImages.isEmpty()) {
                 for (MultipartFile image : houseImages) {
                     // Validate image
@@ -220,33 +250,22 @@ public class HouseController {
                     if (contentType == null || (!contentType.equals("image/jpeg") && !contentType.equals("image/png"))) {
                         continue;
                     }
-
                     // Add to folder
                     String fileName = image.getOriginalFilename();
                     Path filePath = Paths.get(UPLOAD_DIR, fileName);
-
                     // Create directories if they do not exist
                     Files.createDirectories(filePath.getParent());
-
                     // Save file to disk
                     Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
                     // Create and add HouseImage entity
                     HouseImage houseImage = new HouseImage();
                     houseImage.setFileName(fileName);
                     houseImage.setHouse(house);
-                    house.getHouseImages().add(houseImage);
-                }
-                // If no valid images were added (all were invalid types), add default image
-                if (house.getHouseImages().isEmpty()) {
-                    addDefaultImage(house);
+                    houseImageService.save(houseImage);
                 }
             } else {
                 addDefaultImage(house);
             }
-
-            // Save house with images
-            houseService.save(house);
             return ResponseEntity.ok(house);
 
         } catch (Exception e) {
@@ -259,27 +278,24 @@ public class HouseController {
         String defaultFileName = "default.png";
         Path sourcePath = Paths.get("src/main/resources/default.png");
         Path targetPath = Paths.get(UPLOAD_DIR, defaultFileName);
-
         // Create directories if they do not exist
         Files.createDirectories(targetPath.getParent());
-
         // Only copy if default image doesn't exist in upload directory
         if (!Files.exists(targetPath)) {
             Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
         }
-
         HouseImage defaultImage = new HouseImage();
         defaultImage.setFileName(defaultFileName);
         defaultImage.setHouse(house);
-        house.getHouseImages().add(defaultImage);
+        houseImageService.save(defaultImage);
     }
 
 
     // Update House + Upload images:
     @PutMapping("/update/{houseId}")
-    public ResponseEntity<?> updateHouse(@PathVariable Long houseId, @ModelAttribute HouseDTO houseDTO) {
+    public ResponseEntity<?> updateHouse(@PathVariable Long houseId, @ModelAttribute NewHouseDTO newHouseDTO) {
         try {
-            houseService.updateHouse(houseId, houseDTO);
+            houseService.updateHouse(houseId, newHouseDTO);
             // Return the updated house
             Optional<House> updatedHouse = houseService.findById(houseId);
             if (updatedHouse.isPresent()) {
@@ -370,5 +386,32 @@ public class HouseController {
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+    }
+
+
+    @GetMapping("/top-five-houses")
+    public ResponseEntity<?> getTopFiveHouses(Pageable pageable) {
+        return ResponseEntity.ok(houseService.getTopFiveRentalCountHouses(pageable));
+    }
+
+    @GetMapping("/{houseId}/reviews")
+    public ResponseEntity<?> getHouseReviews(@PathVariable Long houseId, @RequestParam Integer hidden) {
+        Optional<House> houseOptional = houseService.findById(houseId);
+        if (houseOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("House not found");
+        }
+        List<Review> reviews = reviewService.findAllByHouseId(houseId);
+        if (hidden == 1) {
+            List<Review> filteredReviews = new ArrayList<>();
+            for (Review review : reviews) {
+                if (review.isHidden()) {
+                    continue;
+                }
+                filteredReviews.add(review);
+            }
+            reviews = filteredReviews;
+        }
+        List<ReviewDTO> reviewDTOS = reviews.stream().map(reviewDTOMapper::toReviewDTO).toList();
+        return ResponseEntity.ok(reviewDTOS);
     }
 }

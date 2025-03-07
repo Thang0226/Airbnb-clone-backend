@@ -10,6 +10,7 @@ public interface HostInfoDTO {
     String getFullName();
     String getAddress();
     String getPhone();
+    String getEmail();
     Integer getHousesForRent();
     BigDecimal getTotalIncome();
 }

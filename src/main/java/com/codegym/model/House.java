@@ -6,10 +6,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Data
@@ -33,9 +29,8 @@ public class House {
     @Enumerated(EnumType.STRING)
     private HouseStatus status;
 
-    @OneToMany(mappedBy = "house", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<HouseImage> houseImages = new ArrayList<>();
+    @Column(nullable = false, columnDefinition = "int default 0")
+    private Integer rentals;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "host_id", nullable = false)

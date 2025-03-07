@@ -8,7 +8,8 @@ import java.util.List;
 
 @Repository
 public interface IHouseImageRepository extends JpaRepository<HouseImage, Long> {
-    List<HouseImage> findByHouseId(Long houseId);
+
+    List<HouseImage> findAllByHouse_Id(Long houseId);
 
     void deleteById(Long imageId);
 }
