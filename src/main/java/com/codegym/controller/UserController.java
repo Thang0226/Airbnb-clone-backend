@@ -362,6 +362,7 @@ public class UserController {
         user.setFullName(userForm.getFullName());
         user.setAddress(userForm.getAddress());
         user.setPhone(userForm.getPhone());
+        user.setEmail(userForm.getEmail());
         userService.save(user);
         return new ResponseEntity<>("User profile update successfully", HttpStatus.OK);
     }

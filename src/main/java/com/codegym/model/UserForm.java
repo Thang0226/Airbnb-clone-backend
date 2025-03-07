@@ -1,5 +1,6 @@
 package com.codegym.model;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
@@ -28,4 +29,8 @@ public class UserForm {
     @NotBlank(message = "Phone number is required")
     @Pattern(regexp = "^0[0-9]{9}$", message = "Phone number must start with 0 and have at least 10 digits")
     private String phone;
+
+    @NotBlank(message = "Email is required")
+    @Email
+    private String email;
 }
