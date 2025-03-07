@@ -1,5 +1,6 @@
 package com.codegym.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,5 +16,6 @@ public class HouseImage {
     private String fileName;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     private House house;
 }

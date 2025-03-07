@@ -33,7 +33,7 @@ create procedure search_houses_asc(
     IN maxPrice INT
 )
 begin
-    SELECT h.*
+    SELECT DISTINCT h.*
     FROM houses h
              LEFT JOIN availabilities a ON a.house_id = h.id
     WHERE ( minBedrooms IS NULL OR h.bedrooms >= minBedrooms )
@@ -56,7 +56,7 @@ create procedure search_houses_desc(
     IN maxPrice INT
 )
 begin
-    SELECT h.*
+    SELECT DISTINCT h.*
     FROM houses h
              LEFT JOIN availabilities a ON a.house_id = h.id
     WHERE ( minBedrooms IS NULL OR h.bedrooms >= minBedrooms )
@@ -390,7 +390,7 @@ VALUES
         '0963852741',
         'mary.a@gmail.com',
         'mary_a',
-        'LOCKED'
+        'ACTIVE'
     );
 
 INSERT INTO users
@@ -401,7 +401,7 @@ values
         'Nguyễn Đức Thắng',
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0888899999',
-        'thang.nd0226@gmail.com',
+        'thang.n@gmail.com',
         'Thắng Nguyễn Đức',
         'ACTIVE',
         true

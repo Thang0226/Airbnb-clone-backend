@@ -80,7 +80,7 @@ public class HouseController {
     @GetMapping
     public ResponseEntity<?> getHousesForAvailable() {
         List<House> houses;
-        houses = houseService.searchHousesDesc(null, LocalDate.now(), LocalDate.now().plusDays(1), null, null, null, null);
+        houses = houseService.searchHousesDesc(null, null, null, null, null, null, null);
         List<HouseDTO> houseDTOs = houses.stream().map(house -> houseMapper.toHouseDTO(house)).toList();
         return ResponseEntity.ok(houseDTOs);
     }
