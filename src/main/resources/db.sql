@@ -402,7 +402,7 @@ values
         '$2a$12$.NjQ.EJcK8atVQjMaWw5A.JHdu/OtQ6T12Yn6b4xcm9l0HJdXeZ.O', -- "123456"
         '0888899999',
         'thang.n@gmail.com',
-        'Thắng Nguyễn Đức',
+        'Thắng Nguyễn',
         'ACTIVE',
         true
     );
