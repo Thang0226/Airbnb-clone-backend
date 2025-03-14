@@ -1,0 +1,44 @@
+services:
+  mysql:
+    container_name: mysql-db
+    image: mysql:8.0.41
+    environment:
+      MYSQL_DATABASE: airbnb
+      MYSQL_ROOT_PASSWORD: 123456
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql:/var/lib/mysql
+    networks:
+      - spring-boot-network
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  spring-boot-app:
+    container_name: airbnb-backend
+    image: spring-boot-app
+    environment:
+      MYSQL_DATABASE: jdbc:mysql://mysql-db:3306/airbnb
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 123456
+      FILE_UPLOAD: /app/images/
+      EXPIRE_TIME: 86400000
+      SECRET_KEY: 123456789987654321123456789987654321123456789
+      DEFAULT_PASSWORD: 123456
+    ports:
+      - "8080:8080"
+    networks:
+      - spring-boot-network
+    depends_on:
+      mysql:
+        condition: service_healthy  # Wait for mysql to finish all
+
+volumes:
+  mysql:
+
+networks:
+  spring-boot-network:
+    driver: bridge

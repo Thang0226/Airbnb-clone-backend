@@ -49,7 +49,6 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/users")
 public class UserController {
 
-
     @Autowired
     private UserService userService;
     @Autowired
@@ -72,7 +71,6 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Account account) {
         try {
-            System.out.println(account.getUsername());
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(account.getUsername(), account.getPassword()));
 
